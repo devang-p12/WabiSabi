@@ -2,7 +2,8 @@ import type { Request, Response } from "express";
 import { registerSchema , loginSchema} from "./auth.schema.js";
 import { registerUser } from "./auth.service.js";
 import { loginUser } from "./auth.service.js";
-
+import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
+import { prisma } from "../../config/prisma.js";
 
 export const register = async (
     req: Request,
@@ -102,4 +103,51 @@ export const login = async (
             },
         });
     }
+};
+
+
+export const getCurrentUser = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        return res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+    }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: req.userId,
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarUrl: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            error: {
+                code: "USER_NOT_FOUND",
+                message: "User not found.",
+            },
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            user,
+        },
+    });
 };
