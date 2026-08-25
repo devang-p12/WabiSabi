@@ -184,3 +184,49 @@ export const refreshUserToken = async (rawRefreshToken: string) => {
         refreshToken,
     };
 };
+
+export const logoutUser = async (rawRefreshToken: string) => {
+    let payload;
+
+    try {
+        payload = verifyRefreshToken(rawRefreshToken);
+    } catch {
+        return;
+    }
+
+    if (
+        typeof payload !== "object" ||
+        payload === null ||
+        !("userId" in payload) ||
+        typeof payload.userId !== "string"
+    ) {
+        return;
+    }
+
+    const tokens = await prisma.refreshToken.findMany({
+        where: {
+            userId: payload.userId,
+            revokedAt: null,
+        },
+    });
+
+    for (const token of tokens) {
+        const matches = await verifyToken(
+            token.tokenHash,
+            rawRefreshToken
+        );
+
+        if (matches) {
+            await prisma.refreshToken.update({
+                where: {
+                    id: token.id,
+                },
+                data: {
+                    revokedAt: new Date(),
+                },
+            });
+
+            return;
+        }
+    }
+};

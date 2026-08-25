@@ -5,6 +5,7 @@ import { loginUser } from "./auth.service.js";
 import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
 import { prisma } from "../../config/prisma.js";
 import { refreshUserToken } from "./auth.service.js";
+import { logoutUser } from "./auth.service.js";
 
 export const register = async (
     req: Request,
@@ -206,4 +207,33 @@ export const refresh = async (
             },
         });
     }
+};
+
+export const logout = async (
+    req: Request,
+    res: Response
+) => {
+    const { refreshToken } = req.body;
+
+    if (
+        typeof refreshToken !== "string" ||
+        refreshToken.length === 0
+    ) {
+        return res.status(400).json({
+            success: false,
+            error: {
+                code: "REFRESH_TOKEN_REQUIRED",
+                message: "Refresh token is required.",
+            },
+        });
+    }
+
+    await logoutUser(refreshToken);
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            message: "Logged out successfully.",
+        },
+    });
 };
