@@ -4,6 +4,7 @@ import { registerUser } from "./auth.service.js";
 import { loginUser } from "./auth.service.js";
 import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
 import { prisma } from "../../config/prisma.js";
+import { refreshUserToken } from "./auth.service.js";
 
 export const register = async (
     req: Request,
@@ -150,4 +151,59 @@ export const getCurrentUser = async (
             user,
         },
     });
+};
+
+export const refresh = async (
+    req: Request,
+    res: Response
+) => {
+    const { refreshToken } = req.body;
+
+    if (
+        typeof refreshToken !== "string" ||
+        refreshToken.length === 0
+    ) {
+        return res.status(400).json({
+            success: false,
+            error: {
+                code: "REFRESH_TOKEN_REQUIRED",
+                message: "Refresh token is required.",
+            },
+        });
+    }
+
+    try {
+        const tokens = await refreshUserToken(refreshToken);
+
+        return res.status(200).json({
+            success: true,
+            data: tokens,
+        });
+    } catch (error) {
+        if (
+            error instanceof Error &&
+            (
+                error.message === "INVALID_REFRESH_TOKEN" ||
+                error.message === "REFRESH_TOKEN_EXPIRED"
+            )
+        ) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: "INVALID_REFRESH_TOKEN",
+                    message: "Invalid or expired refresh token.",
+                },
+            });
+        }
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Something went wrong.",
+            },
+        });
+    }
 };

@@ -1,4 +1,5 @@
-import jwt from "jsonwebtoken";
+import jwt, { type JwtPayload } from "jsonwebtoken";
+
 
 const accessSecret = process.env.JWT_ACCESS_SECRET;
 const refreshSecret = process.env.JWT_REFRESH_SECRET;
@@ -9,25 +10,17 @@ if (!accessSecret || !refreshSecret) {
 
 export const generateAccessToken = (userId: string) => {
     return jwt.sign(
-        {
-            userId,
-        },
+        { userId },
         accessSecret,
-        {
-            expiresIn: "15m",
-        }
+        { expiresIn: "15m" }
     );
 };
 
 export const generateRefreshToken = (userId: string) => {
     return jwt.sign(
-        {
-            userId,
-        },
+        { userId },
         refreshSecret,
-        {
-            expiresIn: "7d",
-        }
+        { expiresIn: "7d" }
     );
 };
 
