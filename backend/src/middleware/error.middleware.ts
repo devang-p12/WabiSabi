@@ -1,0 +1,33 @@
+import type { ErrorRequestHandler } from "express";
+import { AppError } from "../errors/AppError.js";
+
+export const errorHandler: ErrorRequestHandler = (
+    error,
+    _req,
+    res,
+    _next
+) => {
+    console.error(error);
+
+    // Expected application error
+    if (error instanceof AppError) {
+        res.status(error.statusCode).json({
+            success: false,
+            error: {
+                code: error.code,
+                message: error.message,
+            },
+        });
+
+        return;
+    }
+
+    // Unexpected error
+    res.status(500).json({
+        success: false,
+        error: {
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Something went wrong.",
+        },
+    });
+};
