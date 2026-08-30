@@ -3,7 +3,8 @@ import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
 
 import {
     createWorkspaceSchema,
-    updateWorkspaceSchema
+    updateWorkspaceSchema,
+    addWorkspaceMemberSchema
 } from "./workspace.validation.js";
 
 import {
@@ -12,13 +13,14 @@ import {
     getWorkspaceById,
     updateWorkspace,
     deleteWorkspace,
-    getWorkspaceMembers
+    getWorkspaceMembers,
+    addWorkspaceMember
 } from "./workspace.service.js";
 
 import {
     requireWorkspaceAdmin,
     requireWorkspaceOwner,
-    getWorkspaceMembership
+    getWorkspaceMembership,
 } from "./workspace.authorization.js";
 
 export const createWorkspaceController = async (
@@ -316,6 +318,97 @@ export const getWorkspaceMembersController = async (
         success: true,
         data: {
             members,
+        },
+    });
+};
+
+export const addWorkspaceMemberController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const { workspaceId } = req.params;
+
+    if (typeof workspaceId !== "string") {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "INVALID_WORKSPACE_ID",
+                message: "Invalid workspace ID.",
+            },
+        });
+
+        return;
+    }
+
+    const membership =
+        await requireWorkspaceAdmin(
+            workspaceId,
+            req.userId
+        );
+
+    if (!membership) {
+        res.status(403).json({
+            success: false,
+            error: {
+                code: "FORBIDDEN",
+                message:
+                    "Only workspace owners and admins can add members.",
+            },
+        });
+
+        return;
+    }
+
+    const data =
+        addWorkspaceMemberSchema.parse(req.body);
+
+    const result = await addWorkspaceMember(
+        workspaceId,
+        data
+    );
+
+    if (result.error === "USER_NOT_FOUND") {
+        res.status(404).json({
+            success: false,
+            error: {
+                code: "USER_NOT_FOUND",
+                message:
+                    "No Wabi account exists with that email.",
+            },
+        });
+
+        return;
+    }
+
+    if (result.error === "ALREADY_MEMBER") {
+        res.status(409).json({
+            success: false,
+            error: {
+                code: "ALREADY_MEMBER",
+                message:
+                    "User is already a member of this workspace.",
+            },
+        });
+
+        return;
+    }
+
+    res.status(201).json({
+        success: true,
+        data: {
+            member: result.member,
         },
     });
 };

@@ -6,7 +6,8 @@ import {
     getWorkspaceByIdController,
     updateWorkspaceController,
     deleteWorkspaceController,
-    getWorkspaceMembersController
+    getWorkspaceMembersController,
+    addWorkspaceMemberController
 } from "./workspace.controller.js";
 
 import { authenticate } from "../../middleware/auth.middleware.js";
@@ -28,6 +29,11 @@ router.get(
     "/:workspaceId/members",
     authenticate,
     getWorkspaceMembersController
+);
+router.post(
+    "/:workspaceId/members",
+    authenticate,
+    addWorkspaceMemberController
 );
 
 router.get(

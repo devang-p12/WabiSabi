@@ -29,3 +29,14 @@ export const updateWorkspaceSchema = z.object({
         .nullable()
         .optional(),
 });
+
+export const addWorkspaceMemberSchema = z.object({
+    email: z
+        .string()
+        .trim()
+        .email("Invalid email address"),
+
+    role: z
+        .enum(["ADMIN", "MEMBER"])
+        .default("MEMBER"),
+});

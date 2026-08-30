@@ -139,3 +139,73 @@ export const getWorkspaceMembers = async (
         },
     });
 };
+
+interface AddWorkspaceMemberInput {
+    email: string;
+    role: "ADMIN" | "MEMBER";
+}
+
+export const addWorkspaceMember = async (
+    workspaceId: string,
+    data: AddWorkspaceMemberInput
+) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            email: data.email,
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarUrl: true,
+        },
+    });
+
+    if (!user) {
+        return {
+            error: "USER_NOT_FOUND",
+        } as const;
+    }
+
+    const existingMember =
+        await prisma.workspaceMember.findUnique({
+            where: {
+                workspaceId_userId: {
+                    workspaceId,
+                    userId: user.id,
+                },
+            },
+        });
+
+    if (existingMember) {
+        return {
+            error: "ALREADY_MEMBER",
+        } as const;
+    }
+
+    const member =
+        await prisma.workspaceMember.create({
+            data: {
+                workspaceId,
+                userId: user.id,
+                role: data.role,
+            },
+            select: {
+                userId: true,
+                role: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        avatarUrl: true,
+                    },
+                },
+            },
+        });
+
+    return {
+        member,
+    } as const;
+};
