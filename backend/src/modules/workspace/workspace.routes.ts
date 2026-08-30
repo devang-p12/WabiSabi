@@ -8,7 +8,8 @@ import {
     deleteWorkspaceController,
     getWorkspaceMembersController,
     addWorkspaceMemberController,
-    updateWorkspaceMemberController
+    updateWorkspaceMemberController,
+    removeWorkspaceMemberController
 } from "./workspace.controller.js";
 
 import { authenticate } from "../../middleware/auth.middleware.js";
@@ -41,6 +42,12 @@ router.patch(
     "/:workspaceId/members/:userId",
     authenticate,
     updateWorkspaceMemberController
+);
+
+router.delete(
+    "/:workspaceId/members/:userId",
+    authenticate,
+    removeWorkspaceMemberController
 );
 
 router.get(

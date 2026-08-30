@@ -16,13 +16,15 @@ import {
     deleteWorkspace,
     getWorkspaceMembers,
     addWorkspaceMember,
-    updateWorkspaceMember
+    updateWorkspaceMember,
+    removeWorkspaceMember
 } from "./workspace.service.js";
 
 import {
     requireWorkspaceAdmin,
     requireWorkspaceOwner,
     getWorkspaceMembership,
+    canRemoveWorkspaceMember
 } from "./workspace.authorization.js";
 
 export const createWorkspaceController = async (
@@ -512,6 +514,103 @@ export const updateWorkspaceMemberController = async (
         success: true,
         data: {
             member: result.member,
+        },
+    });
+};
+
+export const removeWorkspaceMemberController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const { workspaceId, userId } = req.params;
+
+    if (
+        typeof workspaceId !== "string" ||
+        typeof userId !== "string"
+    ) {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "INVALID_PARAMETERS",
+                message: "Invalid workspace or user ID.",
+            },
+        });
+
+        return;
+    }
+
+    const allowed =
+        await canRemoveWorkspaceMember(
+            workspaceId,
+            req.userId,
+            userId
+        );
+
+    if (!allowed) {
+        res.status(403).json({
+            success: false,
+            error: {
+                code: "FORBIDDEN",
+                message:
+                    "You do not have permission to remove this member.",
+            },
+        });
+
+        return;
+    }
+
+    const result =
+        await removeWorkspaceMember(
+            workspaceId,
+            userId
+        );
+
+    if (result.error === "MEMBER_NOT_FOUND") {
+        res.status(404).json({
+            success: false,
+            error: {
+                code: "MEMBER_NOT_FOUND",
+                message:
+                    "User is not a member of this workspace.",
+            },
+        });
+
+        return;
+    }
+
+    if (
+        result.error ===
+        "OWNER_CANNOT_BE_REMOVED"
+    ) {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "OWNER_CANNOT_BE_REMOVED",
+                message:
+                    "The workspace owner cannot be removed.",
+            },
+        });
+
+        return;
+    }
+
+    res.status(200).json({
+        success: true,
+        data: {
+            message:
+                "Workspace member removed successfully.",
         },
     });
 };

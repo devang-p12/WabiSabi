@@ -60,3 +60,46 @@ export const requireWorkspaceOwner = async (
 
     return membership;
 };
+
+export const canRemoveWorkspaceMember = async (
+    workspaceId: string,
+    currentUserId: string,
+    targetUserId: string
+) => {
+    const currentMembership =
+        await getWorkspaceMembership(
+            workspaceId,
+            currentUserId
+        );
+
+    if (!currentMembership) {
+        return false;
+    }
+
+    const targetMembership =
+        await getWorkspaceMembership(
+            workspaceId,
+            targetUserId
+        );
+
+    if (!targetMembership) {
+        return false;
+    }
+
+    if (targetMembership.role === "OWNER") {
+        return false;
+    }
+
+    if (currentMembership.role === "OWNER") {
+        return true;
+    }
+
+    if (
+        currentMembership.role === "ADMIN" &&
+        targetMembership.role === "MEMBER"
+    ) {
+        return true;
+    }
+
+    return false;
+};

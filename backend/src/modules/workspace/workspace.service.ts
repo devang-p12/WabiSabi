@@ -271,3 +271,43 @@ export const updateWorkspaceMember = async (
         member: updatedMember,
     } as const;
 };
+
+export const removeWorkspaceMember = async (
+    workspaceId: string,
+    userId: string
+) => {
+    const member =
+        await prisma.workspaceMember.findUnique({
+            where: {
+                workspaceId_userId: {
+                    workspaceId,
+                    userId,
+                },
+            },
+        });
+
+    if (!member) {
+        return {
+            error: "MEMBER_NOT_FOUND",
+        } as const;
+    }
+
+    if (member.role === "OWNER") {
+        return {
+            error: "OWNER_CANNOT_BE_REMOVED",
+        } as const;
+    }
+
+    await prisma.workspaceMember.delete({
+        where: {
+            workspaceId_userId: {
+                workspaceId,
+                userId,
+            },
+        },
+    });
+
+    return {
+        success: true,
+    } as const;
+};
