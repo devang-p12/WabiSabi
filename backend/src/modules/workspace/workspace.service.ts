@@ -5,6 +5,12 @@ interface CreateWorkspaceInput {
     description?: string | undefined;
 }
 
+interface UpdateWorkspaceInput {
+    name?: string | undefined;
+    description?: string | null | undefined;
+}
+
+
 export const createWorkspace = async (
     userId: string,
     data: CreateWorkspaceInput
@@ -50,6 +56,50 @@ export const getUserWorkspaces = async (
         },
         orderBy: {
             createdAt: "desc",
+        },
+    });
+};
+
+export const getWorkspaceById = async (
+    workspaceId: string,
+    userId: string
+) => {
+    return prisma.workspace.findFirst({
+        where: {
+            id: workspaceId,
+            members: {
+                some: {
+                    userId,
+                },
+            },
+        },
+        include: {
+            members: {
+                select: {
+                    userId: true,
+                    role: true,
+                },
+            },
+        },
+    });
+};
+
+export const updateWorkspace = async (
+    workspaceId: string,
+    data: UpdateWorkspaceInput
+) => {
+    return prisma.workspace.update({
+        where: {
+            id: workspaceId,
+        },
+        data: {
+            ...(data.name !== undefined && {
+                name: data.name,
+            }),
+
+            ...(data.description !== undefined && {
+                description: data.description,
+            }),
         },
     });
 };

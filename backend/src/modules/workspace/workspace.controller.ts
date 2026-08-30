@@ -3,12 +3,19 @@ import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
 
 import {
     createWorkspaceSchema,
+    updateWorkspaceSchema
 } from "./workspace.validation.js";
 
 import {
     createWorkspace,
-    getUserWorkspaces
+    getUserWorkspaces,
+    getWorkspaceById,
+    updateWorkspace
 } from "./workspace.service.js";
+
+import {
+    requireWorkspaceAdmin,
+} from "./workspace.authorization.js";
 
 export const createWorkspaceController = async (
     req: AuthenticatedRequest,
@@ -66,6 +73,127 @@ export const getUserWorkspacesController = async (
         success: true,
         data: {
             workspaces,
+        },
+    });
+};
+
+export const getWorkspaceByIdController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const { workspaceId } = req.params;
+
+    if (typeof workspaceId !== "string") {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "INVALID_WORKSPACE_ID",
+                message: "Invalid workspace ID.",
+            },
+        });
+
+        return;
+    }
+
+    const workspace = await getWorkspaceById(
+        workspaceId,
+        req.userId
+    );
+
+    if (!workspace) {
+        res.status(404).json({
+            success: false,
+            error: {
+                code: "WORKSPACE_NOT_FOUND",
+                message: "Workspace not found.",
+            },
+        });
+
+        return;
+    }
+
+    res.status(200).json({
+        success: true,
+        data: {
+            workspace,
+        },
+    });
+};
+
+export const updateWorkspaceController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const { workspaceId } = req.params;
+
+    if (typeof workspaceId !== "string") {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "INVALID_WORKSPACE_ID",
+                message: "Invalid workspace ID.",
+            },
+        });
+
+        return;
+    }
+
+    const membership =
+        await requireWorkspaceAdmin(
+            workspaceId,
+            req.userId
+        );
+
+    if (!membership) {
+        res.status(403).json({
+            success: false,
+            error: {
+                code: "FORBIDDEN",
+                message:
+                    "You do not have permission to update this workspace.",
+            },
+        });
+
+        return;
+    }
+
+    const data =
+        updateWorkspaceSchema.parse(req.body);
+
+    const workspace =
+        await updateWorkspace(
+            workspaceId,
+            data
+        );
+
+    res.status(200).json({
+        success: true,
+        data: {
+            workspace,
         },
     });
 };
