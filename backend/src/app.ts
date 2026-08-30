@@ -3,6 +3,7 @@ import cors from "cors";
 
 import authRouter from "./modules/auth/auth.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
+import workspaceRouter from "./modules/workspace/workspace.routes.js";
 
 const app = express();
 
@@ -25,6 +26,10 @@ app.get("/api/v1/health", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use(
+    "/api/v1/workspaces",
+    workspaceRouter
+);
 
 // Always keep this LAST
 app.use(errorHandler);
