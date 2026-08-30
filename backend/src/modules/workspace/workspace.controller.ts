@@ -10,11 +10,13 @@ import {
     createWorkspace,
     getUserWorkspaces,
     getWorkspaceById,
-    updateWorkspace
+    updateWorkspace,
+    deleteWorkspace
 } from "./workspace.service.js";
 
 import {
     requireWorkspaceAdmin,
+    requireWorkspaceOwner
 } from "./workspace.authorization.js";
 
 export const createWorkspaceController = async (
@@ -194,6 +196,65 @@ export const updateWorkspaceController = async (
         success: true,
         data: {
             workspace,
+        },
+    });
+};
+
+export const deleteWorkspaceController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const { workspaceId } = req.params;
+
+    if (typeof workspaceId !== "string") {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "INVALID_WORKSPACE_ID",
+                message: "Invalid workspace ID.",
+            },
+        });
+
+        return;
+    }
+
+    const membership =
+        await requireWorkspaceOwner(
+            workspaceId,
+            req.userId
+        );
+
+    if (!membership) {
+        res.status(403).json({
+            success: false,
+            error: {
+                code: "FORBIDDEN",
+                message:
+                    "Only the workspace owner can delete this workspace.",
+            },
+        });
+
+        return;
+    }
+
+    await deleteWorkspace(workspaceId);
+
+    res.status(200).json({
+        success: true,
+        data: {
+            message: "Workspace deleted successfully.",
         },
     });
 };

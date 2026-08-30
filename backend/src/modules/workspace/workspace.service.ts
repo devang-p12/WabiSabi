@@ -103,3 +103,13 @@ export const updateWorkspace = async (
         },
     });
 };
+
+export const deleteWorkspace = async (
+    workspaceId: string
+) => {
+    return prisma.workspace.delete({
+        where: {
+            id: workspaceId,
+        },
+    });
+};
