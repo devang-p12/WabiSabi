@@ -8,7 +8,7 @@ import {
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
-
+import Workspace from "@/pages/Workspace";
 import AuthGuard from "./components/auth/AuthGaurd";
 
 function App() {
@@ -46,6 +46,11 @@ function App() {
                             replace
                         />
                     }
+                />
+
+                <Route
+                    path="/workspaces/:workspaceId"
+                    element={<Workspace />}
                 />
 
             </Routes>
