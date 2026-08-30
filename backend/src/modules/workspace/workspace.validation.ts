@@ -40,3 +40,7 @@ export const addWorkspaceMemberSchema = z.object({
         .enum(["ADMIN", "MEMBER"])
         .default("MEMBER"),
 });
+
+export const updateWorkspaceMemberSchema = z.object({
+    role: z.enum(["ADMIN", "MEMBER"]),
+});

@@ -209,3 +209,65 @@ export const addWorkspaceMember = async (
         member,
     } as const;
 };
+
+interface UpdateWorkspaceMemberInput {
+    role: "ADMIN" | "MEMBER";
+}
+
+export const updateWorkspaceMember = async (
+    workspaceId: string,
+    userId: string,
+    data: UpdateWorkspaceMemberInput
+) => {
+    const member =
+        await prisma.workspaceMember.findUnique({
+            where: {
+                workspaceId_userId: {
+                    workspaceId,
+                    userId,
+                },
+            },
+        });
+
+    if (!member) {
+        return {
+            error: "MEMBER_NOT_FOUND",
+        } as const;
+    }
+
+    if (member.role === "OWNER") {
+        return {
+            error: "OWNER_CANNOT_BE_MODIFIED",
+        } as const;
+    }
+
+    const updatedMember =
+        await prisma.workspaceMember.update({
+            where: {
+                workspaceId_userId: {
+                    workspaceId,
+                    userId,
+                },
+            },
+            data: {
+                role: data.role,
+            },
+            select: {
+                userId: true,
+                role: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        avatarUrl: true,
+                    },
+                },
+            },
+        });
+
+    return {
+        member: updatedMember,
+    } as const;
+};
