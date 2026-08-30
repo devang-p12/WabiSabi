@@ -7,6 +7,7 @@ import {
 
 import {
     createWorkspace,
+    getUserWorkspaces
 } from "./workspace.service.js";
 
 export const createWorkspaceController = async (
@@ -38,6 +39,33 @@ export const createWorkspaceController = async (
         success: true,
         data: {
             workspace,
+        },
+    });
+};
+
+export const getUserWorkspacesController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const workspaces =
+        await getUserWorkspaces(req.userId);
+
+    res.status(200).json({
+        success: true,
+        data: {
+            workspaces,
         },
     });
 };

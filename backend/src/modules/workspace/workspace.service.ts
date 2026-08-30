@@ -28,3 +28,28 @@ export const createWorkspace = async (
         return workspace;
     });
 };
+
+export const getUserWorkspaces = async (
+    userId: string
+) => {
+    return prisma.workspace.findMany({
+        where: {
+            members: {
+                some: {
+                    userId,
+                },
+            },
+        },
+        include: {
+            members: {
+                select: {
+                    userId: true,
+                    role: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
