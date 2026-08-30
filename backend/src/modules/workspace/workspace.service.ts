@@ -113,3 +113,29 @@ export const deleteWorkspace = async (
         },
     });
 };
+
+export const getWorkspaceMembers = async (
+    workspaceId: string,
+) => {
+    return prisma.workspaceMember.findMany({
+        where: {
+            workspaceId,
+        },
+        select: {
+            userId: true,
+            role: true,
+            createdAt: true,
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "asc",
+        },
+    });
+};

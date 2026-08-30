@@ -11,12 +11,14 @@ import {
     getUserWorkspaces,
     getWorkspaceById,
     updateWorkspace,
-    deleteWorkspace
+    deleteWorkspace,
+    getWorkspaceMembers
 } from "./workspace.service.js";
 
 import {
     requireWorkspaceAdmin,
-    requireWorkspaceOwner
+    requireWorkspaceOwner,
+    getWorkspaceMembership
 } from "./workspace.authorization.js";
 
 export const createWorkspaceController = async (
@@ -255,6 +257,65 @@ export const deleteWorkspaceController = async (
         success: true,
         data: {
             message: "Workspace deleted successfully.",
+        },
+    });
+};
+
+export const getWorkspaceMembersController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    if (!req.userId) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: "UNAUTHORIZED",
+                message: "Authentication required.",
+            },
+        });
+
+        return;
+    }
+
+    const { workspaceId } = req.params;
+
+    if (typeof workspaceId !== "string") {
+        res.status(400).json({
+            success: false,
+            error: {
+                code: "INVALID_WORKSPACE_ID",
+                message: "Invalid workspace ID.",
+            },
+        });
+
+        return;
+    }
+
+    const membership = await getWorkspaceMembership(
+        workspaceId,
+        req.userId
+    );
+
+    if (!membership) {
+        res.status(404).json({
+            success: false,
+            error: {
+                code: "WORKSPACE_NOT_FOUND",
+                message: "Workspace not found.",
+            },
+        });
+
+        return;
+    }
+
+    const members = await getWorkspaceMembers(
+        workspaceId
+    );
+
+    res.status(200).json({
+        success: true,
+        data: {
+            members,
         },
     });
 };

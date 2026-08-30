@@ -5,7 +5,8 @@ import {
     getUserWorkspacesController,
     getWorkspaceByIdController,
     updateWorkspaceController,
-    deleteWorkspaceController
+    deleteWorkspaceController,
+    getWorkspaceMembersController
 } from "./workspace.controller.js";
 
 import { authenticate } from "../../middleware/auth.middleware.js";
@@ -22,6 +23,11 @@ router.get(
     "/",
     authenticate,
     getUserWorkspacesController
+);
+router.get(
+    "/:workspaceId/members",
+    authenticate,
+    getWorkspaceMembersController
 );
 
 router.get(
@@ -41,5 +47,7 @@ router.delete(
     authenticate,
     deleteWorkspaceController
 );
+
+
 
 export default router;
