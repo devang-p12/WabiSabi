@@ -61,3 +61,88 @@ export const deleteWorkspace = async (
 ) => {
     await api.delete(`/workspaces/${workspaceId}`);
 };
+
+
+export interface WorkspaceMember {
+    userId: string;
+    role: "OWNER" | "ADMIN" | "MEMBER";
+    createdAt: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        avatarUrl: string | null;
+    };
+}
+
+export const getWorkspace = async (
+    workspaceId: string
+) => {
+    const response = await api.get<{
+        success: boolean;
+        data: {
+            workspace: Workspace;
+        };
+    }>(`/workspaces/${workspaceId}`);
+
+    return response.data.data.workspace;
+};
+
+export const getWorkspaceMembers = async (
+    workspaceId: string
+) => {
+    const response = await api.get<{
+        success: boolean;
+        data: {
+            members: WorkspaceMember[];
+        };
+    }>(`/workspaces/${workspaceId}/members`);
+
+    return response.data.data.members;
+};
+
+
+export interface AddWorkspaceMemberInput {
+    email: string;
+    role?: "ADMIN" | "MEMBER";
+}
+
+export const addWorkspaceMember = async (
+    workspaceId: string,
+    data: AddWorkspaceMemberInput
+) => {
+    const response = await api.post<{
+        success: boolean;
+        data: {
+            member: WorkspaceMember;
+        };
+    }>(`/workspaces/${workspaceId}/members`, data);
+
+    return response.data.data.member;
+};
+
+export const updateWorkspaceMember = async (
+    workspaceId: string,
+    userId: string,
+    role: "ADMIN" | "MEMBER"
+) => {
+    const response = await api.patch<{
+        success: boolean;
+        data: {
+            member: WorkspaceMember;
+        };
+    }>(`/workspaces/${workspaceId}/members/${userId}`, {
+        role,
+    });
+
+    return response.data.data.member;
+};
+
+export const removeWorkspaceMember = async (
+    workspaceId: string,
+    userId: string
+) => {
+    await api.delete(
+        `/workspaces/${workspaceId}/members/${userId}`
+    );
+};
