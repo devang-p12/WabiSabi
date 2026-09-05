@@ -4,6 +4,9 @@ import {
     Trash2,
 } from "lucide-react";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 import type { Task } from "@/api/task.api";
 
 import { Button } from "@/components/ui/button";
@@ -27,13 +30,33 @@ export default function TaskCard({
     onEdit,
     onDelete,
 }: TaskCardProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: task.id,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition: transition ?? undefined,
+        opacity: isDragging ? 0 : 1,
+    };
+
     return (
-        <div className="group rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md">
-
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className="group rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md"
+        >
             <div className="flex items-start justify-between gap-2">
-
                 <div className="min-w-0 flex-1">
-
                     <h3 className="text-sm font-medium leading-5">
                         {task.title}
                     </h3>
@@ -43,7 +66,6 @@ export default function TaskCard({
                             {task.description}
                         </p>
                     )}
-
                 </div>
 
                 <DropdownMenu>
@@ -58,7 +80,6 @@ export default function TaskCard({
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
-
                         <DropdownMenuItem onClick={onEdit}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
@@ -73,20 +94,16 @@ export default function TaskCard({
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                         </DropdownMenuItem>
-
                     </DropdownMenuContent>
                 </DropdownMenu>
-
             </div>
 
             <div className="mt-3 flex items-center justify-between">
-
                 <span className="text-[10px] text-muted-foreground">
                     #{task.id.slice(0, 6)}
                 </span>
 
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />
-
             </div>
         </div>
     );

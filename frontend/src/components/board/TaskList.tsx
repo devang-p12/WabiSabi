@@ -1,5 +1,10 @@
 import type { Task } from "@/api/task.api";
 
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 import TaskCard from "./TaskCard";
 
 interface TaskListProps {
@@ -18,15 +23,20 @@ export default function TaskList({
     }
 
     return (
-        <div className="space-y-2">
-            {tasks.map((task) => (
-                <TaskCard
-                    key={task.id}
-                    task={task}
-                    onEdit={() => onEdit(task)}
-                    onDelete={() => onDelete(task)}
-                />
-            ))}
-        </div>
+        <SortableContext
+            items={tasks.map((task) => task.id)}
+            strategy={verticalListSortingStrategy}
+        >
+            <div className="space-y-2">
+                {tasks.map((task) => (
+                    <TaskCard
+                        key={task.id}
+                        task={task}
+                        onEdit={() => onEdit(task)}
+                        onDelete={() => onDelete(task)}
+                    />
+                ))}
+            </div>
+        </SortableContext>
     );
 }
