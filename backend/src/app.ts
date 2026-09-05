@@ -4,6 +4,9 @@ import cors from "cors";
 import authRouter from "./modules/auth/auth.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import workspaceRouter from "./modules/workspace/workspace.routes.js";
+import boardRouter from "./modules/boards/board.routes.js"
+import boardDetailRouter from "./modules/boards/board-detail.routes.js"
+import listRouter from "./modules/list/list.routes.js";
 
 const app = express();
 
@@ -31,6 +34,17 @@ app.use(
     "/api/v1/workspaces",
     workspaceRouter
 );
+app.use(
+    "/api/v1/workspaces",
+    boardRouter
+);
+
+app.use(
+    "/api/v1/boards",
+    boardDetailRouter
+);
+
+app.use("/api/v1", listRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

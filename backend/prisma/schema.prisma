@@ -49,6 +49,7 @@ model Workspace {
   updatedAt DateTime @updatedAt
 
   members WorkspaceMember[]
+  boards  Board[]
 }
 
 model WorkspaceMember {
@@ -66,4 +67,32 @@ model WorkspaceMember {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+}
+
+model Board {
+    id          String   @id @default(uuid())
+    name        String
+    description String?
+    workspaceId String
+    createdAt   DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+    lists BoardList[]
+
+    @@index([workspaceId])
+}
+
+model BoardList {
+    id        String   @id @default(uuid())
+    name      String
+    position  Int      @default(0)
+    boardId   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+    @@index([boardId])
 }

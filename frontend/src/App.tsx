@@ -10,6 +10,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Workspace from "@/pages/Workspace";
 import AuthGuard from "./components/auth/AuthGaurd";
+import Board from "./pages/Board";
 
 function App() {
     return (
@@ -51,6 +52,10 @@ function App() {
                 <Route
                     path="/workspaces/:workspaceId"
                     element={<Workspace />}
+                />
+                <Route
+                    path="/workspaces/:workspaceId/boards/:boardId"
+                    element={<Board />}
                 />
 
             </Routes>

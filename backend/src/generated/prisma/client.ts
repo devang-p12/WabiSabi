@@ -61,3 +61,13 @@ export type Workspace = Prisma.WorkspaceModel
  * 
  */
 export type WorkspaceMember = Prisma.WorkspaceMemberModel
+/**
+ * Model Board
+ * 
+ */
+export type Board = Prisma.BoardModel
+/**
+ * Model BoardList
+ * 
+ */
+export type BoardList = Prisma.BoardListModel

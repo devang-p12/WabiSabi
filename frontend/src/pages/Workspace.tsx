@@ -51,6 +51,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { WorkspaceSidebar } from "@/components/workspace/WorkspaceSidebar";
+import {
+    getWorkspaceBoards,
+    type Board,
+} from "@/api/board.api";
+import CreateBoardDialog from "@/components/workspace/CreateBoardDialog";
+import BoardView from "@/components/workspace/BoardView"
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -68,6 +75,29 @@ export default function Workspace() {
 
     const [loading, setLoading] =
         useState(true);
+
+    const [boards, setBoards] = useState<Board[]>([]);
+    const [boardsLoading, setBoardsLoading] = useState(true);
+    const [createBoardOpen, setCreateBoardOpen] = useState(false);
+
+    const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    const loadBoards = async () => {
+        if (!workspaceId) return;
+
+        try {
+            setBoardsLoading(true);
+
+            const data = await getWorkspaceBoards(workspaceId);
+
+            setBoards(data);
+        } catch (error) {
+            console.error("Failed to load boards:", error);
+        } finally {
+            setBoardsLoading(false);
+        }
+    };
 
     const [error, setError] =
         useState("");
@@ -98,8 +128,11 @@ export default function Workspace() {
     }, [workspaceId]);
 
     useEffect(() => {
+        if (!workspaceId) return;
+
         loadWorkspace();
-    }, [loadWorkspace]);
+        loadBoards();
+    }, [workspaceId, loadWorkspace]);
     const handleChangeRole = async (
         userId: string,
         role: "ADMIN" | "MEMBER"
@@ -239,241 +272,273 @@ export default function Workspace() {
             </header>
 
             {/* Content */}
+            {/* Workspace layout */}
+            <div className="flex min-h-[calc(100vh-4rem)] w-full">
+                <WorkspaceSidebar
+                    workspace={workspace}
+                    boards={boards}
+                    selectedBoardId={selectedBoard?.id ?? null}
+                    canCreateBoard={
+                        currentUserRole === "OWNER" ||
+                        currentUserRole === "ADMIN"
+                    }
+                    collapsed={sidebarCollapsed}
+                    onSelectHome={() => setSelectedBoard(null)}
+                    onSelectBoard={(board) => setSelectedBoard(board)}
+                    onCreateBoard={() => setCreateBoardOpen(true)}
+                    onToggleCollapse={() =>
+                        setSidebarCollapsed((value) => !value)
+                    }
+                />
 
-            <main className="mx-auto max-w-7xl p-6">
+                <main className="min-w-0 flex-1 p-6">
+                    {selectedBoard ? (
+                        <BoardView board={selectedBoard} />
+                    ) : (
+                        <>
+                            {/* Workspace heading */}
 
-                {/* Workspace heading */}
+                            <div className="mb-8">
 
-                <div className="mb-8">
+                                <h2 className="text-3xl font-bold tracking-tight">
+                                    {workspace.name}
+                                </h2>
 
-                    <h2 className="text-3xl font-bold tracking-tight">
-                        {workspace.name}
-                    </h2>
-
-                    <p className="mt-1 text-muted-foreground">
-                        {workspace.description ||
-                            "Start organizing your work."}
-                    </p>
-
-                </div>
-
-                {/* Stats */}
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Members
-                            </CardTitle>
-                        </CardHeader>
-
-                        <CardContent>
-                            <p className="text-3xl font-bold">
-                                {members.length}
-                            </p>
-
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                People in this workspace
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Boards
-                            </CardTitle>
-                        </CardHeader>
-
-                        <CardContent>
-                            <p className="text-3xl font-bold">
-                                0
-                            </p>
-
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                No boards yet
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Tasks
-                            </CardTitle>
-                        </CardHeader>
-
-                        <CardContent>
-                            <p className="text-3xl font-bold">
-                                0
-                            </p>
-
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                No tasks yet
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                </div>
-
-                {/* Members */}
-
-                <Card className="mt-6">
-
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-
-                            <div>
-                                <CardTitle>
-                                    Members
-                                </CardTitle>
-
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    People who have access to this workspace.
+                                <p className="mt-1 text-muted-foreground">
+                                    {workspace.description ||
+                                        "Start organizing your work."}
                                 </p>
+
                             </div>
 
-                            {(currentUserRole === "OWNER" ||
-                                currentUserRole === "ADMIN") && (
-                                    <AddMemberDialog
-                                        workspaceId={workspace.id}
-                                        onAdded={loadWorkspace}
-                                    />
-                                )}
+                            {/* Stats */}
 
-                        </div>
-                    </CardHeader>
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-                    <CardContent>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Members
+                                        </CardTitle>
+                                    </CardHeader>
 
-                        {members.length === 0 ? (
-                            <div className="flex min-h-32 flex-col items-center justify-center text-center">
-                                <Users className="mb-2 h-6 w-6 text-muted-foreground" />
+                                    <CardContent>
+                                        <p className="text-3xl font-bold">
+                                            {members.length}
+                                        </p>
 
-                                <p className="font-medium">
-                                    No members
-                                </p>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            People in this workspace
+                                        </p>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Boards
+                                        </CardTitle>
+                                    </CardHeader>
+
+                                    <CardContent>
+                                        <p className="text-3xl font-bold">
+                                            {boards.length}
+                                        </p>
+
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            {boards.length === 1
+                                                ? "Board in this workspace"
+                                                : "Boards in this workspace"}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Tasks
+                                        </CardTitle>
+                                    </CardHeader>
+
+                                    <CardContent>
+                                        <p className="text-3xl font-bold">
+                                            0
+                                        </p>
+
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            No tasks yet
+                                        </p>
+                                    </CardContent>
+                                </Card>
+
                             </div>
-                        ) : (
-                            <div className="divide-y">
 
-                                {members.map((member) => (
-                                    <div
-                                        key={member.userId}
-                                        className="flex items-center justify-between py-4"
-                                    >
+                            {/* Members */}
 
-                                        <div className="flex items-center gap-3">
+                            <Card className="mt-6">
 
-                                            <Avatar>
-                                                <AvatarFallback>
-                                                    {getInitials(
-                                                        member.user.name
-                                                    )}
-                                                </AvatarFallback>
-                                            </Avatar>
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
 
-                                            <div>
-                                                <p className="text-sm font-medium">
-                                                    {member.user.name}
-                                                </p>
+                                        <div>
+                                            <CardTitle>
+                                                Members
+                                            </CardTitle>
 
-                                                <p className="text-xs text-muted-foreground">
-                                                    {member.user.email}
-                                                </p>
-                                            </div>
-
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                People who have access to this workspace.
+                                            </p>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-
-                                            <Badge variant="secondary">
-                                                {member.role}
-                                            </Badge>
-
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        disabled={member.role === "OWNER"}
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-
-                                                <DropdownMenuContent align="end">
-                                                    {currentUserRole === "OWNER" && (
-                                                        <>
-                                                            {member.role === "ADMIN" ? (
-                                                                <DropdownMenuItem
-                                                                    onClick={() =>
-                                                                        handleChangeRole(
-                                                                            member.userId,
-                                                                            "MEMBER"
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <UserRound className="mr-2 h-4 w-4" />
-                                                                    Make member
-                                                                </DropdownMenuItem>
-                                                            ) : (
-                                                                <DropdownMenuItem
-                                                                    onClick={() =>
-                                                                        handleChangeRole(
-                                                                            member.userId,
-                                                                            "ADMIN"
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Shield className="mr-2 h-4 w-4" />
-                                                                    Make admin
-                                                                </DropdownMenuItem>
-                                                            )}
-
-                                                            <DropdownMenuSeparator />
-
-                                                            <DropdownMenuItem
-                                                                className="text-destructive"
-                                                                onClick={() =>
-                                                                    handleRemoveMember(member.userId)
-                                                                }
-                                                            >
-                                                                <UserMinus className="mr-2 h-4 w-4" />
-                                                                Remove member
-                                                            </DropdownMenuItem>
-                                                        </>
-                                                    )}
-
-                                                    {currentUserRole === "ADMIN" &&
-                                                        member.role === "MEMBER" && (
-                                                            <DropdownMenuItem
-                                                                className="text-destructive"
-                                                                onClick={() =>
-                                                                    handleRemoveMember(member.userId)
-                                                                }
-                                                            >
-                                                                <UserMinus className="mr-2 h-4 w-4" />
-                                                                Remove member
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-
-                                        </div>
+                                        {(currentUserRole === "OWNER" ||
+                                            currentUserRole === "ADMIN") && (
+                                                <AddMemberDialog
+                                                    workspaceId={workspace.id}
+                                                    onAdded={loadWorkspace}
+                                                />
+                                            )}
 
                                     </div>
-                                ))}
+                                </CardHeader>
 
-                            </div>
-                        )}
+                                <CardContent>
 
-                    </CardContent>
+                                    {members.length === 0 ? (
+                                        <div className="flex min-h-32 flex-col items-center justify-center text-center">
+                                            <Users className="mb-2 h-6 w-6 text-muted-foreground" />
 
-                </Card>
+                                            <p className="font-medium">
+                                                No members
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="divide-y">
 
-            </main>
+                                            {members.map((member) => (
+                                                <div
+                                                    key={member.userId}
+                                                    className="flex items-center justify-between py-4"
+                                                >
+
+                                                    <div className="flex items-center gap-3">
+
+                                                        <Avatar>
+                                                            <AvatarFallback>
+                                                                {getInitials(
+                                                                    member.user.name
+                                                                )}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+
+                                                        <div>
+                                                            <p className="text-sm font-medium">
+                                                                {member.user.name}
+                                                            </p>
+
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {member.user.email}
+                                                            </p>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+
+                                                        <Badge variant="secondary">
+                                                            {member.role}
+                                                        </Badge>
+
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    disabled={member.role === "OWNER"}
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+
+                                                            <DropdownMenuContent align="end">
+                                                                {currentUserRole === "OWNER" && (
+                                                                    <>
+                                                                        {member.role === "ADMIN" ? (
+                                                                            <DropdownMenuItem
+                                                                                onClick={() =>
+                                                                                    handleChangeRole(
+                                                                                        member.userId,
+                                                                                        "MEMBER"
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <UserRound className="mr-2 h-4 w-4" />
+                                                                                Make member
+                                                                            </DropdownMenuItem>
+                                                                        ) : (
+                                                                            <DropdownMenuItem
+                                                                                onClick={() =>
+                                                                                    handleChangeRole(
+                                                                                        member.userId,
+                                                                                        "ADMIN"
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <Shield className="mr-2 h-4 w-4" />
+                                                                                Make admin
+                                                                            </DropdownMenuItem>
+                                                                        )}
+
+                                                                        <DropdownMenuSeparator />
+
+                                                                        <DropdownMenuItem
+                                                                            className="text-destructive"
+                                                                            onClick={() =>
+                                                                                handleRemoveMember(member.userId)
+                                                                            }
+                                                                        >
+                                                                            <UserMinus className="mr-2 h-4 w-4" />
+                                                                            Remove member
+                                                                        </DropdownMenuItem>
+                                                                    </>
+                                                                )}
+
+                                                                {currentUserRole === "ADMIN" &&
+                                                                    member.role === "MEMBER" && (
+                                                                        <DropdownMenuItem
+                                                                            className="text-destructive"
+                                                                            onClick={() =>
+                                                                                handleRemoveMember(member.userId)
+                                                                            }
+                                                                        >
+                                                                            <UserMinus className="mr-2 h-4 w-4" />
+                                                                            Remove member
+                                                                        </DropdownMenuItem>
+                                                                    )}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+
+                                                    </div>
+
+                                                </div>
+                                            ))}
+
+                                        </div>
+                                    )}
+
+                                </CardContent>
+
+                            </Card>
+                        </>
+                    )}
+
+                </main>
+            </div>
+            <CreateBoardDialog
+                open={createBoardOpen}
+                onOpenChange={setCreateBoardOpen}
+                workspaceId={workspace.id}
+                onCreated={loadBoards}
+            />
+
 
         </div>
     );
