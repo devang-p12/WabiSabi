@@ -264,6 +264,7 @@ export default function BoardView({
         title: string,
         description: string | null,
         priority: TaskPriority,
+        dueDate: string | null,
     ) => {
         if (!editingTask) return;
 
@@ -276,6 +277,7 @@ export default function BoardView({
                     title,
                     description,
                     priority,
+                    dueDate,
                 },
             );
 

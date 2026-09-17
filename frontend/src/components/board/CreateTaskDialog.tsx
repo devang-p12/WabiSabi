@@ -37,6 +37,7 @@ export default function CreateTaskDialog({
     const [description, setDescription] = useState("");
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
+    const [dueDate, setDueDate] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -58,11 +59,15 @@ export default function CreateTaskDialog({
                 description:
                     description.trim() || undefined,
                 priority,
+                dueDate: dueDate
+                    ? new Date(`${dueDate}T23:59:59`).toISOString()
+                    : null,
             });
 
             setTitle("");
             setDescription("");
             setPriority("MEDIUM");
+            setDueDate("");
 
             onOpenChange(false);
 
@@ -70,7 +75,7 @@ export default function CreateTaskDialog({
         } catch (error: any) {
             setError(
                 error?.response?.data?.message ||
-                    "Failed to create task."
+                "Failed to create task."
             );
         } finally {
             setLoading(false);
@@ -188,6 +193,27 @@ export default function CreateTaskDialog({
                                 Urgent
                             </option>
                         </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label
+                            htmlFor="task-due-date"
+                            className="text-sm font-medium"
+                        >
+                            Due date
+                            <span className="ml-1 font-normal text-muted-foreground">
+                                (optional)
+                            </span>
+                        </label>
+
+                        <Input
+                            id="task-due-date"
+                            type="date"
+                            value={dueDate}
+                            onChange={(event) =>
+                                setDueDate(event.target.value)
+                            }
+                            disabled={loading}
+                        />
                     </div>
 
                     {error && (

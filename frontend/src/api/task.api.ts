@@ -9,6 +9,7 @@ export interface Task {
     position: number;
     listId: string;
     priority: TaskPriority;
+    dueDate: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -17,12 +18,14 @@ export interface CreateTaskInput {
     title: string;
     description?: string;
     priority?: TaskPriority;
+    dueDate?: string | null;
 }
 
 export interface UpdateTaskInput {
     title?: string;
     description?: string | null;
     priority?: TaskPriority;
+    dueDate?: string | null;
 }
 
 export const getListTasks = async (

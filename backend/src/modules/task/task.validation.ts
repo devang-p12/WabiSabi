@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 const taskPrioritySchema = z.enum([
@@ -6,6 +7,14 @@ const taskPrioritySchema = z.enum([
     "HIGH",
     "URGENT",
 ]);
+
+const taskDueDateSchema = z
+    .string()
+    .datetime({
+        message: "Invalid due date",
+    })
+    .nullable()
+    .optional();
 
 export const createTaskSchema = z.object({
     title: z
@@ -31,6 +40,9 @@ export const createTaskSchema = z.object({
 
     priority:
         taskPrioritySchema.optional(),
+
+    dueDate:
+        taskDueDateSchema,
 });
 
 export const updateTaskSchema = z.object({
@@ -59,6 +71,9 @@ export const updateTaskSchema = z.object({
 
     priority:
         taskPrioritySchema.optional(),
+
+    dueDate:
+        taskDueDateSchema,
 });
 
 export const moveTaskSchema = z.object({

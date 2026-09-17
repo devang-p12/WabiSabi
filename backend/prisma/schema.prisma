@@ -113,6 +113,7 @@ model Task {
   position    Int          @default(0)
   listId      String
   priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

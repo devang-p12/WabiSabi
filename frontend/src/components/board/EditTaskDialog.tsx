@@ -25,6 +25,7 @@ interface EditTaskDialogProps {
         title: string,
         description: string | null,
         priority: TaskPriority,
+        dueDate: string | null,
     ) => Promise<void>;
 }
 
@@ -38,6 +39,7 @@ export default function EditTaskDialog({
     const [description, setDescription] = useState("");
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
+    const [dueDate, setDueDate] = useState("");
 
     const [saving, setSaving] = useState(false);
 
@@ -46,6 +48,7 @@ export default function EditTaskDialog({
             setTitle(task.title);
             setDescription(task.description ?? "");
             setPriority(task.priority ?? "MEDIUM");
+
         }
     }, [task]);
 
@@ -67,6 +70,9 @@ export default function EditTaskDialog({
                 trimmedTitle,
                 description.trim() || null,
                 priority,
+                dueDate
+                    ? new Date(`${dueDate}T23:59:59`).toISOString()
+                    : null,
             );
 
             onOpenChange(false);
@@ -176,6 +182,39 @@ export default function EditTaskDialog({
                                     Urgent
                                 </option>
                             </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="edit-task-due-date"
+                                className="text-sm font-medium"
+                            >
+                                Due date
+                                <span className="ml-1 font-normal text-muted-foreground">
+                                    (optional)
+                                </span>
+                            </label>
+
+                            <Input
+                                id="edit-task-due-date"
+                                type="date"
+                                value={dueDate}
+                                onChange={(event) =>
+                                    setDueDate(event.target.value)
+                                }
+                                disabled={saving}
+                            />
+
+                            {dueDate && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDueDate("")}
+                                    disabled={saving}
+                                >
+                                    Clear due date
+                                </Button>
+                            )}
                         </div>
                     </div>
 

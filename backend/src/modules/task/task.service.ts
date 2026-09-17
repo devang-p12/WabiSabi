@@ -12,6 +12,7 @@ export const createTask = async (
         title: string;
         description?: string;
         priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+        dueDate?: string | null;
     }
 ) => {
     const list = await prisma.boardList.findUnique({
@@ -56,12 +57,14 @@ export const createTask = async (
     const task = await prisma.task.create({
         data: {
             title: data.title,
-            description:
-                data.description ?? null,
-            priority:
-                data.priority ?? "MEDIUM",
-            position,
+            ...(data.description !== undefined && {
+                description: data.description,
+            }),
             listId,
+            priority: data.priority ?? "MEDIUM",
+            dueDate: data.dueDate
+                ? new Date(data.dueDate)
+                : null,
         },
     });
 
@@ -159,11 +162,8 @@ export const updateTask = async (
     data: {
         title?: string;
         description?: string | null;
-        priority?:
-        | "LOW"
-        | "MEDIUM"
-        | "HIGH"
-        | "URGENT";
+        priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+        dueDate?: string | null;
     }
 ) => {
     const task = await prisma.task.findUnique({
@@ -208,13 +208,17 @@ export const updateTask = async (
                 }),
 
                 ...(data.description !== undefined && {
-                    description:
-                        data.description,
+                    description: data.description,
                 }),
 
                 ...(data.priority !== undefined && {
-                    priority:
-                        data.priority,
+                    priority: data.priority,
+                }),
+
+                ...(data.dueDate !== undefined && {
+                    dueDate: data.dueDate
+                        ? new Date(data.dueDate)
+                        : null,
                 }),
             },
         });
