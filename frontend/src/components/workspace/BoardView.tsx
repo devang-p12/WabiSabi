@@ -28,6 +28,7 @@ import CreateListDialog from "../board/CreateListDialog";
 import CreateTaskDialog from "../board/CreateTaskDialog";
 import DeleteListDialog from "../board/DeleteListDialog";
 import DeleteTaskDialog from "../board/DeleteTaskDialog";
+import TaskDetailsDialog from "../board/TaskDetailsDialog";
 import EditTaskDialog from "../board/EditTaskDialog";
 import RenameListDialog from "../board/RenameListDialog";
 
@@ -65,6 +66,9 @@ export default function BoardView({
 
     const [editingList, setEditingList] =
         useState<BoardList | null>(null);
+
+    const [selectedTask, setSelectedTask] =
+        useState<Task | null>(null);
 
     const [deletingList, setDeletingList] =
         useState<BoardList | null>(null);
@@ -487,6 +491,9 @@ export default function BoardView({
                                                     list,
                                                 )
                                             }
+                                            onViewTask={(task) =>
+                                                setSelectedTask(task)
+                                            }
                                             onEditTask={(
                                                 task,
                                             ) =>
@@ -620,6 +627,28 @@ export default function BoardView({
                 onSave={
                     handleUpdateTask
                 }
+            />
+            {/* Task details */}
+            <TaskDetailsDialog
+                task={selectedTask}
+                open={selectedTask !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedTask(null);
+                    }
+                }}
+                onEdit={() => {
+                    if (!selectedTask) return;
+
+                    setEditingTask(selectedTask);
+                    setSelectedTask(null);
+                }}
+                onDelete={() => {
+                    if (!selectedTask) return;
+
+                    setDeletingTask(selectedTask);
+                    setSelectedTask(null);
+                }}
             />
 
             {/* Delete task */}

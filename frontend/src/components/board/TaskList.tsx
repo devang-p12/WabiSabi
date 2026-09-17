@@ -9,12 +9,13 @@ import TaskCard from "./TaskCard";
 
 interface TaskListProps {
     tasks: Task[];
+    onView: (task: Task) => void;
     onEdit: (task: Task) => void;
     onDelete: (task: Task) => void;
 }
-
 export default function TaskList({
     tasks,
+    onView,
     onEdit,
     onDelete,
 }: TaskListProps) {
@@ -32,6 +33,7 @@ export default function TaskList({
                     <TaskCard
                         key={task.id}
                         task={task}
+                        onView={() => onView(task)}
                         onEdit={() => onEdit(task)}
                         onDelete={() => onDelete(task)}
                     />

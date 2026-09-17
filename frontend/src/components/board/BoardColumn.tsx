@@ -30,6 +30,7 @@ interface BoardColumnProps {
     onAddTask: () => void;
     onRename: () => void;
     onDelete: () => void;
+    onViewTask: (task: Task) => void;
     onEditTask: (task: Task) => void;
     onDeleteTask: (task: Task) => void;
 }
@@ -41,6 +42,7 @@ export default function BoardColumn({
     onAddTask,
     onRename,
     onDelete,
+    onViewTask,
     onEditTask,
     onDeleteTask,
 }: BoardColumnProps) {
@@ -122,9 +124,8 @@ export default function BoardColumn({
             {/* Tasks */}
             <div
                 ref={setNodeRef}
-                className={`min-h-0 flex-1 overflow-y-auto p-3 transition-colors ${
-                    isOver ? "bg-muted/50" : ""
-                }`}
+                className={`min-h-0 flex-1 overflow-y-auto p-3 transition-colors ${isOver ? "bg-muted/50" : ""
+                    }`}
             >
                 {tasks.length === 0 ? (
                     <div className="flex min-h-[180px] flex-col items-center justify-center rounded-lg border border-dashed bg-background/40 px-5 text-center">
@@ -161,6 +162,7 @@ export default function BoardColumn({
                 ) : (
                     <TaskList
                         tasks={tasks}
+                        onView={onViewTask}
                         onEdit={onEditTask}
                         onDelete={onDeleteTask}
                     />

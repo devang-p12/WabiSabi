@@ -3,6 +3,7 @@ import {
     Pencil,
     Trash2,
     GripVertical,
+    CalendarDays,
 } from "lucide-react";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -22,6 +23,7 @@ import {
 
 interface TaskCardProps {
     task: Task;
+    onView: () => void;
     onEdit: () => void;
     onDelete: () => void;
 }
@@ -57,6 +59,7 @@ const priorityConfig: Record<
 
 export default function TaskCard({
     task,
+    onView,
     onEdit,
     onDelete,
 }: TaskCardProps) {
@@ -78,18 +81,57 @@ export default function TaskCard({
     };
 
     const priority = priorityConfig[task.priority];
+    const dueDate = task.dueDate
+        ? new Date(task.dueDate)
+        : null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDay = dueDate
+        ? new Date(dueDate)
+        : null;
+
+    if (dueDay) {
+        dueDay.setHours(0, 0, 0, 0);
+    }
+
+    const isOverdue =
+        dueDay !== null &&
+        dueDay < today;
+
+    const isDueToday =
+        dueDay !== null &&
+        dueDay.getTime() === today.getTime();
+
+    const formattedDueDate = dueDate
+        ? dueDate.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+        })
+        : null;
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className="group rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md"
+            onClick={onView}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onView();
+                }
+            }}
+            className="group cursor-pointer rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md"
         >
             <div className="flex items-start gap-2">
                 <button
                     type="button"
                     {...attributes}
                     {...listeners}
+                    onClick={(event) => event.stopPropagation()}
                     className="mt-0.5 flex h-6 w-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 active:cursor-grabbing"
                     aria-label={`Drag ${task.title}`}
                 >
@@ -111,6 +153,7 @@ export default function TaskCard({
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
+                            onClick={(event) => event.stopPropagation()}
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
@@ -139,12 +182,33 @@ export default function TaskCard({
             </div>
 
             <div className="mt-3 flex items-center justify-between gap-2">
-                <span className="text-[10px] text-muted-foreground">
-                    #{task.id.slice(0, 6)}
-                </span>
+                <div className="flex min-w-0 items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground">
+                        #{task.id.slice(0, 6)}
+                    </span>
+
+                    {formattedDueDate && (
+                        <span
+                            className={`flex items-center gap-1 text-[10px] font-medium ${isOverdue
+                                ? "text-destructive"
+                                : isDueToday
+                                    ? "text-orange-600 dark:text-orange-400"
+                                    : "text-muted-foreground"
+                                }`}
+                        >
+                            <CalendarDays className="h-3 w-3" />
+
+                            {isOverdue
+                                ? `Overdue · ${formattedDueDate}`
+                                : isDueToday
+                                    ? `Today · ${formattedDueDate}`
+                                    : formattedDueDate}
+                        </span>
+                    )}
+                </div>
 
                 <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${priority.className}`}
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${priority.className}`}
                 >
                     {priority.label}
                 </span>
