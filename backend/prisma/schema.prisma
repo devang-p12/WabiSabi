@@ -14,9 +14,9 @@ enum WorkspaceRole {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String
-  email        String   @unique
+  email        String  @unique
   passwordHash String
   avatarUrl    String?
 
@@ -41,7 +41,7 @@ model RefreshToken {
 }
 
 model Workspace {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
 
@@ -70,29 +70,54 @@ model WorkspaceMember {
 }
 
 model Board {
-    id          String   @id @default(uuid())
-    name        String
-    description String?
-    workspaceId String
-    createdAt   DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  workspaceId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-    workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-    lists BoardList[]
+  lists BoardList[]
 
-    @@index([workspaceId])
+  @@index([workspaceId])
 }
 
 model BoardList {
-    id        String   @id @default(uuid())
-    name      String
-    position  Int      @default(0)
-    boardId   String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  position  Int      @default(0)
+  boardId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
-    @@index([boardId])
+  tasks Task[]
+
+  @@index([boardId])
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  position    Int          @default(0)
+  listId      String
+  priority    TaskPriority @default(MEDIUM)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  list BoardList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@index([listId])
 }

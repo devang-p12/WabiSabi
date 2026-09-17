@@ -1,6 +1,9 @@
 import { useState } from "react";
 
-import { createTask } from "@/api/task.api";
+import {
+    createTask,
+    type TaskPriority,
+} from "@/api/task.api";
 
 import {
     Dialog,
@@ -31,8 +34,9 @@ export default function CreateTaskDialog({
     onCreated,
 }: CreateTaskDialogProps) {
     const [title, setTitle] = useState("");
-    const [description, setDescription] =
-        useState("");
+    const [description, setDescription] = useState("");
+    const [priority, setPriority] =
+        useState<TaskPriority>("MEDIUM");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -53,10 +57,12 @@ export default function CreateTaskDialog({
                 title: trimmedTitle,
                 description:
                     description.trim() || undefined,
+                priority,
             });
 
             setTitle("");
             setDescription("");
+            setPriority("MEDIUM");
 
             onOpenChange(false);
 
@@ -75,6 +81,7 @@ export default function CreateTaskDialog({
         if (!value && !loading) {
             setTitle("");
             setDescription("");
+            setPriority("MEDIUM");
             setError("");
         }
 
@@ -87,7 +94,6 @@ export default function CreateTaskDialog({
             onOpenChange={handleOpenChange}
         >
             <DialogContent className="sm:max-w-lg">
-
                 <DialogHeader>
                     <DialogTitle>
                         Create a task
@@ -103,7 +109,6 @@ export default function CreateTaskDialog({
                 </DialogHeader>
 
                 <div className="space-y-4 py-2">
-
                     <div className="space-y-2">
                         <label
                             htmlFor="task-title"
@@ -148,12 +153,48 @@ export default function CreateTaskDialog({
                         />
                     </div>
 
+                    <div className="space-y-2">
+                        <label
+                            htmlFor="task-priority"
+                            className="text-sm font-medium"
+                        >
+                            Priority
+                        </label>
+
+                        <select
+                            id="task-priority"
+                            value={priority}
+                            onChange={(event) =>
+                                setPriority(
+                                    event.target.value as TaskPriority
+                                )
+                            }
+                            disabled={loading}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <option value="LOW">
+                                Low
+                            </option>
+
+                            <option value="MEDIUM">
+                                Medium
+                            </option>
+
+                            <option value="HIGH">
+                                High
+                            </option>
+
+                            <option value="URGENT">
+                                Urgent
+                            </option>
+                        </select>
+                    </div>
+
                     {error && (
                         <p className="text-sm text-destructive">
                             {error}
                         </p>
                     )}
-
                 </div>
 
                 <DialogFooter>
@@ -179,7 +220,6 @@ export default function CreateTaskDialog({
                             : "Create task"}
                     </Button>
                 </DialogFooter>
-
             </DialogContent>
         </Dialog>
     );

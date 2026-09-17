@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-import type { Task } from "@/api/task.api";
+import type {
+    Task,
+    TaskPriority,
+} from "@/api/task.api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +24,7 @@ interface EditTaskDialogProps {
     onSave: (
         title: string,
         description: string | null,
+        priority: TaskPriority,
     ) => Promise<void>;
 }
 
@@ -32,12 +36,16 @@ export default function EditTaskDialog({
 }: EditTaskDialogProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [priority, setPriority] =
+        useState<TaskPriority>("MEDIUM");
+
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (task) {
             setTitle(task.title);
             setDescription(task.description ?? "");
+            setPriority(task.priority ?? "MEDIUM");
         }
     }, [task]);
 
@@ -58,6 +66,7 @@ export default function EditTaskDialog({
             await onSave(
                 trimmedTitle,
                 description.trim() || null,
+                priority,
             );
 
             onOpenChange(false);
@@ -129,6 +138,44 @@ export default function EditTaskDialog({
                                 rows={5}
                                 placeholder="Add a description..."
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="edit-task-priority"
+                                className="text-sm font-medium"
+                            >
+                                Priority
+                            </label>
+
+                            <select
+                                id="edit-task-priority"
+                                value={priority}
+                                onChange={(event) =>
+                                    setPriority(
+                                        event.target
+                                            .value as TaskPriority,
+                                    )
+                                }
+                                disabled={saving}
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="LOW">
+                                    Low
+                                </option>
+
+                                <option value="MEDIUM">
+                                    Medium
+                                </option>
+
+                                <option value="HIGH">
+                                    High
+                                </option>
+
+                                <option value="URGENT">
+                                    Urgent
+                                </option>
+                            </select>
                         </div>
                     </div>
 

@@ -47,3 +47,8 @@ export type Board = Prisma.BoardModel
  * 
  */
 export type BoardList = Prisma.BoardListModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel

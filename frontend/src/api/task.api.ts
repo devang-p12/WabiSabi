@@ -1,11 +1,14 @@
 import { api } from "./client";
 
+export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
 export interface Task {
     id: string;
     title: string;
     description: string | null;
     position: number;
     listId: string;
+    priority: TaskPriority;
     createdAt: string;
     updatedAt: string;
 }
@@ -13,11 +16,13 @@ export interface Task {
 export interface CreateTaskInput {
     title: string;
     description?: string;
+    priority?: TaskPriority;
 }
 
 export interface UpdateTaskInput {
     title?: string;
     description?: string | null;
+    priority?: TaskPriority;
 }
 
 export const getListTasks = async (
@@ -43,14 +48,15 @@ export const getTask = async (
 export const createTask = async (
     listId: string,
     data: CreateTaskInput
-): Promise<Task> => {
+) => {
     const response = await api.post(
         `/lists/${listId}/tasks`,
         data
     );
 
-    return response.data.data.task;
+    return response.data;
 };
+
 
 export const updateTask = async (
     taskId: string,
@@ -63,6 +69,7 @@ export const updateTask = async (
 
     return response.data.data.task;
 };
+
 
 export const deleteTask = async (
     taskId: string

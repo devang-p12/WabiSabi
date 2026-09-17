@@ -15,6 +15,7 @@ import {
     moveTask,
     updateTask,
     type Task,
+    type TaskPriority,
 } from "@/api/task.api";
 
 import BoardColumn from "../board/BoardColumn";
@@ -262,69 +263,43 @@ export default function BoardView({
     const handleUpdateTask = async (
         title: string,
         description: string | null,
+        priority: TaskPriority,
     ) => {
-        if (!editingTask) {
-            return;
-        }
+        if (!editingTask) return;
 
         try {
             setError(null);
 
-            const updatedTask =
-                await updateTask(
-                    editingTask.id,
-                    {
-                        title,
-                        description,
-                    },
-                );
+            const updatedTask = await updateTask(
+                editingTask.id,
+                {
+                    title,
+                    description,
+                    priority,
+                },
+            );
 
             setTasks((current) => {
-                const next = {
-                    ...current,
-                };
+                const next = { ...current };
 
-                /*
-                 * Remove the old copy from every
-                 * list first.
-                 *
-                 * This keeps state correct even if
-                 * the API response changes listId.
-                 */
-                for (const listId of Object.keys(
-                    next,
-                )) {
-                    next[listId] = (
-                        next[listId] ?? []
-                    ).filter(
-                        (task) =>
-                            task.id !==
-                            updatedTask.id,
+                for (const listId of Object.keys(next)) {
+                    next[listId] = (next[listId] ?? []).map((task) =>
+                        task.id === updatedTask.id
+                            ? updatedTask
+                            : task
                     );
                 }
-
-                next[updatedTask.listId] = [
-                    ...(next[
-                        updatedTask.listId
-                    ] ?? []),
-                    updatedTask,
-                ];
 
                 return next;
             });
 
             setEditingTask(null);
         } catch (err) {
-            console.error(
-                "Failed to update task:",
-                err,
-            );
-
             setError(
-                "Failed to update task.",
+                err instanceof Error
+                    ? err.message
+                    : "Failed to update task",
             );
-
-            throw err;
         }
     };
 
@@ -350,7 +325,7 @@ export default function BoardView({
 
                 next[deletingTask.listId] = (
                     next[
-                        deletingTask.listId
+                    deletingTask.listId
                     ] ?? []
                 ).filter(
                     (task) =>
@@ -443,7 +418,7 @@ export default function BoardView({
                             Loading board...
                         </div>
                     ) : lists.length ===
-                      0 ? (
+                        0 ? (
                         <BoardEmptyState
                             onCreateList={() =>
                                 setCreateListOpen(
@@ -464,16 +439,16 @@ export default function BoardView({
                                 searchQuery
                                     .trim()
                                     .length >
-                                    0 ||
+                                0 ||
                                 sortOption !==
-                                    "position"
+                                "position"
                             }
                         >
                             {lists.map(
                                 (list) => {
                                     const listTasks =
                                         tasks[
-                                            list.id
+                                        list.id
                                         ] ?? [];
 
                                     const visibleTasks =

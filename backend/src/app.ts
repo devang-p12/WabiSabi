@@ -7,6 +7,7 @@ import workspaceRouter from "./modules/workspace/workspace.routes.js";
 import boardRouter from "./modules/boards/board.routes.js"
 import boardDetailRouter from "./modules/boards/board-detail.routes.js"
 import listRouter from "./modules/list/list.routes.js";
+import taskRouter from "./modules/task/task.routes.js";
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use(
 );
 
 app.use("/api/v1", listRouter);
+app.use("/api/v1", taskRouter);
 
 // Always keep this LAST
 app.use(errorHandler);
