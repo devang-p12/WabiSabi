@@ -464,50 +464,22 @@ export default function BoardView({
 
                                     return (
                                         <BoardColumn
-                                            key={
-                                                list.id
-                                            }
-                                            list={
-                                                list
-                                            }
-                                            tasks={
-                                                visibleTasks
-                                            }
-                                            totalTasks={
-                                                listTasks.length
-                                            }
-                                            onAddTask={() =>
-                                                setCreateTaskList(
-                                                    list,
-                                                )
-                                            }
-                                            onRename={() =>
-                                                setEditingList(
-                                                    list,
-                                                )
-                                            }
-                                            onDelete={() =>
-                                                setDeletingList(
-                                                    list,
-                                                )
-                                            }
-                                            onViewTask={(task) =>
-                                                setSelectedTask(task)
-                                            }
-                                            onEditTask={(
-                                                task,
-                                            ) =>
-                                                setEditingTask(
-                                                    task,
-                                                )
-                                            }
-                                            onDeleteTask={(
-                                                task,
-                                            ) =>
-                                                setDeletingTask(
-                                                    task,
-                                                )
-                                            }
+                                            key={list.id}
+                                            list={list}
+                                            tasks={visibleTasks}
+                                            totalTasks={listTasks.length}
+                                            onAddTask={() => setCreateTaskList(list)}
+                                            onRename={() => setEditingList(list)}
+                                            onDelete={() => setDeletingList(list)}
+                                            onViewTask={(task) => {
+                                                setSelectedTask(task);
+                                            }}
+                                            onEditTask={(task) => {
+                                                setEditingTask(task);
+                                            }}
+                                            onDeleteTask={(task) => {
+                                                setDeletingTask(task);
+                                            }}
                                         />
                                     );
                                 },
@@ -612,62 +584,58 @@ export default function BoardView({
             />
 
             {/* Edit task */}
+            {/* Task dialogs */}
+
             <EditTaskDialog
                 task={editingTask}
-                open={
-                    editingTask !== null
-                }
+                open={editingTask !== null}
                 onOpenChange={(open) => {
                     if (!open) {
-                        setEditingTask(
-                            null,
-                        );
+                        setEditingTask(null);
                     }
                 }}
-                onSave={
-                    handleUpdateTask
-                }
+                onSave={handleUpdateTask}
             />
-            {/* Task details */}
-            <TaskDetailsDialog
-                task={selectedTask}
-                open={selectedTask !== null}
-                onOpenChange={(open) => {
-                    if (!open) {
+
+            {selectedTask && (
+                <TaskDetailsDialog
+                    task={selectedTask}
+                    open={true}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setSelectedTask(null);
+                        }
+                    }}
+                    onEdit={() => {
+                        const task = selectedTask;
+
+                        // Close details first
                         setSelectedTask(null);
-                    }
-                }}
-                onEdit={() => {
-                    if (!selectedTask) return;
 
-                    setEditingTask(selectedTask);
-                    setSelectedTask(null);
-                }}
-                onDelete={() => {
-                    if (!selectedTask) return;
+                        // Then open edit
+                        setEditingTask(task);
+                    }}
+                    onDelete={() => {
+                        const task = selectedTask;
 
-                    setDeletingTask(selectedTask);
-                    setSelectedTask(null);
-                }}
-            />
+                        setSelectedTask(null);
+                        setDeletingTask(task);
+                    }}
+                />
+            )}
 
-            {/* Delete task */}
-            <DeleteTaskDialog
-                task={deletingTask}
-                open={
-                    deletingTask !== null
-                }
-                onOpenChange={(open) => {
-                    if (!open) {
-                        setDeletingTask(
-                            null,
-                        );
-                    }
-                }}
-                onConfirm={
-                    handleDeleteTask
-                }
-            />
+            {!selectedTask && (
+                <DeleteTaskDialog
+                    task={deletingTask}
+                    open={deletingTask !== null}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setDeletingTask(null);
+                        }
+                    }}
+                    onConfirm={handleDeleteTask}
+                />
+            )}
         </div>
     );
 }

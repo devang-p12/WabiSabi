@@ -40,17 +40,26 @@ export default function EditTaskDialog({
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
     const [dueDate, setDueDate] = useState("");
-
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        if (task) {
-            setTitle(task.title);
-            setDescription(task.description ?? "");
-            setPriority(task.priority ?? "MEDIUM");
+        if (!task) return;
 
-        }
+        setTitle(task.title);
+        setDescription(task.description ?? "");
+        setPriority(task.priority ?? "MEDIUM");
+        setDueDate(
+            task.dueDate
+                ? task.dueDate.slice(0, 10)
+                : "",
+        );
     }, [task]);
+
+    // IMPORTANT:
+    // Do not keep a Dialog mounted when there is no task.
+    if (!task) {
+        return null;
+    }
 
     const handleSubmit = async (
         event: React.FormEvent,
@@ -71,7 +80,9 @@ export default function EditTaskDialog({
                 description.trim() || null,
                 priority,
                 dueDate
-                    ? new Date(`${dueDate}T23:59:59`).toISOString()
+                    ? new Date(
+                          `${dueDate}T23:59:59`,
+                      ).toISOString()
                     : null,
             );
 
@@ -121,6 +132,7 @@ export default function EditTaskDialog({
                                 }
                                 maxLength={200}
                                 autoFocus
+                                disabled={saving}
                             />
                         </div>
 
@@ -143,6 +155,7 @@ export default function EditTaskDialog({
                                 maxLength={5000}
                                 rows={5}
                                 placeholder="Add a description..."
+                                disabled={saving}
                             />
                         </div>
 
@@ -169,20 +182,18 @@ export default function EditTaskDialog({
                                 <option value="LOW">
                                     Low
                                 </option>
-
                                 <option value="MEDIUM">
                                     Medium
                                 </option>
-
                                 <option value="HIGH">
                                     High
                                 </option>
-
                                 <option value="URGENT">
                                     Urgent
                                 </option>
                             </select>
                         </div>
+
                         <div className="space-y-2">
                             <label
                                 htmlFor="edit-task-due-date"
@@ -199,7 +210,9 @@ export default function EditTaskDialog({
                                 type="date"
                                 value={dueDate}
                                 onChange={(event) =>
-                                    setDueDate(event.target.value)
+                                    setDueDate(
+                                        event.target.value,
+                                    )
                                 }
                                 disabled={saving}
                             />
@@ -209,7 +222,9 @@ export default function EditTaskDialog({
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => setDueDate("")}
+                                    onClick={() =>
+                                        setDueDate("")
+                                    }
                                     disabled={saving}
                                 >
                                     Clear due date

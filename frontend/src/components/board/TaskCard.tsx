@@ -153,26 +153,50 @@ export default function TaskCard({
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
-                            onClick={(event) => event.stopPropagation()}
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                            className="h-8 w-8"
+                            onPointerDown={(event) => {
+                                event.stopPropagation();
+                            }}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                            }}
                         >
-                            <MoreHorizontal className="h-3.5 w-3.5" />
+                            <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
 
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={onEdit}>
+                    <DropdownMenuContent
+                        align="end"
+                        onPointerDown={(event) => {
+                            event.stopPropagation();
+                        }}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                        }}
+                    >
+                        <DropdownMenuItem
+                            onPointerDown={(event) => {
+                                event.stopPropagation();
+                            }}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onEdit();
+                            }}
+                        >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                         </DropdownMenuItem>
 
-                        <DropdownMenuSeparator />
-
                         <DropdownMenuItem
-                            onClick={onDelete}
-                            className="text-destructive focus:text-destructive"
+                            onPointerDown={(event) => {
+                                event.stopPropagation();
+                            }}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onDelete();
+                            }}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
