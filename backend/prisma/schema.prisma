@@ -79,7 +79,8 @@ model Board {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  lists BoardList[]
+  lists  BoardList[]
+  labels Label[]
 
   @@index([workspaceId])
 }
@@ -118,7 +119,33 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  list BoardList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  list   BoardList   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  labels TaskLabel[]
 
   @@index([listId])
+}
+
+model Label {
+  id        String   @id @default(uuid())
+  name      String
+  color     String
+  boardId   String
+  createdAt DateTime @default(now())
+
+  board Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks TaskLabel[]
+
+  @@unique([boardId, name])
+  @@index([boardId])
+}
+
+model TaskLabel {
+  taskId  String
+  labelId String
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@index([labelId])
 }

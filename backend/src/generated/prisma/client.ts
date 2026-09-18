@@ -76,3 +76,13 @@ export type BoardList = Prisma.BoardListModel
  * 
  */
 export type Task = Prisma.TaskModel
+/**
+ * Model Label
+ * 
+ */
+export type Label = Prisma.LabelModel
+/**
+ * Model TaskLabel
+ * 
+ */
+export type TaskLabel = Prisma.TaskLabelModel

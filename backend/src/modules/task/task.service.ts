@@ -110,11 +110,20 @@ export const getListTasks = async (
         orderBy: {
             position: "asc",
         },
+        include: {
+            labels: {
+                include: {
+                    label: true,
+                },
+            },
+        },
     });
-
     return {
-        tasks,
-    } as const;
+    tasks: tasks.map((task) => ({
+        ...task,
+        labels: task.labels.map((taskLabel) => taskLabel.label),
+    })),
+} as const;
 };
 
 export const getTask = async (
@@ -131,9 +140,13 @@ export const getTask = async (
                     board: true,
                 },
             },
+            labels: {
+                include: {
+                    label: true,
+                },
+            },
         },
     });
-
     if (!task) {
         return {
             error: "Task not found.",
@@ -152,7 +165,10 @@ export const getTask = async (
     }
 
     return {
-        task,
+        task: {
+            ...task,
+            labels: task.labels.map((taskLabel) => taskLabel.label),
+        },
     } as const;
 };
 
