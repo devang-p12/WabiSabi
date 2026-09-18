@@ -119,11 +119,11 @@ export const getListTasks = async (
         },
     });
     return {
-    tasks: tasks.map((task) => ({
-        ...task,
-        labels: task.labels.map((taskLabel) => taskLabel.label),
-    })),
-} as const;
+        tasks: tasks.map((task) => ({
+            ...task,
+            labels: task.labels.map((taskLabel) => taskLabel.label),
+        })),
+    } as const;
 };
 
 export const getTask = async (
@@ -212,35 +212,47 @@ export const updateTask = async (
         } as const;
     }
 
-    const updatedTask =
-        await prisma.task.update({
-            where: {
-                id: taskId,
+    const updatedTask = await prisma.task.update({
+        where: {
+            id: taskId,
+        },
+
+        data: {
+            ...(data.title !== undefined && {
+                title: data.title,
+            }),
+
+            ...(data.description !== undefined && {
+                description: data.description,
+            }),
+
+            ...(data.priority !== undefined && {
+                priority: data.priority,
+            }),
+
+            ...(data.dueDate !== undefined && {
+                dueDate: data.dueDate
+                    ? new Date(data.dueDate)
+                    : null,
+            }),
+        },
+
+        include: {
+            labels: {
+                include: {
+                    label: true,
+                },
             },
-
-            data: {
-                ...(data.title !== undefined && {
-                    title: data.title,
-                }),
-
-                ...(data.description !== undefined && {
-                    description: data.description,
-                }),
-
-                ...(data.priority !== undefined && {
-                    priority: data.priority,
-                }),
-
-                ...(data.dueDate !== undefined && {
-                    dueDate: data.dueDate
-                        ? new Date(data.dueDate)
-                        : null,
-                }),
-            },
-        });
+        },
+    });
 
     return {
-        task: updatedTask,
+        task: {
+            ...updatedTask,
+            labels: updatedTask.labels.map(
+                (taskLabel) => taskLabel.label
+            ),
+        },
     } as const;
 };
 
