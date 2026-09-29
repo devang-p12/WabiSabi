@@ -148,6 +148,21 @@ export default function TaskCard({
                             {task.description}
                         </p>
                     )}
+                    {task.labels.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                            {task.labels.map((label) => (
+                                <span
+                                    key={label.id}
+                                    className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
+                                    style={{
+                                        backgroundColor: label.color,
+                                    }}
+                                >
+                                    {label.name}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <DropdownMenu>

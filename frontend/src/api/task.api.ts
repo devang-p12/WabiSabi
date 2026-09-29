@@ -2,6 +2,14 @@ import { api } from "./client";
 
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
+export interface Label {
+    id: string;
+    name: string;
+    color: string;
+    boardId: string;
+    createdAt: string;
+}
+
 export interface Task {
     id: string;
     title: string;
@@ -12,6 +20,7 @@ export interface Task {
     dueDate: string | null;
     createdAt: string;
     updatedAt: string;
+    labels: Label[];
 }
 
 export interface CreateTaskInput {
@@ -51,13 +60,13 @@ export const getTask = async (
 export const createTask = async (
     listId: string,
     data: CreateTaskInput
-) => {
+): Promise<Task> => {
     const response = await api.post(
         `/lists/${listId}/tasks`,
         data
     );
 
-    return response.data;
+    return response.data.data.task;
 };
 
 

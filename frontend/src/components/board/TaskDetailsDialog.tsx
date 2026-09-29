@@ -5,6 +5,8 @@ import {
     Trash2,
 } from "lucide-react";
 
+import TaskLabelSelector from "./TaskLabelSelector";
+
 import type { Task } from "@/api/task.api";
 
 import { Button } from "@/components/ui/button";
@@ -20,10 +22,12 @@ import {
 
 interface TaskDetailsDialogProps {
     task: Task | null;
+    boardId: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onEdit: () => void;
     onDelete: () => void;
+    onLabelsChange: (labels: Task["labels"]) => void;
 }
 
 const priorityConfig = {
@@ -51,10 +55,12 @@ const priorityConfig = {
 
 export default function TaskDetailsDialog({
     task,
+    boardId,
     open,
     onOpenChange,
     onEdit,
     onDelete,
+    onLabelsChange,
 }: TaskDetailsDialogProps) {
     if (!task) {
         return null;
@@ -64,10 +70,10 @@ export default function TaskDetailsDialog({
 
     const formattedDueDate = task.dueDate
         ? new Date(task.dueDate).toLocaleDateString(undefined, {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-          })
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        })
         : null;
 
     const isOverdue =
@@ -132,11 +138,10 @@ export default function TaskDetailsDialog({
 
                             {formattedDueDate ? (
                                 <div
-                                    className={`flex items-center gap-2 text-sm ${
-                                        isOverdue
+                                    className={`flex items-center gap-2 text-sm ${isOverdue
                                             ? "text-destructive"
                                             : "text-muted-foreground"
-                                    }`}
+                                        }`}
                                 >
                                     <CalendarDays className="h-4 w-4" />
                                     <span>
@@ -184,6 +189,18 @@ export default function TaskDetailsDialog({
                                 </p>
                             </div>
                         </div>
+                    </div>
+                    {/* Labels */}
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-medium">
+                            Labels
+                        </h4>
+
+                        <TaskLabelSelector
+                            task={task}
+                            boardId={boardId}
+                            onLabelsChange={onLabelsChange}
+                        />
                     </div>
                 </div>
 

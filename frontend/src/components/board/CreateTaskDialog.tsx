@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     createTask,
@@ -13,6 +13,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    getBoardLabels,
+    addLabelToTask,
+    type Label,
+} from "@/api/label.api";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +28,7 @@ interface CreateTaskDialogProps {
     onOpenChange: (open: boolean) => void;
     listId: string;
     listName: string;
+    boardId: string;
     onCreated: () => void | Promise<void>;
 }
 
@@ -31,6 +37,7 @@ export default function CreateTaskDialog({
     onOpenChange,
     listId,
     listName,
+    boardId,
     onCreated,
 }: CreateTaskDialogProps) {
     const [title, setTitle] = useState("");
@@ -38,6 +45,8 @@ export default function CreateTaskDialog({
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
     const [dueDate, setDueDate] = useState("");
+    const [boardLabels, setBoardLabels] = useState<Label[]>([]);
+    const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -54,7 +63,7 @@ export default function CreateTaskDialog({
             setLoading(true);
             setError("");
 
-            await createTask(listId, {
+            const createdTask = await createTask(listId, {
                 title: trimmedTitle,
                 description:
                     description.trim() || undefined,
@@ -64,11 +73,27 @@ export default function CreateTaskDialog({
                     : null,
             });
 
+            console.log("Created task:", createdTask);
+            console.log("Selected labels:", selectedLabels);
+
+            for (const label of selectedLabels) {
+                console.log("Assigning label:", {
+                    taskId: createdTask.id,
+                    labelId: label.id,
+                    labelName: label.name,
+                });
+
+                await addLabelToTask(
+                    createdTask.id,
+                    label.id
+                );
+            }
+
             setTitle("");
             setDescription("");
             setPriority("MEDIUM");
             setDueDate("");
-
+            setSelectedLabels([]);
             onOpenChange(false);
 
             await onCreated();
@@ -87,11 +112,34 @@ export default function CreateTaskDialog({
             setTitle("");
             setDescription("");
             setPriority("MEDIUM");
+            setDueDate("");
+            setSelectedLabels([]);
             setError("");
         }
 
         onOpenChange(value);
     };
+
+    useEffect(() => {
+        const fetchLabels = async () => {
+            if (!boardId) return;
+
+            try {
+                const labels = await getBoardLabels(boardId);
+                console.log("Fetched labels:", labels);
+                setBoardLabels(labels);
+            } catch (error) {
+                console.error(
+                    "Failed to fetch board labels:",
+                    error
+                );
+            }
+        };
+
+        if (open) {
+            fetchLabels();
+        }
+    }, [open, boardId]);
 
     return (
         <Dialog
@@ -214,6 +262,77 @@ export default function CreateTaskDialog({
                             }
                             disabled={loading}
                         />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                            Labels
+                        </label>
+
+                        {selectedLabels.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {selectedLabels.map((label) => (
+                                    <button
+                                        key={label.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedLabels((current) =>
+                                                current.filter(
+                                                    (item) =>
+                                                        item.id !== label.id
+                                                )
+                                            );
+                                        }}
+                                        className="rounded-full px-2.5 py-1 text-xs font-medium text-white"
+                                        style={{
+                                            backgroundColor: label.color,
+                                        }}
+                                    >
+                                        {label.name} ×
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {boardLabels.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                No labels created for this board.
+                            </p>
+                        ) : (
+                            <div className="flex flex-wrap gap-2">
+                                {boardLabels
+                                    .filter(
+                                        (label) =>
+                                            !selectedLabels.some(
+                                                (selected) =>
+                                                    selected.id === label.id
+                                            )
+                                    )
+                                    .map((label) => (
+                                        <button
+                                            key={label.id}
+                                            type="button"
+                                            disabled={loading}
+                                            onClick={() => {
+                                                setSelectedLabels((current) => [
+                                                    ...current,
+                                                    label,
+                                                ]);
+                                            }}
+                                            className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+                                        >
+                                            <span
+                                                className="h-3 w-3 rounded-full"
+                                                style={{
+                                                    backgroundColor:
+                                                        label.color,
+                                                }}
+                                            />
+
+                                            {label.name}
+                                        </button>
+                                    ))}
+                            </div>
+                        )}
                     </div>
 
                     {error && (

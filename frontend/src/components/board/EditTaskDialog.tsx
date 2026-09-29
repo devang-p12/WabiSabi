@@ -4,7 +4,7 @@ import type {
     Task,
     TaskPriority,
 } from "@/api/task.api";
-
+import TaskLabelSelector from "./TaskLabelSelector";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface EditTaskDialogProps {
     task: Task | null;
+    boardId: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSave: (
@@ -27,13 +28,16 @@ interface EditTaskDialogProps {
         priority: TaskPriority,
         dueDate: string | null,
     ) => Promise<void>;
+    onLabelsChange?: (labels: Task["labels"]) => void;
 }
 
 export default function EditTaskDialog({
     task,
+    boardId,
     open,
     onOpenChange,
     onSave,
+    onLabelsChange,
 }: EditTaskDialogProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -81,8 +85,8 @@ export default function EditTaskDialog({
                 priority,
                 dueDate
                     ? new Date(
-                          `${dueDate}T23:59:59`,
-                      ).toISOString()
+                        `${dueDate}T23:59:59`,
+                    ).toISOString()
                     : null,
             );
 
@@ -192,6 +196,20 @@ export default function EditTaskDialog({
                                     Urgent
                                 </option>
                             </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                                Labels
+                            </label>
+
+                            <TaskLabelSelector
+                                task={task}
+                                boardId={boardId}   
+                                onLabelsChange={(labels) => {
+                                    onLabelsChange?.(labels);
+                                }}
+                            />
                         </div>
 
                         <div className="space-y-2">

@@ -400,14 +400,14 @@ export default function BoardView({
 
             <BoardToolbar
                 searchQuery={searchQuery}
-                onSearchChange={
-                    setSearchQuery
-                }
+                onSearchChange={setSearchQuery}
                 sortOption={sortOption}
-                onSortChange={
-                    setSortOption
-                }
+                onSortChange={setSortOption}
+                boardId={board.id}
+                onLabelsChange={loadLists}
             />
+
+
 
             {error && (
                 <div className="border-b bg-destructive/10 px-4 py-2 text-sm text-destructive">
@@ -576,6 +576,7 @@ export default function BoardView({
                     createTaskList?.name ??
                     ""
                 }
+                boardId={board.id}
                 onCreated={async () => {
                     await loadTasks(
                         lists,
@@ -588,41 +589,55 @@ export default function BoardView({
 
             <EditTaskDialog
                 task={editingTask}
+                boardId={board.id}
                 open={editingTask !== null}
                 onOpenChange={(open) => {
                     if (!open) {
                         setEditingTask(null);
                     }
                 }}
+                onLabelsChange={(labels) => {
+                    setEditingTask((current) =>
+                        current
+                            ? {
+                                ...current,
+                                labels,
+                            }
+                            : null
+                    );
+                }}
                 onSave={handleUpdateTask}
             />
-
-            {selectedTask && (
-                <TaskDetailsDialog
-                    task={selectedTask}
-                    open={true}
-                    onOpenChange={(open) => {
-                        if (!open) {
-                            setSelectedTask(null);
-                        }
-                    }}
-                    onEdit={() => {
-                        const task = selectedTask;
-
-                        // Close details first
+            <TaskDetailsDialog
+                task={selectedTask}
+                boardId={board.id}
+                open={true}
+                onOpenChange={(open) => {
+                    if (!open) {
                         setSelectedTask(null);
-
-                        // Then open edit
-                        setEditingTask(task);
-                    }}
-                    onDelete={() => {
-                        const task = selectedTask;
-
-                        setSelectedTask(null);
-                        setDeletingTask(task);
-                    }}
-                />
-            )}
+                    }
+                }}
+                onLabelsChange={(labels) => {
+                    setSelectedTask((current) =>
+                        current
+                            ? {
+                                ...current,
+                                labels,
+                            }
+                            : null
+                    );
+                }}
+                onEdit={() => {
+                    const task = selectedTask;
+                    setSelectedTask(null);
+                    setEditingTask(task);
+                }}
+                onDelete={() => {
+                    const task = selectedTask;
+                    setSelectedTask(null);
+                    setDeletingTask(task);
+                }}
+            />
 
             {!selectedTask && (
                 <DeleteTaskDialog
