@@ -23,6 +23,7 @@ import BoardEmptyState from "../board/BoardEmptyState";
 import BoardHeader from "../board/BoardHeader";
 import BoardToolbar, {
     type SortOption,
+    type PriorityFilter
 } from "../board/BoardToolbar";
 import CreateListDialog from "../board/CreateListDialog";
 import CreateTaskDialog from "../board/CreateTaskDialog";
@@ -45,6 +46,7 @@ export default function BoardView({
 }: BoardViewProps) {
     const [lists, setLists] = useState<BoardList[]>([]);
 
+
     const [tasks, setTasks] = useState<
         Record<string, Task[]>
     >({});
@@ -59,6 +61,9 @@ export default function BoardView({
 
     const [sortOption, setSortOption] =
         useState<SortOption>("position");
+
+    const [priorityFilter, setPriorityFilter] =
+        useState<PriorityFilter>("ALL");
 
     /* List dialogs */
     const [createListOpen, setCreateListOpen] =
@@ -82,6 +87,8 @@ export default function BoardView({
 
     const [deletingTask, setDeletingTask] =
         useState<Task | null>(null);
+
+
 
     /**
      * Load tasks for all lists.
@@ -148,28 +155,25 @@ export default function BoardView({
     /**
      * Get tasks after search + sort.
      */
-    const getVisibleTasks = (
-        listTasks: Task[],
-    ) => {
-        const query =
-            searchQuery.trim().toLowerCase();
+    const getVisibleTasks = (listTasks: Task[]) => {
+        let visibleTasks = listTasks;
 
-        let visible = listTasks;
-
-        if (query) {
-            visible = listTasks.filter((task) => {
-                return (
-                    task.title
-                        .toLowerCase()
-                        .includes(query) ||
-                    task.description
-                        ?.toLowerCase()
-                        .includes(query)
-                );
-            });
+        if (searchQuery.trim()) {
+            visibleTasks = visibleTasks.filter((task) =>
+                task.title
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())
+            );
         }
 
-        return [...visible].sort((a, b) => {
+        // Priority filter
+        if (priorityFilter !== "ALL") {
+            visibleTasks = visibleTasks.filter(
+                (task) => task.priority === priorityFilter
+            );
+        }
+
+        return [...visibleTasks].sort((a, b) => {
             switch (sortOption) {
                 case "title":
                     return a.title.localeCompare(
@@ -405,6 +409,8 @@ export default function BoardView({
                 onSortChange={setSortOption}
                 boardId={board.id}
                 onLabelsChange={loadLists}
+                priorityFilter={priorityFilter}
+                onPriorityFilterChange={setPriorityFilter}
             />
 
 

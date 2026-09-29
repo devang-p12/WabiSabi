@@ -27,7 +27,11 @@ interface BoardToolbarProps {
     onSortChange: (value: SortOption) => void;
     boardId: string;
     onLabelsChange: () => void;
+    priorityFilter: PriorityFilter;
+    onPriorityFilterChange: (value: PriorityFilter) => void;
 }
+
+export type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 export default function BoardToolbar({
     searchQuery,
@@ -36,6 +40,8 @@ export default function BoardToolbar({
     onSortChange,
     boardId,
     onLabelsChange,
+    priorityFilter,
+    onPriorityFilterChange,
 }: BoardToolbarProps) {
     return (
         <div className="flex h-10 shrink-0 items-center gap-1 border-b px-2">
@@ -68,6 +74,36 @@ export default function BoardToolbar({
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            onClick={() => onPriorityFilterChange("ALL")}
+                        >
+                            All priorities
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onPriorityFilterChange("LOW")}
+                        >
+                            Low
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onPriorityFilterChange("MEDIUM")}
+                        >
+                            Medium
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onPriorityFilterChange("HIGH")}
+                        >
+                            High
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onPriorityFilterChange("URGENT")}
+                        >
+                            Urgent
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                             onClick={() => onSearchChange("")}
                         >
