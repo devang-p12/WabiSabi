@@ -18,7 +18,18 @@ import LabelManager from "./LabelManager";
 export type SortOption =
     | "position"
     | "title"
-    | "created";
+    | "created"
+    | "dueDateAsc"
+    | "dueDateDesc";
+
+export type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
+export type DueDateFilter =
+    | "ALL"
+    | "OVERDUE"
+    | "TODAY"
+    | "THIS_WEEK"
+    | "NO_DATE";
 
 interface BoardToolbarProps {
     searchQuery: string;
@@ -29,9 +40,10 @@ interface BoardToolbarProps {
     onLabelsChange: () => void;
     priorityFilter: PriorityFilter;
     onPriorityFilterChange: (value: PriorityFilter) => void;
+    dueDateFilter: DueDateFilter;
+    onDueDateFilterChange: (value: DueDateFilter) => void;
 }
 
-export type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 export default function BoardToolbar({
     searchQuery,
@@ -42,6 +54,8 @@ export default function BoardToolbar({
     onLabelsChange,
     priorityFilter,
     onPriorityFilterChange,
+    dueDateFilter,
+    onDueDateFilterChange,
 }: BoardToolbarProps) {
     return (
         <div className="flex h-10 shrink-0 items-center gap-1 border-b px-2">
@@ -69,7 +83,25 @@ export default function BoardToolbar({
                             className="h-8"
                         >
                             <Filter className="mr-1.5 h-3.5 w-3.5" />
-                            Filter
+                            {priorityFilter === "ALL" && dueDateFilter === "ALL"
+                                ? "Filter"
+                                : [
+                                    priorityFilter !== "ALL"
+                                        ? priorityFilter.charAt(0) +
+                                        priorityFilter.slice(1).toLowerCase()
+                                        : null,
+                                    dueDateFilter !== "ALL"
+                                        ? dueDateFilter === "OVERDUE"
+                                            ? "Overdue"
+                                            : dueDateFilter === "TODAY"
+                                                ? "Today"
+                                                : dueDateFilter === "THIS_WEEK"
+                                                    ? "This week"
+                                                    : "No date"
+                                        : null,
+                                ]
+                                    .filter(Boolean)
+                                    .join(" · ")}
                         </Button>
                     </DropdownMenuTrigger>
 
@@ -109,7 +141,37 @@ export default function BoardToolbar({
                         >
                             Clear search
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => onDueDateFilterChange("ALL")}
+                        >
+                            All due dates
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onDueDateFilterChange("OVERDUE")}
+                        >
+                            Overdue
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onDueDateFilterChange("TODAY")}
+                        >
+                            Due today
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onDueDateFilterChange("THIS_WEEK")}
+                        >
+                            Due this week
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onDueDateFilterChange("NO_DATE")}
+                        >
+                            No due date
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
+
                 </DropdownMenu>
 
                 {/* Sort */}
@@ -121,7 +183,16 @@ export default function BoardToolbar({
                             className="h-8"
                         >
                             <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
-                            Sort
+
+                            {sortOption === "position"
+                                ? "Sort"
+                                : sortOption === "title"
+                                    ? "Sort: Title"
+                                    : sortOption === "created"
+                                        ? "Sort: Created"
+                                        : sortOption === "dueDateAsc"
+                                            ? "Sort: Due date ↑"
+                                            : "Sort: Due date ↓"}
                         </Button>
                     </DropdownMenuTrigger>
 
@@ -148,6 +219,17 @@ export default function BoardToolbar({
                             }
                         >
                             Created date
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => onSortChange("dueDateAsc")}
+                        >
+                            Due date ↑
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onSortChange("dueDateDesc")}
+                        >
+                            Due date ↓
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

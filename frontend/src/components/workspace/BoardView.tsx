@@ -23,7 +23,8 @@ import BoardEmptyState from "../board/BoardEmptyState";
 import BoardHeader from "../board/BoardHeader";
 import BoardToolbar, {
     type SortOption,
-    type PriorityFilter
+    type PriorityFilter,
+    type DueDateFilter
 } from "../board/BoardToolbar";
 import CreateListDialog from "../board/CreateListDialog";
 import CreateTaskDialog from "../board/CreateTaskDialog";
@@ -64,6 +65,9 @@ export default function BoardView({
 
     const [priorityFilter, setPriorityFilter] =
         useState<PriorityFilter>("ALL");
+
+    const [dueDateFilter, setDueDateFilter] =
+        useState<DueDateFilter>("ALL");
 
     /* List dialogs */
     const [createListOpen, setCreateListOpen] =
@@ -156,6 +160,8 @@ export default function BoardView({
      * Get tasks after search + sort.
      */
     const getVisibleTasks = (listTasks: Task[]) => {
+        console.log("SORT:", sortOption);
+
         let visibleTasks = listTasks;
 
         if (searchQuery.trim()) {
@@ -173,29 +179,92 @@ export default function BoardView({
             );
         }
 
+        if (dueDateFilter !== "ALL") {
+            const now = new Date();
+
+            visibleTasks = visibleTasks.filter((task) => {
+                if (dueDateFilter === "NO_DATE") {
+                    return task.dueDate === null;
+                }
+
+                if (!task.dueDate) {
+                    return false;
+                }
+
+                const dueDate = new Date(task.dueDate);
+
+                if (dueDateFilter === "OVERDUE") {
+                    return dueDate < now;
+                }
+
+                if (dueDateFilter === "TODAY") {
+                    return (
+                        dueDate.getFullYear() === now.getFullYear() &&
+                        dueDate.getMonth() === now.getMonth() &&
+                        dueDate.getDate() === now.getDate()
+                    );
+                }
+
+                if (dueDateFilter === "THIS_WEEK") {
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setHours(0, 0, 0, 0);
+
+                    // Monday = start of week
+                    const day = startOfWeek.getDay();
+                    const daysFromMonday = day === 0 ? 6 : day - 1;
+                    startOfWeek.setDate(
+                        startOfWeek.getDate() - daysFromMonday
+                    );
+
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(
+                        endOfWeek.getDate() + 7
+                    );
+
+                    return (
+                        dueDate >= startOfWeek &&
+                        dueDate < endOfWeek
+                    );
+                }
+
+                return true;
+            });
+        }
+
         return [...visibleTasks].sort((a, b) => {
             switch (sortOption) {
                 case "title":
-                    return a.title.localeCompare(
-                        b.title,
-                    );
+                    return a.title.localeCompare(b.title);
 
                 case "created":
                     return (
-                        new Date(
-                            a.createdAt,
-                        ).getTime() -
-                        new Date(
-                            b.createdAt,
-                        ).getTime()
+                        new Date(a.createdAt).getTime() -
+                        new Date(b.createdAt).getTime()
+                    );
+
+                case "dueDateAsc":
+                    if (!a.dueDate && !b.dueDate) return 0;
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+
+                    return (
+                        new Date(a.dueDate).getTime() -
+                        new Date(b.dueDate).getTime()
+                    );
+
+                case "dueDateDesc":
+                    if (!a.dueDate && !b.dueDate) return 0;
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+
+                    return (
+                        new Date(b.dueDate).getTime() -
+                        new Date(a.dueDate).getTime()
                     );
 
                 case "position":
                 default:
-                    return (
-                        a.position -
-                        b.position
-                    );
+                    return a.position - b.position;
             }
         });
     };
@@ -411,9 +480,9 @@ export default function BoardView({
                 onLabelsChange={loadLists}
                 priorityFilter={priorityFilter}
                 onPriorityFilterChange={setPriorityFilter}
+                dueDateFilter={dueDateFilter}
+                onDueDateFilterChange={setDueDateFilter}
             />
-
-
 
             {error && (
                 <div className="border-b bg-destructive/10 px-4 py-2 text-sm text-destructive">
