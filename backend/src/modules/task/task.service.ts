@@ -180,6 +180,7 @@ export const updateTask = async (
         description?: string | null;
         priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
         dueDate?: string | null;
+        completed?: boolean;
     }
 ) => {
     const task = await prisma.task.findUnique({
@@ -234,6 +235,9 @@ export const updateTask = async (
                 dueDate: data.dueDate
                     ? new Date(data.dueDate)
                     : null,
+            }),
+            ...(data.completed !== undefined && {
+                completed: data.completed,
             }),
         },
 

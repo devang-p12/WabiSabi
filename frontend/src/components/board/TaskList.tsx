@@ -12,12 +12,16 @@ interface TaskListProps {
     onView: (task: Task) => void;
     onEdit: (task: Task) => void;
     onDelete: (task: Task) => void;
+    onCompletedChange: (task: Task) => void;
 }
+
+
 export default function TaskList({
     tasks,
     onView,
     onEdit,
     onDelete,
+    onCompletedChange,
 }: TaskListProps) {
     if (tasks.length === 0) {
         return null;
@@ -36,6 +40,7 @@ export default function TaskList({
                         onView={() => onView(task)}
                         onEdit={() => onEdit(task)}
                         onDelete={() => onDelete(task)}
+                        onCompletedChange={onCompletedChange}
                     />
                 ))}
             </div>

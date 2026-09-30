@@ -9,7 +9,11 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import type { Task, TaskPriority } from "@/api/task.api";
+import {
+    updateTask,
+    type Task,
+    type TaskPriority,
+} from "@/api/task.api";
 
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +30,7 @@ interface TaskCardProps {
     onView: () => void;
     onEdit: () => void;
     onDelete: () => void;
+    onCompletedChange: (task: Task) => void;
 }
 
 const priorityConfig: Record<
@@ -62,6 +67,7 @@ export default function TaskCard({
     onView,
     onEdit,
     onDelete,
+    onCompletedChange,
 }: TaskCardProps) {
     const {
         attributes,
@@ -81,6 +87,7 @@ export default function TaskCard({
     };
 
     const priority = priorityConfig[task.priority];
+
     const dueDate = task.dueDate
         ? new Date(task.dueDate)
         : null;
@@ -111,6 +118,25 @@ export default function TaskCard({
         })
         : null;
 
+    const handleCompletedChange = async (
+        event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+        event.stopPropagation();
+
+        try {
+            const updatedTask = await updateTask(task.id, {
+                completed: !task.completed,
+            });
+
+            onCompletedChange(updatedTask);
+        } catch (error) {
+            console.error(
+                "Failed to update task completion:",
+                error
+            );
+        }
+    };
+
     return (
         <div
             ref={setNodeRef}
@@ -138,16 +164,51 @@ export default function TaskCard({
                     <GripVertical className="h-4 w-4" />
                 </button>
 
+                {/* Completion checkbox */}
+                <button
+                    type="button"
+                    onClick={handleCompletedChange}
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                        task.completed
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted"
+                    }`}
+                    aria-label={
+                        task.completed
+                            ? "Mark task incomplete"
+                            : "Mark task complete"
+                    }
+                >
+                    {task.completed && (
+                        <span className="text-xs">✓</span>
+                    )}
+                </button>
+
                 <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-medium leading-5">
+                    {/* Task title */}
+                    <h3
+                        className={`text-sm font-medium leading-5 ${
+                            task.completed
+                                ? "text-muted-foreground line-through"
+                                : ""
+                        }`}
+                    >
                         {task.title}
                     </h3>
 
+                    {/* Task description */}
                     {task.description && (
-                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        <p
+                            className={`mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground ${
+                                task.completed
+                                    ? "line-through opacity-70"
+                                    : ""
+                            }`}
+                        >
                             {task.description}
                         </p>
                     )}
+
                     {task.labels.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1.5">
                             {task.labels.map((label) => (
@@ -228,12 +289,13 @@ export default function TaskCard({
 
                     {formattedDueDate && (
                         <span
-                            className={`flex items-center gap-1 text-[10px] font-medium ${isOverdue
-                                ? "text-destructive"
-                                : isDueToday
-                                    ? "text-orange-600 dark:text-orange-400"
-                                    : "text-muted-foreground"
-                                }`}
+                            className={`flex items-center gap-1 text-[10px] font-medium ${
+                                isOverdue
+                                    ? "text-destructive"
+                                    : isDueToday
+                                        ? "text-orange-600 dark:text-orange-400"
+                                        : "text-muted-foreground"
+                            }`}
                         >
                             <CalendarDays className="h-3 w-3" />
 

@@ -74,6 +74,9 @@ export const updateTaskSchema = z.object({
 
     dueDate:
         taskDueDateSchema,
+
+    completed:
+        z.boolean().optional(),
 });
 
 export const moveTaskSchema = z.object({

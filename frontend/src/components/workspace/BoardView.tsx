@@ -382,6 +382,22 @@ export default function BoardView({
         }
     };
 
+
+    const handleCompletedChange = (updatedTask: Task) => {
+        setTasks((current) => {
+            const next = { ...current };
+
+            for (const listId of Object.keys(next)) {
+                next[listId] = (next[listId] ?? []).map((task) =>
+                    task.id === updatedTask.id
+                        ? updatedTask
+                        : task
+                );
+            }
+
+            return next;
+        });
+    };
     /**
      * Delete task.
      */
@@ -555,6 +571,7 @@ export default function BoardView({
                                             onDeleteTask={(task) => {
                                                 setDeletingTask(task);
                                             }}
+                                            onCompletedChange={handleCompletedChange}
                                         />
                                     );
                                 },
