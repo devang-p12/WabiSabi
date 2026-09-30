@@ -24,6 +24,11 @@ export type SortOption =
 
 export type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
+export type StatusFilter =
+    | "ALL"
+    | "ACTIVE"
+    | "COMPLETED";
+
 export type DueDateFilter =
     | "ALL"
     | "OVERDUE"
@@ -42,6 +47,8 @@ interface BoardToolbarProps {
     onPriorityFilterChange: (value: PriorityFilter) => void;
     dueDateFilter: DueDateFilter;
     onDueDateFilterChange: (value: DueDateFilter) => void;
+    statusFilter: StatusFilter;
+    onStatusFilterChange: (value: StatusFilter) => void;
 }
 
 
@@ -56,6 +63,8 @@ export default function BoardToolbar({
     onPriorityFilterChange,
     dueDateFilter,
     onDueDateFilterChange,
+    statusFilter,
+    onStatusFilterChange,
 }: BoardToolbarProps) {
     return (
         <div className="flex h-10 shrink-0 items-center gap-1 border-b px-2">
@@ -83,13 +92,22 @@ export default function BoardToolbar({
                             className="h-8"
                         >
                             <Filter className="mr-1.5 h-3.5 w-3.5" />
-                            {priorityFilter === "ALL" && dueDateFilter === "ALL"
+                            {statusFilter === "ALL" &&
+                                priorityFilter === "ALL" &&
+                                dueDateFilter === "ALL"
                                 ? "Filter"
                                 : [
+                                    statusFilter !== "ALL"
+                                        ? statusFilter === "ACTIVE"
+                                            ? "Active"
+                                            : "Completed"
+                                        : null,
+
                                     priorityFilter !== "ALL"
                                         ? priorityFilter.charAt(0) +
                                         priorityFilter.slice(1).toLowerCase()
                                         : null,
+
                                     dueDateFilter !== "ALL"
                                         ? dueDateFilter === "OVERDUE"
                                             ? "Overdue"
@@ -169,6 +187,23 @@ export default function BoardToolbar({
                             onClick={() => onDueDateFilterChange("NO_DATE")}
                         >
                             No due date
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => onStatusFilterChange("ALL")}
+                        >
+                            All tasks
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onStatusFilterChange("ACTIVE")}
+                        >
+                            Active
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={() => onStatusFilterChange("COMPLETED")}
+                        >
+                            Completed
                         </DropdownMenuItem>
                     </DropdownMenuContent>
 

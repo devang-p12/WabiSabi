@@ -24,7 +24,8 @@ import BoardHeader from "../board/BoardHeader";
 import BoardToolbar, {
     type SortOption,
     type PriorityFilter,
-    type DueDateFilter
+    type DueDateFilter,
+    type StatusFilter
 } from "../board/BoardToolbar";
 import CreateListDialog from "../board/CreateListDialog";
 import CreateTaskDialog from "../board/CreateTaskDialog";
@@ -65,6 +66,9 @@ export default function BoardView({
 
     const [priorityFilter, setPriorityFilter] =
         useState<PriorityFilter>("ALL");
+
+    const [statusFilter, setStatusFilter] =
+        useState<StatusFilter>("ALL");
 
     const [dueDateFilter, setDueDateFilter] =
         useState<DueDateFilter>("ALL");
@@ -160,15 +164,30 @@ export default function BoardView({
      * Get tasks after search + sort.
      */
     const getVisibleTasks = (listTasks: Task[]) => {
+
         console.log("SORT:", sortOption);
 
         let visibleTasks = listTasks;
 
+        // Search filter
         if (searchQuery.trim()) {
             visibleTasks = visibleTasks.filter((task) =>
                 task.title
                     .toLowerCase()
                     .includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Status filter
+        if (statusFilter === "ACTIVE") {
+            visibleTasks = visibleTasks.filter(
+                (task) => !task.completed
+            );
+        }
+
+        if (statusFilter === "COMPLETED") {
+            visibleTasks = visibleTasks.filter(
+                (task) => task.completed
             );
         }
 
@@ -179,10 +198,12 @@ export default function BoardView({
             );
         }
 
+        // Due date filter
         if (dueDateFilter !== "ALL") {
             const now = new Date();
 
             visibleTasks = visibleTasks.filter((task) => {
+
                 if (dueDateFilter === "NO_DATE") {
                     return task.dueDate === null;
                 }
@@ -207,16 +228,20 @@ export default function BoardView({
 
                 if (dueDateFilter === "THIS_WEEK") {
                     const startOfWeek = new Date(now);
+
                     startOfWeek.setHours(0, 0, 0, 0);
 
                     // Monday = start of week
                     const day = startOfWeek.getDay();
-                    const daysFromMonday = day === 0 ? 6 : day - 1;
+                    const daysFromMonday =
+                        day === 0 ? 6 : day - 1;
+
                     startOfWeek.setDate(
                         startOfWeek.getDate() - daysFromMonday
                     );
 
                     const endOfWeek = new Date(startOfWeek);
+
                     endOfWeek.setDate(
                         endOfWeek.getDate() + 7
                     );
@@ -231,8 +256,11 @@ export default function BoardView({
             });
         }
 
+        // Sorting
         return [...visibleTasks].sort((a, b) => {
+
             switch (sortOption) {
+
                 case "title":
                     return a.title.localeCompare(b.title);
 
@@ -268,7 +296,6 @@ export default function BoardView({
             }
         });
     };
-
     /**
      * Rename list.
      */
@@ -498,6 +525,8 @@ export default function BoardView({
                 onPriorityFilterChange={setPriorityFilter}
                 dueDateFilter={dueDateFilter}
                 onDueDateFilterChange={setDueDateFilter}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
             />
 
             {error && (
