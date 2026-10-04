@@ -404,6 +404,7 @@ export const ModelName = {
   Board: 'Board',
   BoardList: 'BoardList',
   Task: 'Task',
+  Subtask: 'Subtask',
   Label: 'Label',
   TaskLabel: 'TaskLabel',
   Comment: 'Comment',
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "workspace" | "workspaceMember" | "board" | "boardList" | "task" | "label" | "taskLabel" | "comment" | "activityLog"
+    modelProps: "user" | "refreshToken" | "workspace" | "workspaceMember" | "board" | "boardList" | "task" | "subtask" | "label" | "taskLabel" | "comment" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -945,6 +946,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Subtask: {
+      payload: Prisma.$SubtaskPayload<ExtArgs>
+      fields: Prisma.SubtaskFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SubtaskFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SubtaskFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>
+        }
+        findFirst: {
+          args: Prisma.SubtaskFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SubtaskFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>
+        }
+        findMany: {
+          args: Prisma.SubtaskFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>[]
+        }
+        create: {
+          args: Prisma.SubtaskCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>
+        }
+        createMany: {
+          args: Prisma.SubtaskCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SubtaskCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>[]
+        }
+        delete: {
+          args: Prisma.SubtaskDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>
+        }
+        update: {
+          args: Prisma.SubtaskUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>
+        }
+        deleteMany: {
+          args: Prisma.SubtaskDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SubtaskUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SubtaskUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>[]
+        }
+        upsert: {
+          args: Prisma.SubtaskUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubtaskPayload>
+        }
+        aggregate: {
+          args: Prisma.SubtaskAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSubtask>
+        }
+        groupBy: {
+          args: Prisma.SubtaskGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubtaskGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SubtaskCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubtaskCountAggregateOutputType> | number
+        }
+      }
+    }
     Label: {
       payload: Prisma.$LabelPayload<ExtArgs>
       fields: Prisma.LabelFieldRefs
@@ -1368,6 +1443,18 @@ export const TaskScalarFieldEnum = {
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
+export const SubtaskScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  completed: 'completed',
+  taskId: 'taskId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubtaskScalarFieldEnum = (typeof SubtaskScalarFieldEnum)[keyof typeof SubtaskScalarFieldEnum]
+
+
 export const LabelScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1720,6 +1807,7 @@ export type GlobalOmitConfig = {
   board?: Prisma.BoardOmit
   boardList?: Prisma.BoardListOmit
   task?: Prisma.TaskOmit
+  subtask?: Prisma.SubtaskOmit
   label?: Prisma.LabelOmit
   taskLabel?: Prisma.TaskLabelOmit
   comment?: Prisma.CommentOmit

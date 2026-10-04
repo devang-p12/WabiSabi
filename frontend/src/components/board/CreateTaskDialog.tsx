@@ -21,7 +21,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 
 interface CreateTaskDialogProps {
     open: boolean;
@@ -194,16 +194,10 @@ export default function CreateTaskDialog({
                             </span>
                         </label>
 
-                        <Textarea
-                            id="task-description"
+                        <RichTextEditor
                             value={description}
-                            onChange={(event) =>
-                                setDescription(
-                                    event.target.value
-                                )
-                            }
+                            onChange={setDescription}
                             placeholder="Describe what needs to be done..."
-                            rows={4}
                         />
                     </div>
 

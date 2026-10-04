@@ -128,6 +128,7 @@ export const getListTasks = async (
                     label: true,
                 },
             },
+            subtasks: true,
         },
     });
     return {
@@ -157,6 +158,7 @@ export const getTask = async (
                     label: true,
                 },
             },
+            subtasks: true,
         },
     });
     if (!task) {
@@ -259,6 +261,7 @@ export const updateTask = async (
                     label: true,
                 },
             },
+            subtasks: true,
         },
     });
 

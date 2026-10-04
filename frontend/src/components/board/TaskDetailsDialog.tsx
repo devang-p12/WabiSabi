@@ -13,6 +13,7 @@ import {
 import TaskLabelSelector from "./TaskLabelSelector";
 import TaskComments from "./TaskComments";
 import TaskActivity from "./TaskActivity";
+import TaskSubtasks from "./TaskSubtasks";
 
 import type { Task } from "@/api/task.api";
 
@@ -176,9 +177,10 @@ export default function TaskDetailsDialog({
                                 Description
                             </h4>
                             {task.description ? (
-                                <p className="whitespace-pre-wrap rounded-lg bg-muted/40 px-4 py-3 text-sm leading-6 text-foreground">
-                                    {task.description}
-                                </p>
+                                <div
+                                    className="prose prose-sm dark:prose-invert max-w-none rounded-lg bg-muted/40 px-4 py-3"
+                                    dangerouslySetInnerHTML={{ __html: task.description }}
+                                />
                             ) : (
                                 <button
                                     type="button"
@@ -188,6 +190,14 @@ export default function TaskDetailsDialog({
                                     + Add a description…
                                 </button>
                             )}
+                        </div>
+
+                        {/* Subtasks / Checklist */}
+                        <div>
+                            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                                Checklist
+                            </h4>
+                            <TaskSubtasks taskId={task.id} />
                         </div>
 
                         {/* Comments / Activity tabs */}

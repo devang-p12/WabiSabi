@@ -22,6 +22,7 @@ export interface Task {
     createdAt: string;
     updatedAt: string;
     labels: Label[];
+    subtasks?: { id: string; title: string; completed: boolean }[];
 }
 
 export interface CreateTaskInput {

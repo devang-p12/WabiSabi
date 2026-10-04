@@ -226,7 +226,7 @@ export default function BoardDndContext({
                                 <h3 className="text-sm font-medium leading-5">{activeTask.title}</h3>
                                 {activeTask.description && (
                                     <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                                        {activeTask.description}
+                                        {activeTask.description.replace(/<[^>]+>/g, ' ').trim()}
                                     </p>
                                 )}
                                 {activeTask.labels.length > 0 && (
@@ -241,6 +241,19 @@ export default function BoardDndContext({
                                             </span>
                                         ))}
                                     </div>
+                                )}
+                            </div>
+                        </div>
+                        {/* Footer (matches TaskCard exactly if we wanted, but simplifed) */}
+                        <div className="mt-3 flex items-center justify-between gap-2">
+                            <div className="flex min-w-0 items-center gap-2">
+                                {activeTask.subtasks && activeTask.subtasks.length > 0 && (
+                                    <span className={`flex items-center gap-1 text-[10px] font-medium ${
+                                        activeTask.subtasks.every(s => s.completed) ? "text-primary" : "text-muted-foreground"
+                                    }`}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-list-checks h-3 w-3"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                        {activeTask.subtasks.filter((s) => s.completed).length}/{activeTask.subtasks.length}
+                                    </span>
                                 )}
                             </div>
                         </div>

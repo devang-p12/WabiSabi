@@ -127,8 +127,22 @@ model Task {
   labels TaskLabel[]
   comments     Comment[]
   activityLogs ActivityLog[]
+  subtasks     Subtask[]
 
   @@index([listId])
+}
+
+model Subtask {
+  id        String   @id @default(uuid())
+  title     String
+  completed Boolean  @default(false)
+  taskId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
 }
 
 model Label {

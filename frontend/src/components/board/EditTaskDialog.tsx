@@ -15,7 +15,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 
 interface EditTaskDialogProps {
     task: Task | null;
@@ -149,18 +149,10 @@ export default function EditTaskDialog({
                                 Description
                             </label>
 
-                            <Textarea
-                                id="edit-task-description"
+                            <RichTextEditor
                                 value={description}
-                                onChange={(event) =>
-                                    setDescription(
-                                        event.target.value,
-                                    )
-                                }
-                                maxLength={5000}
-                                rows={5}
+                                onChange={setDescription}
                                 placeholder="Add a description..."
-                                disabled={saving}
                             />
                         </div>
 

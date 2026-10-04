@@ -3,6 +3,7 @@ import {
     Pencil,
     Trash2,
     CalendarDays,
+    ListChecks,
 } from "lucide-react";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -180,7 +181,7 @@ export default function TaskCard({
                                 task.completed ? "line-through opacity-70" : ""
                             }`}
                         >
-                            {task.description}
+                            {task.description.replace(/<[^>]+>/g, ' ').trim()}
                         </p>
                     )}
 
@@ -260,6 +261,14 @@ export default function TaskCard({
                                 : isDueToday
                                     ? `Today · ${formattedDueDate}`
                                     : formattedDueDate}
+                        </span>
+                    )}
+                    {task.subtasks && task.subtasks.length > 0 && (
+                        <span className={`flex items-center gap-1 text-[10px] font-medium ${
+                            task.subtasks.every(s => s.completed) ? "text-primary" : "text-muted-foreground"
+                        }`}>
+                            <ListChecks className="h-3 w-3" />
+                            {task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length}
                         </span>
                     )}
                 </div>

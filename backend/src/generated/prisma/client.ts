@@ -77,6 +77,11 @@ export type BoardList = Prisma.BoardListModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model Subtask
+ * 
+ */
+export type Subtask = Prisma.SubtaskModel
+/**
  * Model Label
  * 
  */
