@@ -26,3 +26,22 @@ export const TaskPriority = {
 } as const
 
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
+
+
+export const ActionType = {
+  CREATE: 'CREATE',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE',
+  MOVE: 'MOVE'
+} as const
+
+export type ActionType = (typeof ActionType)[keyof typeof ActionType]
+
+
+export const EntityType = {
+  TASK: 'TASK',
+  LIST: 'LIST',
+  BOARD: 'BOARD'
+} as const
+
+export type EntityType = (typeof EntityType)[keyof typeof EntityType]

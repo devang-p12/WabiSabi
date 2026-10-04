@@ -54,18 +54,14 @@ export default function TaskLabelSelector({
     const handleAddLabel = async (label: Label) => {
         try {
             await addLabelToTask(task.id, label.id);
-
-            const updatedLabels = [
-                ...task.labels,
-                label,
-            ];
-
-            onLabelsChange?.(updatedLabels);
-        } catch (error) {
-            console.error(
-                "Failed to add label to task:",
-                error
-            );
+            onLabelsChange?.([...task.labels, label]);
+        } catch (error: any) {
+            // If it's a 409 Conflict, it means the label is already added, which is fine!
+            if (error?.response?.status === 409) {
+                onLabelsChange?.([...task.labels, label]);
+            } else {
+                console.error("Failed to add label to task:", error);
+            }
         }
     };
 

@@ -90,6 +90,7 @@ export default function RenameListDialog({
                             }
                         }}
                     />
+                    <p className="text-[11px] text-muted-foreground mt-2">Pick a clear name for this stage</p>
                 </div>
 
                 <DialogFooter>

@@ -68,6 +68,18 @@ export const createTask = async (
         },
     });
 
+    await prisma.activityLog.create({
+        data: {
+            action: "CREATE",
+            entityType: "TASK",
+            entityId: task.id,
+            entityTitle: task.title,
+            userId,
+            boardId: list.board.id,
+            taskId: task.id,
+        },
+    });
+
     return {
         task,
     } as const;
@@ -250,6 +262,18 @@ export const updateTask = async (
         },
     });
 
+    await prisma.activityLog.create({
+        data: {
+            action: "UPDATE",
+            entityType: "TASK",
+            entityId: updatedTask.id,
+            entityTitle: updatedTask.title,
+            userId,
+            boardId: task.list.board.id,
+            taskId: updatedTask.id,
+        },
+    });
+
     return {
         task: {
             ...updatedTask,
@@ -297,6 +321,17 @@ export const deleteTask = async (
     await prisma.task.delete({
         where: {
             id: taskId,
+        },
+    });
+
+    await prisma.activityLog.create({
+        data: {
+            action: "DELETE",
+            entityType: "TASK",
+            entityId: task.id,
+            entityTitle: task.title,
+            userId,
+            boardId: task.list.board.id,
         },
     });
 

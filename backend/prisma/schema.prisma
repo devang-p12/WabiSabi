@@ -25,6 +25,8 @@ model User {
 
   refreshTokens        RefreshToken[]
   workspaceMemberships WorkspaceMember[]
+  comments             Comment[]
+  activityLogs         ActivityLog[]
 }
 
 model RefreshToken {
@@ -81,6 +83,7 @@ model Board {
 
   lists  BoardList[]
   labels Label[]
+  activityLogs ActivityLog[]
 
   @@index([workspaceId])
 }
@@ -122,6 +125,8 @@ model Task {
 
   list   BoardList   @relation(fields: [listId], references: [id], onDelete: Cascade)
   labels TaskLabel[]
+  comments     Comment[]
+  activityLogs ActivityLog[]
 
   @@index([listId])
 }
@@ -149,4 +154,54 @@ model TaskLabel {
 
   @@id([taskId, labelId])
   @@index([labelId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+enum ActionType {
+  CREATE
+  UPDATE
+  DELETE
+  MOVE
+}
+
+enum EntityType {
+  TASK
+  LIST
+  BOARD
+}
+
+model ActivityLog {
+  id          String     @id @default(uuid())
+  action      ActionType
+  entityType  EntityType
+  entityId    String
+  entityTitle String
+  userId      String
+  createdAt   DateTime   @default(now())
+  
+  // To track where it happened
+  boardId     String?
+  taskId      String?
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task  Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  board Board? @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@index([boardId])
+  @@index([taskId])
+  @@index([userId])
 }

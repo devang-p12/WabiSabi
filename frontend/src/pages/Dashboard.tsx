@@ -8,7 +8,6 @@ import {
     LayoutDashboard,
     Loader2,
     LogOut,
-    Plus,
     Settings,
     Sparkles,
     User,

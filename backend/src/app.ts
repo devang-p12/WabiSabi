@@ -9,6 +9,8 @@ import boardDetailRouter from "./modules/boards/board-detail.routes.js"
 import listRouter from "./modules/list/list.routes.js";
 import taskRouter from "./modules/task/task.routes.js";
 import labelRouter from "./modules/labels/label.routes.js";
+import commentRouter from "./modules/comment/comment.routes.js";
+import activityRouter from "./modules/activity/activity.routes.js";
 
 const app = express();
 
@@ -49,6 +51,8 @@ app.use(
 app.use("/api/v1", listRouter);
 app.use("/api/v1", taskRouter);
 app.use("/api/v1", labelRouter);
+app.use("/api/v1", commentRouter);
+app.use("/api/v1", activityRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

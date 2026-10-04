@@ -2,7 +2,6 @@ import {
     MoreHorizontal,
     Pencil,
     Trash2,
-    GripVertical,
     CalendarDays,
 } from "lucide-react";
 
@@ -21,7 +20,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -35,30 +33,23 @@ interface TaskCardProps {
 
 const priorityConfig: Record<
     TaskPriority,
-    {
-        label: string;
-        className: string;
-    }
+    { label: string; className: string }
 > = {
     LOW: {
         label: "Low",
-        className:
-            "bg-muted text-muted-foreground",
+        className: "bg-muted text-muted-foreground",
     },
     MEDIUM: {
         label: "Medium",
-        className:
-            "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+        className: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
     },
     HIGH: {
         label: "High",
-        className:
-            "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+        className: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
     },
     URGENT: {
         label: "Urgent",
-        className:
-            "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
+        className: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
     },
 };
 
@@ -76,40 +67,25 @@ export default function TaskCard({
         transform,
         transition,
         isDragging,
-    } = useSortable({
-        id: task.id,
-    });
+    } = useSortable({ id: task.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition: transition ?? undefined,
-        opacity: isDragging ? 0 : 1,
     };
 
     const priority = priorityConfig[task.priority];
 
-    const dueDate = task.dueDate
-        ? new Date(task.dueDate)
-        : null;
-
+    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const dueDay = dueDate
-        ? new Date(dueDate)
-        : null;
+    const dueDay = dueDate ? new Date(dueDate) : null;
+    if (dueDay) dueDay.setHours(0, 0, 0, 0);
 
-    if (dueDay) {
-        dueDay.setHours(0, 0, 0, 0);
-    }
-
-    const isOverdue =
-        dueDay !== null &&
-        dueDay < today;
-
+    const isOverdue = dueDay !== null && dueDay < today;
     const isDueToday =
-        dueDay !== null &&
-        dueDay.getTime() === today.getTime();
+        dueDay !== null && dueDay.getTime() === today.getTime();
 
     const formattedDueDate = dueDate
         ? dueDate.toLocaleDateString("en-IN", {
@@ -119,28 +95,39 @@ export default function TaskCard({
         : null;
 
     const handleCompletedChange = async (
-        event: React.MouseEvent<HTMLButtonElement>
+        event: React.MouseEvent<HTMLButtonElement>,
     ) => {
+        // Stop propagation so neither drag nor onView fires
         event.stopPropagation();
-
         try {
             const updatedTask = await updateTask(task.id, {
                 completed: !task.completed,
             });
-
             onCompletedChange(updatedTask);
         } catch (error) {
-            console.error(
-                "Failed to update task completion:",
-                error
-            );
+            console.error("Failed to update task completion:", error);
         }
     };
+
+    // When this card is being dragged, render a placeholder in its slot.
+    if (isDragging) {
+        return (
+            <div
+                ref={setNodeRef}
+                style={{ ...style, minHeight: 72 }}
+                className="rounded-lg border-2 border-dashed border-primary/30 bg-primary/5"
+            />
+        );
+    }
 
     return (
         <div
             ref={setNodeRef}
             style={style}
+            // Spread drag listeners on the whole card
+            {...listeners}
+            {...attributes}
+            // Only open details on a real click (not after a drag)
             onClick={onView}
             role="button"
             tabIndex={0}
@@ -150,24 +137,14 @@ export default function TaskCard({
                     onView();
                 }
             }}
-            className="group cursor-pointer rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md"
+            className="group cursor-grab rounded-lg border bg-background p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
         >
             <div className="flex items-start gap-2">
-                <button
-                    type="button"
-                    {...attributes}
-                    {...listeners}
-                    onClick={(event) => event.stopPropagation()}
-                    className="mt-0.5 flex h-6 w-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100 active:cursor-grabbing"
-                    aria-label={`Drag ${task.title}`}
-                >
-                    <GripVertical className="h-4 w-4" />
-                </button>
-
-                {/* Completion checkbox */}
+                {/* Completion checkbox — stopPropagation prevents drag from starting here */}
                 <button
                     type="button"
                     onClick={handleCompletedChange}
+                    onPointerDown={(e) => e.stopPropagation()}
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                         task.completed
                             ? "bg-primary text-primary-foreground"
@@ -200,9 +177,7 @@ export default function TaskCard({
                     {task.description && (
                         <p
                             className={`mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground ${
-                                task.completed
-                                    ? "line-through opacity-70"
-                                    : ""
+                                task.completed ? "line-through opacity-70" : ""
                             }`}
                         >
                             {task.description}
@@ -215,9 +190,7 @@ export default function TaskCard({
                                 <span
                                     key={label.id}
                                     className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
-                                    style={{
-                                        backgroundColor: label.color,
-                                    }}
+                                    style={{ backgroundColor: label.color }}
                                 >
                                     {label.name}
                                 </span>
@@ -226,18 +199,15 @@ export default function TaskCard({
                     )}
                 </div>
 
+                {/* Dropdown menu — stopPropagation on both pointer and click so drag never starts here */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
-                            onPointerDown={(event) => {
-                                event.stopPropagation();
-                            }}
-                            onClick={(event) => {
-                                event.stopPropagation();
-                            }}
+                            className="h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <MoreHorizontal className="h-4 w-4" />
                         </Button>
@@ -245,19 +215,12 @@ export default function TaskCard({
 
                     <DropdownMenuContent
                         align="end"
-                        onPointerDown={(event) => {
-                            event.stopPropagation();
-                        }}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <DropdownMenuItem
-                            onPointerDown={(event) => {
-                                event.stopPropagation();
-                            }}
-                            onClick={(event) => {
-                                event.stopPropagation();
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 onEdit();
                             }}
                         >
@@ -266,13 +229,11 @@ export default function TaskCard({
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                            onPointerDown={(event) => {
-                                event.stopPropagation();
-                            }}
-                            onClick={(event) => {
-                                event.stopPropagation();
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 onDelete();
                             }}
+                            className="text-destructive focus:text-destructive"
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -283,10 +244,6 @@ export default function TaskCard({
 
             <div className="mt-3 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground">
-                        #{task.id.slice(0, 6)}
-                    </span>
-
                     {formattedDueDate && (
                         <span
                             className={`flex items-center gap-1 text-[10px] font-medium ${
@@ -298,7 +255,6 @@ export default function TaskCard({
                             }`}
                         >
                             <CalendarDays className="h-3 w-3" />
-
                             {isOverdue
                                 ? `Overdue · ${formattedDueDate}`
                                 : isDueToday

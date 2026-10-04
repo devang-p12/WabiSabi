@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 interface BoardHeaderProps {
     board: Board;
-    onBack: () => void;
+    onBack?: () => void;
     onAddTask: () => void;
     onAddList: () => void;
     onRefresh: () => void;

@@ -16,48 +16,20 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-
                 {/* Public routes */}
-                <Route
-                    path="/login"
-                    element={<Login />}
-                />
-
-                <Route
-                    path="/register"
-                    element={<Register />}
-                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
                 {/* Protected routes */}
                 <Route element={<AuthGuard />}>
-
-                    <Route
-                        path="/dashboard"
-                        element={<Dashboard />}
-                    />
-
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/workspaces/:workspaceId" element={<Workspace />} />
+                    <Route path="/workspaces/:workspaceId/boards/:boardId" element={<Board />} />
                 </Route>
 
-                {/* Fallback */}
-                <Route
-                    path="*"
-                    element={
-                        <Navigate
-                            to="/login"
-                            replace
-                        />
-                    }
-                />
-
-                <Route
-                    path="/workspaces/:workspaceId"
-                    element={<Workspace />}
-                />
-                <Route
-                    path="/workspaces/:workspaceId/boards/:boardId"
-                    element={<Board />}
-                />
-
+                {/* Fallbacks */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </BrowserRouter>
     );

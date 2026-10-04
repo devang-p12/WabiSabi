@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Board } from "@/api/board.api";
 
 import {
+    createList,
     deleteList,
     getBoardLists,
     updateList,
@@ -39,7 +40,7 @@ import BoardDndContext from "../dnd/BoardDndContext";
 
 interface BoardViewProps {
     board: Board;
-    onBack: () => void;
+    onBack?: () => void;
 }
 
 export default function BoardView({
@@ -58,6 +59,25 @@ export default function BoardView({
     const [error, setError] = useState<string | null>(
         null,
     );
+    const [isCreatingStarters, setIsCreatingStarters] = useState(false);
+
+    const handleAddStarterColumns = async () => {
+        try {
+            setIsCreatingStarters(true);
+            setError(null);
+            await createList(board.id, { name: "To Do" });
+            await createList(board.id, { name: "In Progress" });
+            await createList(board.id, { name: "Done" });
+            await loadLists();
+        } catch (err: any) {
+            setError(
+                err.response?.data?.error?.message ??
+                "Failed to create starter columns."
+            );
+        } finally {
+            setIsCreatingStarters(false);
+        }
+    };
 
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -551,6 +571,8 @@ export default function BoardView({
                                     true,
                                 )
                             }
+                            onAddStarterColumns={handleAddStarterColumns}
+                            isCreatingStarters={isCreatingStarters}
                         />
                     ) : (
                         <BoardDndContext

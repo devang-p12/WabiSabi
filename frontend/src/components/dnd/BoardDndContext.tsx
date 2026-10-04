@@ -1,35 +1,33 @@
 import {
     DndContext,
     DragOverlay,
+    PointerSensor,
+    MouseSensor,
+    TouchSensor,
     closestCenter,
+    useSensor,
+    useSensors,
+    defaultDropAnimationSideEffects,
+    type DropAnimation,
     type DragEndEvent,
     type DragStartEvent,
+    type DragOverEvent,
 } from "@dnd-kit/core";
-
+import { arrayMove } from "@dnd-kit/sortable";
 import {
     useState,
+    useRef,
     type Dispatch,
     type ReactNode,
     type SetStateAction,
 } from "react";
-
 import type { Task } from "@/api/task.api";
 
 interface BoardDndContextProps {
     tasks: Record<string, Task[]>;
-
-    onTasksChange: Dispatch<
-        SetStateAction<Record<string, Task[]>>
-    >;
-
-    onMoveTask: (
-        taskId: string,
-        listId: string,
-        position: number,
-    ) => Promise<Task>;
-
+    onTasksChange: Dispatch<SetStateAction<Record<string, Task[]>>>;
+    onMoveTask: (taskId: string, listId: string, position: number) => Promise<Task>;
     children: ReactNode;
-
     disabled?: boolean;
 }
 
@@ -40,524 +38,211 @@ export default function BoardDndContext({
     children,
     disabled = false,
 }: BoardDndContextProps) {
-    const [activeTask, setActiveTask] =
-        useState<Task | null>(null);
+    const [activeTask, setActiveTask] = useState<Task | null>(null);
+    const originalTasks = useRef<Record<string, Task[]> | null>(null);
 
-    /**
-     * Find the list containing a task.
-     */
-    const findTaskLocation = (
-        taskId: string,
-    ) => {
-        for (const [
-            listId,
-            listTasks,
-        ] of Object.entries(tasks)) {
-            const index = listTasks.findIndex(
-                (task) => task.id === taskId,
-            );
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    );
 
+    const dropAnimation: DropAnimation = {
+        sideEffects: defaultDropAnimationSideEffects({
+            styles: { active: { opacity: "0" } },
+        }),
+    };
+
+    const findTaskLocation = (taskId: string, tasksToSearch = tasks) => {
+        for (const [listId, listTasks] of Object.entries(tasksToSearch)) {
+            const index = listTasks.findIndex((task) => task.id === taskId);
             if (index !== -1) {
-                return {
-                    listId,
-                    index,
-                    task: listTasks[index],
-                };
+                return { listId, index, task: listTasks[index] };
             }
         }
-
         return null;
     };
 
-    /**
-     * Find which list an over element belongs to.
-     *
-     * `over.id` can be either:
-     * - a list ID
-     * - a task ID
-     */
-    const findTargetList = (
-        overId: string,
-    ): string | null => {
-        // Dropped directly over a list.
-        if (
-            Object.prototype.hasOwnProperty.call(
-                tasks,
-                overId,
-            )
-        ) {
-            return overId;
+    const findTargetList = (overId: string): string | null => {
+        if (Object.prototype.hasOwnProperty.call(tasks, overId)) return overId;
+        for (const [listId, listTasks] of Object.entries(tasks)) {
+            if (listTasks.some((task) => task.id === overId)) return listId;
         }
-
-        // Dropped over a task.
-        for (const [
-            listId,
-            listTasks,
-        ] of Object.entries(tasks)) {
-            if (
-                listTasks.some(
-                    (task) =>
-                        task.id === overId,
-                )
-            ) {
-                return listId;
-            }
-        }
-
         return null;
     };
 
-    /**
-     * Drag started.
-     */
-    const handleDragStart = (
-        event: DragStartEvent,
-    ) => {
-        if (disabled) {
-            return;
-        }
-
-        const taskId = String(
-            event.active.id,
-        );
-
-        const location =
-            findTaskLocation(taskId);
-
+    const handleDragStart = (event: DragStartEvent) => {
+        if (disabled) return;
+        const taskId = String(event.active.id);
+        const location = findTaskLocation(taskId);
         if (location?.task) {
             setActiveTask(location.task);
+            originalTasks.current = tasks;
         }
     };
 
-    /**
-     * Drag cancelled.
-     */
     const handleDragCancel = () => {
         setActiveTask(null);
+        if (originalTasks.current) {
+            onTasksChange(originalTasks.current);
+            originalTasks.current = null;
+        }
     };
 
-    /**
-     * Drag ended.
-     */
-    const handleDragEnd = async (
-        event: DragEndEvent,
-    ) => {
-        setActiveTask(null);
-
-        if (disabled) {
-            return;
-        }
-
+    const handleDragOver = (event: DragOverEvent) => {
         const { active, over } = event;
+        if (!over) return;
 
-        if (!over) {
-            return;
-        }
-
-        const taskId = String(active.id);
+        const activeId = String(active.id);
         const overId = String(over.id);
 
-        // Find the task being dragged.
-        const source = findTaskLocation(taskId);
+        if (activeId === overId) return;
 
-        if (!source) {
-            return;
-        }
+        const activeLocation = findTaskLocation(activeId);
+        const overListId = findTargetList(overId);
 
-        // Find the target list.
-        const targetListId =
-            findTargetList(overId);
+        if (!activeLocation || !overListId) return;
 
-        if (!targetListId) {
-            return;
-        }
+        // If crossing lists, update state immediately for the preview ghost to follow
+        if (activeLocation.listId !== overListId) {
+            onTasksChange((prev) => {
+                const activeItems = prev[activeLocation.listId] || [];
+                const overItems = prev[overListId] || [];
+                const activeIndex = activeItems.findIndex(t => t.id === activeId);
+                const overIndex = overId === overListId 
+                    ? overItems.length 
+                    : overItems.findIndex(t => t.id === overId);
 
-        const sourceListId = source.listId;
-
-        const sourceTasks =
-            tasks[sourceListId] ?? [];
-
-        const targetTasks =
-            tasks[targetListId] ?? [];
-
-        /*
-         * ==========================================
-         * SAME LIST
-         * ==========================================
-         */
-        if (sourceListId === targetListId) {
-            const oldIndex = source.index;
-
-            const overIndex =
-                targetTasks.findIndex(
-                    (task) => task.id === overId,
-                );
-
-            /*
-             * If we are over the list itself,
-             * don't change anything.
-             */
-            if (overIndex === -1) {
-                return;
-            }
-
-            /*
-             * Get the vertical position of the
-             * target card.
-             */
-            const overRect =
-                over.rect;
-
-            const overMiddleY =
-                overRect.top +
-                overRect.height / 2;
-
-            /*
-             * `active.rect.current.translated`
-             * gives us the dragged card's current
-             * position.
-             */
-            const activeRect =
-                active.rect.current
-                    .translated;
-
-            if (!activeRect) {
-                return;
-            }
-
-            const activeMiddleY =
-                activeRect.top +
-                activeRect.height / 2;
-
-            /*
-             * Decide whether the task should go
-             * before or after the target.
-             */
-            let newIndex = overIndex;
-
-            if (
-                activeMiddleY >
-                overMiddleY
-            ) {
-                newIndex =
-                    overIndex + 1;
-            }
-
-            /*
-             * The dragged item is currently still
-             * included in the array, so remove it
-             * before calculating the final position.
-             */
-            const reorderedTasks = [
-                ...sourceTasks,
-            ];
-
-            const [
-                movedTask,
-            ] = reorderedTasks.splice(
-                oldIndex,
-                1,
-            );
-
-            if (!movedTask) {
-                return;
-            }
-
-            /*
-             * If the item was removed from before
-             * the insertion point, the insertion
-             * index shifts left by one.
-             */
-            if (oldIndex < newIndex) {
-                newIndex--;
-            }
-
-            /*
-             * Keep the index inside the array.
-             */
-            newIndex = Math.max(
-                0,
-                Math.min(
-                    newIndex,
-                    reorderedTasks.length,
-                ),
-            );
-
-            /*
-             * Nothing changed.
-             */
-            if (oldIndex === newIndex) {
-                return;
-            }
-
-            reorderedTasks.splice(
-                newIndex,
-                0,
-                movedTask,
-            );
-
-            /*
-             * Recalculate positions.
-             */
-            const updatedTasks =
-                reorderedTasks.map(
-                    (task, index) => ({
-                        ...task,
-                        position: index,
-                    }),
-                );
-
-            const previousTasks =
-                sourceTasks;
-
-            /*
-             * Optimistic update.
-             */
-            onTasksChange(
-                (current) => ({
-                    ...current,
-                    [sourceListId]:
-                        updatedTasks,
-                }),
-            );
-
-            try {
-                await onMoveTask(
-                    taskId,
-                    targetListId,
-                    newIndex,
-                );
-            } catch (error) {
-                console.error(
-                    "Failed to move task:",
-                    error,
-                );
-
-                /*
-                 * Rollback.
-                 */
-                onTasksChange(
-                    (current) => ({
-                        ...current,
-                        [sourceListId]:
-                            previousTasks,
-                    }),
-                );
-            }
-
-            return;
-        }
-
-        /*
-         * ==========================================
-         * CROSS LIST
-         * ==========================================
-         */
-
-        const newSourceTasks =
-            sourceTasks.filter(
-                (task) =>
-                    task.id !== taskId,
-            );
-
-        const newTargetTasks = [
-            ...targetTasks,
-        ];
-
-        let targetIndex =
-            targetTasks.findIndex(
-                (task) => task.id === overId,
-            );
-
-        /*
-         * Dropped directly onto the list
-         * instead of a task -> append.
-         */
-        if (targetIndex === -1) {
-            targetIndex =
-                targetTasks.length;
-        } else {
-            /*
-             * Determine whether we're dropping
-             * above or below the target task.
-             */
-            const overRect =
-                over.rect;
-
-            const overMiddleY =
-                overRect.top +
-                overRect.height / 2;
-
-            const activeRect =
-                active.rect.current
-                    .translated;
-
-            if (activeRect) {
-                const activeMiddleY =
-                    activeRect.top +
-                    activeRect.height / 2;
-
-                if (
-                    activeMiddleY >
-                    overMiddleY
-                ) {
-                    targetIndex++;
+                let newIndex;
+                if (overId === overListId) {
+                    newIndex = overItems.length;
+                } else {
+                    const isBelowOverItem =
+                        over &&
+                        active.rect.current.translated &&
+                        active.rect.current.translated.top > over.rect.top + over.rect.height / 2;
+                    newIndex = overIndex >= 0 ? overIndex + (isBelowOverItem ? 1 : 0) : overItems.length;
                 }
-            }
-        }
 
-        /*
-         * Keep index valid.
-         */
-        targetIndex = Math.max(
-            0,
-            Math.min(
-                targetIndex,
-                newTargetTasks.length,
-            ),
-        );
+                const newActiveItems = [...activeItems];
+                const [movedItem] = newActiveItems.splice(activeIndex, 1);
+                const newOverItems = [...overItems];
+                newOverItems.splice(newIndex, 0, { ...movedItem, listId: overListId });
 
-        /*
-         * Insert dragged task.
-         */
-        newTargetTasks.splice(
-            targetIndex,
-            0,
-            {
-                ...source.task,
-                listId: targetListId,
-            },
-        );
-
-        /*
-         * Recalculate source positions.
-         */
-        const updatedSourceTasks =
-            newSourceTasks.map(
-                (task, index) => ({
-                    ...task,
-                    position: index,
-                }),
-            );
-
-        /*
-         * Recalculate target positions.
-         */
-        const updatedTargetTasks =
-            newTargetTasks.map(
-                (task, index) => ({
-                    ...task,
-                    listId: targetListId,
-                    position: index,
-                }),
-            );
-
-        const previousSourceTasks =
-            sourceTasks;
-
-        const previousTargetTasks =
-            targetTasks;
-
-        /*
-         * Optimistic update.
-         */
-        onTasksChange(
-            (current) => ({
-                ...current,
-
-                [sourceListId]:
-                    updatedSourceTasks,
-
-                [targetListId]:
-                    updatedTargetTasks,
-            }),
-        );
-
-        try {
-            await onMoveTask(
-                taskId,
-                targetListId,
-                targetIndex,
-            );
-        } catch (error) {
-            console.error(
-                "Failed to move task:",
-                error,
-            );
-
-            /*
-             * Rollback.
-             */
-            onTasksChange(
-                (current) => ({
-                    ...current,
-
-                    [sourceListId]:
-                        previousSourceTasks,
-
-                    [targetListId]:
-                        previousTargetTasks,
-                }),
-            );
+                return {
+                    ...prev,
+                    [activeLocation.listId]: newActiveItems,
+                    [overListId]: newOverItems,
+                };
+            });
         }
     };
 
-    /**
-     * When DnD is disabled,
-     * render children normally.
-     */
-    if (disabled) {
-        return <>{children}</>;
-    }
+    const handleDragEnd = async (event: DragEndEvent) => {
+        setActiveTask(null);
+        if (disabled) return;
+
+        const { active, over } = event;
+        if (!over) {
+            if (originalTasks.current) {
+                onTasksChange(originalTasks.current);
+                originalTasks.current = null;
+            }
+            return;
+        }
+
+        const activeId = String(active.id);
+        const overId = String(over.id);
+
+        const activeLocation = findTaskLocation(activeId);
+        const targetListId = findTargetList(overId);
+
+        if (!activeLocation || !targetListId) return;
+
+        const originalLocation = originalTasks.current ? findTaskLocation(activeId, originalTasks.current) : null;
+        
+        let finalIndex = activeLocation.index;
+        
+        // Only perform arrayMove if it's a same-list shift during drop.
+        // For cross-list, onDragOver already placed it.
+        if (activeId !== overId) {
+            const targetTasks = tasks[targetListId] ?? [];
+            const overIndex = targetTasks.findIndex((task) => task.id === overId);
+            
+            if (overIndex !== -1) {
+                finalIndex = overIndex;
+                const newTargetTasks = arrayMove(targetTasks, activeLocation.index, overIndex);
+                
+                onTasksChange((current) => ({
+                    ...current,
+                    [targetListId]: newTargetTasks.map((t, i) => ({ ...t, position: i })),
+                }));
+            }
+        } else {
+             // We dropped on the exact placeholder or list
+             onTasksChange((current) => ({
+                 ...current,
+                 [targetListId]: (current[targetListId] ?? []).map((t, i) => ({ ...t, position: i })),
+             }));
+        }
+
+        const hasMoved = activeLocation.index !== finalIndex || activeLocation.listId !== originalLocation?.listId;
+        const rollbackState = originalTasks.current;
+        originalTasks.current = null;
+
+        try {
+            if (hasMoved) {
+                await onMoveTask(activeId, targetListId, finalIndex);
+            }
+        } catch (error) {
+            console.error("Failed to move task:", error);
+            if (rollbackState) {
+                onTasksChange(rollbackState);
+            }
+        }
+    };
+
+    if (disabled) return <>{children}</>;
 
     return (
         <DndContext
-            collisionDetection={
-                closestCenter
-            }
-            onDragStart={
-                handleDragStart
-            }
-            onDragEnd={
-                handleDragEnd
-            }
-            onDragCancel={
-                handleDragCancel
-            }
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
         >
             {children}
-
-            <DragOverlay>
+            <DragOverlay dropAnimation={dropAnimation}>
                 {activeTask ? (
-                    <div className="w-[280px] rotate-2 cursor-grabbing rounded-lg border bg-background p-3 shadow-xl">
-                        <div className="flex items-start justify-between gap-2">
+                    <div
+                        className="w-[280px] cursor-grabbing rounded-lg border bg-background p-3"
+                        style={{ boxShadow: "0 16px 40px -8px rgba(0,0,0,0.25), 0 4px 12px -4px rgba(0,0,0,0.15)" }}
+                    >
+                        <div className="flex items-start gap-2">
+                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border opacity-40" />
                             <div className="min-w-0 flex-1">
-                                <h3 className="text-sm font-medium leading-5">
-                                    {
-                                        activeTask.title
-                                    }
-                                </h3>
-
+                                <h3 className="text-sm font-medium leading-5">{activeTask.title}</h3>
                                 {activeTask.description && (
                                     <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                                        {
-                                            activeTask.description
-                                        }
+                                        {activeTask.description}
                                     </p>
                                 )}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 flex items-center justify-between">
-                            <span className="text-[10px] text-muted-foreground">
-                                #
-                                {activeTask.id.slice(
-                                    0,
-                                    6,
+                                {activeTask.labels.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {activeTask.labels.map((label) => (
+                                            <span
+                                                key={label.id}
+                                                className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
+                                                style={{ backgroundColor: label.color }}
+                                            >
+                                                {label.name}
+                                            </span>
+                                        ))}
+                                    </div>
                                 )}
-                            </span>
-
-                            <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />
+                            </div>
                         </div>
                     </div>
                 ) : null}

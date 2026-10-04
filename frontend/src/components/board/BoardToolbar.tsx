@@ -2,6 +2,7 @@ import {
     Filter,
     Search,
     SlidersHorizontal,
+    X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -66,10 +67,23 @@ export default function BoardToolbar({
     statusFilter,
     onStatusFilterChange,
 }: BoardToolbarProps) {
+    const hasActiveFilters =
+        searchQuery.trim().length > 0 ||
+        priorityFilter !== "ALL" ||
+        dueDateFilter !== "ALL" ||
+        statusFilter !== "ALL";
+
+    const handleClearFilters = () => {
+        onSearchChange("");
+        onPriorityFilterChange("ALL");
+        onDueDateFilterChange("ALL");
+        onStatusFilterChange("ALL");
+    };
+
     return (
-        <div className="flex h-10 shrink-0 items-center gap-1 border-b px-2">
+        <div className="flex h-11 shrink-0 items-center gap-1.5 border-b px-3 bg-muted/10">
             {/* Search */}
-            <div className="relative hidden w-48 lg:block">
+            <div className="relative w-36 sm:w-48 md:w-56">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
 
                 <Input
@@ -78,9 +92,31 @@ export default function BoardToolbar({
                         onSearchChange(event.target.value)
                     }
                     placeholder="Search tasks..."
-                    className="h-8 pl-8 text-xs"
+                    className="h-8 pl-8 pr-7 text-xs bg-background"
                 />
+
+                {searchQuery && (
+                    <button
+                        onClick={() => onSearchChange("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                        <X className="h-3 w-3" />
+                    </button>
+                )}
             </div>
+
+            {hasActiveFilters && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearFilters}
+                    className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                    title="Clear all filters"
+                >
+                    <X className="mr-1 h-3 w-3" />
+                    Reset
+                </Button>
+            )}
 
             <div className="ml-auto flex items-center gap-1">
                 {/* Filter */}

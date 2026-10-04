@@ -180,6 +180,7 @@ export default function CreateTaskDialog({
                             placeholder="e.g. Implement authentication"
                             autoFocus
                         />
+                        <p className="text-[11px] text-muted-foreground">Keep it short and descriptive</p>
                     </div>
 
                     <div className="space-y-2">
@@ -241,6 +242,7 @@ export default function CreateTaskDialog({
                                 Urgent
                             </option>
                         </select>
+                        <p className="text-[11px] text-muted-foreground">Helps team know what to tackle first</p>
                     </div>
                     <div className="space-y-2">
                         <label
@@ -262,6 +264,7 @@ export default function CreateTaskDialog({
                             }
                             disabled={loading}
                         />
+                        <p className="text-[11px] text-muted-foreground">Set a target completion date</p>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">

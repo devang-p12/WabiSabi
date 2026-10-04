@@ -101,6 +101,7 @@ export default function CreateListDialog({
                         }}
                         autoFocus
                     />
+                    <p className="text-[11px] text-muted-foreground">e.g., Backlog, In Progress, Review</p>
 
                     {error && (
                         <p className="text-sm text-destructive">

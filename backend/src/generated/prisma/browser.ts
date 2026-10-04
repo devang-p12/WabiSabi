@@ -62,3 +62,13 @@ export type Label = Prisma.LabelModel
  * 
  */
 export type TaskLabel = Prisma.TaskLabelModel
+/**
+ * Model Comment
+ * 
+ */
+export type Comment = Prisma.CommentModel
+/**
+ * Model ActivityLog
+ * 
+ */
+export type ActivityLog = Prisma.ActivityLogModel

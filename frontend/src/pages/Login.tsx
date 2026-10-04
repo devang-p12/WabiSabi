@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
-import { api } from "@/api/client";
+
 import { useAuth } from "@/context/AuthContext";
 
 import { Button } from "@/components/ui/button";

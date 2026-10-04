@@ -3,7 +3,11 @@ import axios, {
     type InternalAxiosRequestConfig,
 } from "axios";
 
-const API_URL = "http://localhost:3000/api/v1";
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    (typeof window !== "undefined" && window.location.hostname
+        ? `http://${window.location.hostname}:3000/api/v1`
+        : "http://localhost:3000/api/v1");
 
 export const api = axios.create({
     baseURL: API_URL,

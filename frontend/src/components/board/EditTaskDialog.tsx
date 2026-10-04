@@ -138,6 +138,7 @@ export default function EditTaskDialog({
                                 autoFocus
                                 disabled={saving}
                             />
+                            <p className="text-[11px] text-muted-foreground">Keep it short and descriptive</p>
                         </div>
 
                         <div className="space-y-2">
@@ -196,6 +197,7 @@ export default function EditTaskDialog({
                                     Urgent
                                 </option>
                             </select>
+                            <p className="text-[11px] text-muted-foreground">Helps team know what to tackle first</p>
                         </div>
 
                         <div className="space-y-2">
@@ -234,6 +236,7 @@ export default function EditTaskDialog({
                                 }
                                 disabled={saving}
                             />
+                            <p className="text-[11px] text-muted-foreground">Set a target completion date</p>
 
                             {dueDate && (
                                 <Button

@@ -59,7 +59,9 @@ export const ModelName = {
   BoardList: 'BoardList',
   Task: 'Task',
   Label: 'Label',
-  TaskLabel: 'TaskLabel'
+  TaskLabel: 'TaskLabel',
+  Comment: 'Comment',
+  ActivityLog: 'ActivityLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -183,6 +185,33 @@ export const TaskLabelScalarFieldEnum = {
 } as const
 
 export type TaskLabelScalarFieldEnum = (typeof TaskLabelScalarFieldEnum)[keyof typeof TaskLabelScalarFieldEnum]
+
+
+export const CommentScalarFieldEnum = {
+  id: 'id',
+  text: 'text',
+  taskId: 'taskId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
+
+
+export const ActivityLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  entityTitle: 'entityTitle',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  boardId: 'boardId',
+  taskId: 'taskId'
+} as const
+
+export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
 export const SortOrder = {
