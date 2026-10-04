@@ -28,10 +28,12 @@ let waitingRequests: Array<{
 }> = [];
 
 const getAccessToken = () =>
-    sessionStorage.getItem("wabi_access_token");
+    sessionStorage.getItem("wabi_access_token") ||
+    localStorage.getItem("wabi_access_token");
 
 const getRefreshToken = () =>
-    sessionStorage.getItem("wabi_refresh_token");
+    sessionStorage.getItem("wabi_refresh_token") ||
+    localStorage.getItem("wabi_refresh_token");
 
 const saveTokens = (
     accessToken: string,
@@ -46,6 +48,16 @@ const saveTokens = (
         "wabi_refresh_token",
         refreshToken
     );
+
+    localStorage.setItem(
+        "wabi_access_token",
+        accessToken
+    );
+
+    localStorage.setItem(
+        "wabi_refresh_token",
+        refreshToken
+    );
 };
 
 const clearTokens = () => {
@@ -54,6 +66,14 @@ const clearTokens = () => {
     );
 
     sessionStorage.removeItem(
+        "wabi_refresh_token"
+    );
+
+    localStorage.removeItem(
+        "wabi_access_token"
+    );
+
+    localStorage.removeItem(
         "wabi_refresh_token"
     );
 };

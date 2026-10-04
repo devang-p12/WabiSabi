@@ -4,6 +4,7 @@ import {
     getWorkspaceMembership,
     requireWorkspaceAdmin,
 } from "../workspace/workspace.authorization.js";
+import { getIO } from "../../socket.js";
 
 export const createList = async (
     boardId: string,
@@ -55,6 +56,12 @@ export const createList = async (
             position,
         },
     });
+
+    try {
+        getIO().to(`board_${boardId}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on createList:", e);
+    }
 
     return {
         list,
@@ -146,6 +153,12 @@ export const updateList = async (
         },
     });
 
+    try {
+        getIO().to(`board_${list.boardId}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on updateList:", e);
+    }
+
     return {
         list: updatedList,
     } as const;
@@ -186,6 +199,12 @@ export const deleteList = async (
             id: listId,
         },
     });
+
+    try {
+        getIO().to(`board_${list.boardId}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on deleteList:", e);
+    }
 
     return {
         success: true,

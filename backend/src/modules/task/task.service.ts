@@ -4,6 +4,7 @@ import {
     getWorkspaceMembership,
     requireWorkspaceAdmin,
 } from "../workspace/workspace.authorization.js";
+import { getIO } from "../../socket.js";
 
 export const createTask = async (
     listId: string,
@@ -79,6 +80,12 @@ export const createTask = async (
             taskId: task.id,
         },
     });
+
+    try {
+        getIO().to(`board_${list.board.id}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on createTask:", e);
+    }
 
     return {
         task,
@@ -277,6 +284,12 @@ export const updateTask = async (
         },
     });
 
+    try {
+        getIO().to(`board_${task.list.board.id}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on updateTask:", e);
+    }
+
     return {
         task: {
             ...updatedTask,
@@ -337,6 +350,12 @@ export const deleteTask = async (
             boardId: task.list.board.id,
         },
     });
+
+    try {
+        getIO().to(`board_${task.list.board.id}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on deleteTask:", e);
+    }
 
     return {
         success: true,
@@ -413,7 +432,7 @@ export const moveTask = async (
 
     const sourceListId = task.listId;
 
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         // Moving inside the same list
         if (sourceListId === targetListId) {
             const tasks = await tx.task.findMany({
@@ -575,4 +594,13 @@ export const moveTask = async (
             },
         });
     });
+
+    try {
+        console.log(`[Socket.io] Emitting board_updated for board_${targetList.boardId}`);
+        getIO().to(`board_${targetList.boardId}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on moveTask:", e);
+    }
+
+    return result;
 };

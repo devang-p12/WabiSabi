@@ -65,14 +65,12 @@ export function AuthProvider({
         const restoreSession = async () => {
             try {
                 const storedAccessToken =
-                    sessionStorage.getItem(
-                        ACCESS_TOKEN_KEY
-                    );
+                    sessionStorage.getItem(ACCESS_TOKEN_KEY) ||
+                    localStorage.getItem(ACCESS_TOKEN_KEY);
 
                 const storedRefreshToken =
-                    sessionStorage.getItem(
-                        REFRESH_TOKEN_KEY
-                    );
+                    sessionStorage.getItem(REFRESH_TOKEN_KEY) ||
+                    localStorage.getItem(REFRESH_TOKEN_KEY);
 
                 /*
                  * No saved session.
@@ -90,6 +88,11 @@ export function AuthProvider({
                             await getCurrentUser(
                                 storedAccessToken
                             );
+
+                        sessionStorage.setItem(ACCESS_TOKEN_KEY, storedAccessToken);
+                        sessionStorage.setItem(REFRESH_TOKEN_KEY, storedRefreshToken);
+                        localStorage.setItem(ACCESS_TOKEN_KEY, storedAccessToken);
+                        localStorage.setItem(REFRESH_TOKEN_KEY, storedRefreshToken);
 
                         setAccessToken(
                             storedAccessToken
@@ -125,6 +128,16 @@ export function AuthProvider({
                 );
 
                 sessionStorage.setItem(
+                    REFRESH_TOKEN_KEY,
+                    result.refreshToken
+                );
+
+                localStorage.setItem(
+                    ACCESS_TOKEN_KEY,
+                    result.accessToken
+                );
+
+                localStorage.setItem(
                     REFRESH_TOKEN_KEY,
                     result.refreshToken
                 );
@@ -167,6 +180,14 @@ export function AuthProvider({
             REFRESH_TOKEN_KEY
         );
 
+        localStorage.removeItem(
+            ACCESS_TOKEN_KEY
+        );
+
+        localStorage.removeItem(
+            REFRESH_TOKEN_KEY
+        );
+
         setUser(null);
         setAccessToken(null);
         setRefreshToken(null);
@@ -190,6 +211,16 @@ export function AuthProvider({
         );
 
         sessionStorage.setItem(
+            REFRESH_TOKEN_KEY,
+            result.refreshToken
+        );
+
+        localStorage.setItem(
+            ACCESS_TOKEN_KEY,
+            result.accessToken
+        );
+
+        localStorage.setItem(
             REFRESH_TOKEN_KEY,
             result.refreshToken
         );

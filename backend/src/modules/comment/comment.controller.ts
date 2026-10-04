@@ -2,6 +2,19 @@ import type { Response } from "express";
 import type { AuthenticatedRequest } from "../../middleware/auth.middleware.js";
 import { prisma } from "../../config/prisma.js";
 
+import { getIO } from "../../socket.js";
+
+const emitBoardUpdateFromTask = async (taskId: string) => {
+    try {
+        const task = await prisma.task.findUnique({ where: { id: taskId }, include: { list: true }});
+        if (task) {
+            getIO().to(`board_${task.list.boardId}`).emit("board_updated");
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
+
 export const getTaskCommentsController = async (
     req: AuthenticatedRequest,
     res: Response
@@ -61,6 +74,8 @@ export const createCommentController = async (
         },
     });
 
+    await emitBoardUpdateFromTask(taskId);
+
     res.status(201).json({ success: true, data: comment });
 };
 
@@ -93,6 +108,8 @@ export const deleteCommentController = async (
     await prisma.comment.delete({
         where: { id: commentId },
     });
+
+    await emitBoardUpdateFromTask(comment.taskId);
 
     res.json({ success: true, message: "Comment deleted" });
 };

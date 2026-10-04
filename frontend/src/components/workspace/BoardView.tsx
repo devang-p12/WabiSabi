@@ -37,6 +37,7 @@ import EditTaskDialog from "../board/EditTaskDialog";
 import RenameListDialog from "../board/RenameListDialog";
 
 import BoardDndContext from "../dnd/BoardDndContext";
+import { useSocket } from "@/contexts/SocketContext";
 
 interface BoardViewProps {
     board: Board;
@@ -137,9 +138,18 @@ export default function BoardView({
                 }),
             );
 
-            setTasks(
-                Object.fromEntries(entries),
-            );
+            const newTasksMap = Object.fromEntries(entries);
+            setTasks(newTasksMap);
+
+            // Keep currently open modal in sync if active
+            setSelectedTask((current) => {
+                if (!current) return null;
+                for (const listTasks of Object.values(newTasksMap)) {
+                    const matched = listTasks.find((t) => t.id === current.id);
+                    if (matched) return matched;
+                }
+                return current;
+            });
         } catch (err) {
             console.error(
                 "Failed to load tasks:",
@@ -153,9 +163,11 @@ export default function BoardView({
     /**
      * Load lists + tasks.
      */
-    const loadLists = async () => {
+    const loadLists = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) {
+                setLoading(true);
+            }
             setError(null);
 
             const data =
@@ -172,13 +184,45 @@ export default function BoardView({
 
             setError("Failed to load board.");
         } finally {
-            setLoading(false);
+            if (!silent) {
+                setLoading(false);
+            }
         }
     };
 
     useEffect(() => {
         loadLists();
     }, [board.id]);
+
+    const { socket } = useSocket();
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const joinRoom = () => {
+            console.log(`[BoardView] Joining room board_${board.id} (socket id: ${socket.id})`);
+            socket.emit("join_board", board.id);
+        };
+
+        if (socket.connected) {
+            joinRoom();
+        }
+
+        socket.on("connect", joinRoom);
+
+        const handleBoardUpdated = () => {
+            console.log(`[BoardView] Real-time board_updated received for board ${board.id}`);
+            loadLists(true); // Silent reload so board state refreshes seamlessly
+        };
+
+        socket.on("board_updated", handleBoardUpdated);
+
+        return () => {
+            socket.off("connect", joinRoom);
+            socket.off("board_updated", handleBoardUpdated);
+            socket.emit("leave_board", board.id);
+        };
+    }, [socket, board.id]);
 
     /**
      * Get tasks after search + sort.
