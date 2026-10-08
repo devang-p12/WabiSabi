@@ -12,10 +12,12 @@ import Workspace from "@/pages/Workspace";
 import AuthGuard from "./components/auth/AuthGaurd";
 import Board from "./pages/Board";
 import NotificationToastAlert from "./components/notifications/NotificationToastAlert";
+import CommandPalette from "./components/command/CommandPalette";
 
 function App() {
     return (
         <BrowserRouter>
+            <CommandPalette />
             <NotificationToastAlert />
             <Routes>
                 {/* Public routes */}

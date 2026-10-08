@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import OnlineMembers, { type BoardUserPresence } from "./OnlineMembers";
 import NotificationBell from "../notifications/NotificationBell";
+import CommandTriggerButton from "../command/CommandTriggerButton";
 
 interface BoardHeaderProps {
     board: Board;
@@ -80,6 +81,8 @@ export default function BoardHeader({
 
             {/* Right */}
             <div className="flex shrink-0 items-center gap-2">
+                <CommandTriggerButton />
+
                 <OnlineMembers
                     members={onlineMembers || []}
                     currentUserId={currentUserId}

@@ -59,6 +59,7 @@ export const ModelName = {
   BoardList: 'BoardList',
   Task: 'Task',
   Subtask: 'Subtask',
+  Attachment: 'Attachment',
   Label: 'Label',
   TaskLabel: 'TaskLabel',
   Comment: 'Comment',
@@ -163,6 +164,7 @@ export const TaskScalarFieldEnum = {
   priority: 'priority',
   dueDate: 'dueDate',
   completed: 'completed',
+  coverUrl: 'coverUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   assigneeId: 'assigneeId'
@@ -181,6 +183,19 @@ export const SubtaskScalarFieldEnum = {
 } as const
 
 export type SubtaskScalarFieldEnum = (typeof SubtaskScalarFieldEnum)[keyof typeof SubtaskScalarFieldEnum]
+
+
+export const AttachmentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  name: 'name',
+  url: 'url',
+  size: 'size',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
 export const LabelScalarFieldEnum = {

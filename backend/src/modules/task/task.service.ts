@@ -16,6 +16,7 @@ export const createTask = async (
         priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | undefined;
         dueDate?: string | null | undefined;
         assigneeId?: string | null | undefined;
+        coverUrl?: string | null | undefined;
     }
 ) => {
     const list = await prisma.boardList.findUnique({
@@ -69,6 +70,7 @@ export const createTask = async (
                 ? new Date(data.dueDate)
                 : null,
             assigneeId: data.assigneeId ?? null,
+            coverUrl: data.coverUrl ?? null,
         },
         include: {
             assignee: {
@@ -85,6 +87,7 @@ export const createTask = async (
                 },
             },
             subtasks: true,
+            attachments: true,
         },
     });
 
@@ -184,6 +187,7 @@ export const getListTasks = async (
                 },
             },
             subtasks: true,
+            attachments: true,
         },
     });
     return {
@@ -222,6 +226,7 @@ export const getTask = async (
                 },
             },
             subtasks: true,
+            attachments: true,
         },
     });
     if (!task) {
@@ -259,6 +264,7 @@ export const updateTask = async (
         dueDate?: string | null | undefined;
         completed?: boolean | undefined;
         assigneeId?: string | null | undefined;
+        coverUrl?: string | null | undefined;
     }
 ) => {
     const task = await prisma.task.findUnique({
@@ -321,6 +327,10 @@ export const updateTask = async (
             ...(data.assigneeId !== undefined && {
                 assigneeId: data.assigneeId,
             }),
+
+            ...(data.coverUrl !== undefined && {
+                coverUrl: data.coverUrl,
+            }),
         },
 
         include: {
@@ -338,6 +348,7 @@ export const updateTask = async (
                 },
             },
             subtasks: true,
+            attachments: true,
         },
     });
 

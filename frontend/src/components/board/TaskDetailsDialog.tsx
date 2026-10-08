@@ -16,8 +16,10 @@ import TaskAssigneeSelector from "./TaskAssigneeSelector";
 import TaskComments from "./TaskComments";
 import TaskActivity from "./TaskActivity";
 import TaskSubtasks from "./TaskSubtasks";
+import TaskAttachments from "./TaskAttachments";
 
 import { type Task, updateTask } from "@/api/task.api";
+import { resolveAssetUrl, setTaskCover } from "@/api/attachment.api";
 import type { WorkspaceMember } from "@/api/workspace.api";
 
 import { Button } from "@/components/ui/button";
@@ -88,6 +90,16 @@ export default function TaskDetailsDialog({
         }
     };
 
+    const handleCoverChange = async (newCoverUrl: string | null) => {
+        try {
+            await setTaskCover(task.id, newCoverUrl);
+            const updated = { ...task, coverUrl: newCoverUrl };
+            onTaskUpdate?.(updated);
+        } catch (err) {
+            console.error("Failed to update task cover:", err);
+        }
+    };
+
     const priority = priorityConfig[task.priority];
 
     const formattedDueDate = task.dueDate
@@ -110,6 +122,27 @@ export default function TaskDetailsDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden">
+                {/* Hero Cover Image */}
+                {task.coverUrl && (
+                    <div className="relative w-full h-44 sm:h-52 bg-muted/60 overflow-hidden group">
+                        <img
+                            src={resolveAssetUrl(task.coverUrl)}
+                            alt="Task cover"
+                            className="h-full w-full object-cover"
+                        />
+                        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                className="h-7 text-xs bg-background/80 backdrop-blur-xs hover:bg-background shadow-xs cursor-pointer"
+                                onClick={() => handleCoverChange(null)}
+                            >
+                                Remove cover
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b">
                     <div className="flex-1 min-w-0">
@@ -213,6 +246,15 @@ export default function TaskDetailsDialog({
                                 Checklist
                             </h4>
                             <TaskSubtasks taskId={task.id} />
+                        </div>
+
+                        {/* Attachments & Cover */}
+                        <div className="pt-1">
+                            <TaskAttachments
+                                taskId={task.id}
+                                coverUrl={task.coverUrl}
+                                onCoverChange={handleCoverChange}
+                            />
                         </div>
 
                         {/* Comments / Activity tabs */}

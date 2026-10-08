@@ -17,6 +17,8 @@ export interface TaskAssignee {
     avatarUrl: string | null;
 }
 
+import type { TaskAttachment } from "./attachment.api";
+
 export interface Task {
     id: string;
     title: string;
@@ -26,12 +28,14 @@ export interface Task {
     priority: TaskPriority;
     dueDate: string | null;
     completed: boolean;
+    coverUrl?: string | null;
     assigneeId?: string | null;
     assignee?: TaskAssignee | null;
     createdAt: string;
     updatedAt: string;
     labels: Label[];
     subtasks?: { id: string; title: string; completed: boolean }[];
+    attachments?: TaskAttachment[];
 }
 
 export interface CreateTaskInput {
@@ -40,6 +44,7 @@ export interface CreateTaskInput {
     priority?: TaskPriority;
     dueDate?: string | null;
     assigneeId?: string | null;
+    coverUrl?: string | null;
 }
 
 export interface UpdateTaskInput {
@@ -49,6 +54,7 @@ export interface UpdateTaskInput {
     dueDate?: string | null;
     completed?: boolean;
     assigneeId?: string | null;
+    coverUrl?: string | null;
 }
 
 export const getListTasks = async (

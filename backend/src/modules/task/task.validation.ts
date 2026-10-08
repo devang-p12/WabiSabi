@@ -49,6 +49,11 @@ export const createTaskSchema = z.object({
         .uuid("Invalid assignee ID")
         .nullable()
         .optional(),
+
+    coverUrl: z
+        .string()
+        .nullable()
+        .optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -84,6 +89,11 @@ export const updateTaskSchema = z.object({
     assigneeId: z
         .string()
         .uuid("Invalid assignee ID")
+        .nullable()
+        .optional(),
+
+    coverUrl: z
+        .string()
         .nullable()
         .optional(),
 

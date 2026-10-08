@@ -122,6 +122,7 @@ model Task {
   priority    TaskPriority @default(MEDIUM)
   dueDate     DateTime?
   completed   Boolean      @default(false)
+  coverUrl    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -133,6 +134,7 @@ model Task {
   comments     Comment[]
   activityLogs ActivityLog[]
   subtasks     Subtask[]
+  attachments  Attachment[]
 
   @@index([listId])
   @@index([assigneeId])
@@ -145,6 +147,20 @@ model Subtask {
   taskId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  taskId    String
+  name      String
+  url       String
+  size      Int
+  type      String
+  createdAt DateTime @default(now())
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 

@@ -12,12 +12,14 @@ import {
     Trash2,
     AlertCircle,
     ListTodo,
+    Paperclip,
 } from "lucide-react";
 import { cn } from "cn";
 
 import type { BoardList } from "@/api/list.api";
 import type { Task, TaskPriority } from "@/api/task.api";
 import type { WorkspaceMember } from "@/api/workspace.api";
+import { resolveAssetUrl } from "@/api/attachment.api";
 import TaskAssigneeSelector from "./TaskAssigneeSelector";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -266,6 +268,14 @@ export default function BoardTableView({
                                                             onClick={() => onViewTask(task)}
                                                             className="flex items-center gap-2 min-w-0 cursor-pointer flex-1"
                                                         >
+                                                            {task.coverUrl && (
+                                                                <img
+                                                                    src={resolveAssetUrl(task.coverUrl)}
+                                                                    alt=""
+                                                                    className="h-4 w-4 rounded-xs object-cover shrink-0 ring-1 ring-border"
+                                                                />
+                                                            )}
+
                                                             <span
                                                                 className={cn(
                                                                     "truncate font-medium hover:underline hover:text-primary transition-colors",
@@ -274,6 +284,15 @@ export default function BoardTableView({
                                                             >
                                                                 {task.title}
                                                             </span>
+
+                                                            {task.attachments && task.attachments.length > 0 && (
+                                                                <span
+                                                                    title={`${task.attachments.length} attachment(s)`}
+                                                                    className="inline-flex items-center text-muted-foreground/70"
+                                                                >
+                                                                    <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                                                                </span>
+                                                            )}
 
                                                             {task.description && (
                                                                 <span title="Has description" className="inline-flex items-center">

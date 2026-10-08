@@ -4,6 +4,7 @@ import {
     Trash2,
     CalendarDays,
     ListChecks,
+    Paperclip,
 } from "lucide-react";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -14,6 +15,7 @@ import {
     type Task,
     type TaskPriority,
 } from "@/api/task.api";
+import { resolveAssetUrl } from "@/api/attachment.api";
 
 import { Button } from "@/components/ui/button";
 
@@ -147,6 +149,18 @@ export default function TaskCard({
                     : ""
             }`}
         >
+            {/* Card Cover Image */}
+            {task.coverUrl && (
+                <div className="relative -mx-3 -mt-3 mb-2.5 overflow-hidden rounded-t-lg bg-muted/40 aspect-video max-h-36">
+                    <img
+                        src={resolveAssetUrl(task.coverUrl)}
+                        alt={task.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                        loading="lazy"
+                    />
+                </div>
+            )}
+
             {/* Remote collaborator dragging badge */}
             {remoteDraggingInfo && (
                 <div
@@ -290,6 +304,15 @@ export default function TaskCard({
                         }`}>
                             <ListChecks className="h-3 w-3" />
                             {task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length}
+                        </span>
+                    )}
+                    {task.attachments && task.attachments.length > 0 && (
+                        <span
+                            className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground"
+                            title={`${task.attachments.length} attachment${task.attachments.length > 1 ? "s" : ""}`}
+                        >
+                            <Paperclip className="h-3 w-3" />
+                            {task.attachments.length}
                         </span>
                     )}
                 </div>

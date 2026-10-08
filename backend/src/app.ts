@@ -13,6 +13,13 @@ import commentRouter from "./modules/comment/comment.routes.js";
 import activityRouter from "./modules/activity/activity.routes.js";
 import subtaskRouter from "./modules/subtask/subtask.routes.js";
 import notificationRouter from "./modules/notification/notification.routes.js";
+import searchRouter from "./modules/search/search.routes.js";
+import attachmentRouter from "./modules/attachment/attachment.routes.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -24,6 +31,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
 
 app.get("/api/v1/health", (_req, res) => {
     res.json({
@@ -57,6 +65,8 @@ app.use("/api/v1", commentRouter);
 app.use("/api/v1", activityRouter);
 app.use("/api/v1", subtaskRouter);
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/search", searchRouter);
+app.use("/api/v1", attachmentRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

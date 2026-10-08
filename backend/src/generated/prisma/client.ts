@@ -82,6 +82,11 @@ export type Task = Prisma.TaskModel
  */
 export type Subtask = Prisma.SubtaskModel
 /**
+ * Model Attachment
+ * 
+ */
+export type Attachment = Prisma.AttachmentModel
+/**
  * Model Label
  * 
  */
