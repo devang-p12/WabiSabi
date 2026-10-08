@@ -27,6 +27,9 @@ model User {
   workspaceMemberships WorkspaceMember[]
   comments             Comment[]
   activityLogs         ActivityLog[]
+  assignedTasks        Task[]            @relation("TaskAssignee")
+  notifications        Notification[]    @relation("UserNotifications")
+  sentNotifications    Notification[]    @relation("NotificationActor")
 }
 
 model RefreshToken {
@@ -124,12 +127,15 @@ model Task {
   updatedAt DateTime @updatedAt
 
   list         BoardList     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  assigneeId   String?
+  assignee     User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   labels       TaskLabel[]
   comments     Comment[]
   activityLogs ActivityLog[]
   subtasks     Subtask[]
 
   @@index([listId])
+  @@index([assigneeId])
 }
 
 model Subtask {
@@ -219,3 +225,32 @@ model ActivityLog {
   @@index([taskId])
   @@index([userId])
 }
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMMENT
+  TASK_MENTION
+  TASK_DUE_SOON
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  actorId     String?
+  type        NotificationType
+  title       String
+  message     String
+  read        Boolean          @default(false)
+  taskId      String?
+  boardId     String?
+  workspaceId String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user  User  @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+

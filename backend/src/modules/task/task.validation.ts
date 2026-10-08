@@ -43,6 +43,12 @@ export const createTaskSchema = z.object({
 
     dueDate:
         taskDueDateSchema,
+
+    assigneeId: z
+        .string()
+        .uuid("Invalid assignee ID")
+        .nullable()
+        .optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -74,6 +80,12 @@ export const updateTaskSchema = z.object({
 
     dueDate:
         taskDueDateSchema,
+
+    assigneeId: z
+        .string()
+        .uuid("Invalid assignee ID")
+        .nullable()
+        .optional(),
 
     completed:
         z.boolean().optional(),

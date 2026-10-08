@@ -39,11 +39,14 @@ export const createSubtask = async (
 
 export const updateSubtask = async (
     subtaskId: string,
-    data: { title?: string; completed?: boolean }
+    data: { title?: string | undefined; completed?: boolean | undefined }
 ) => {
     const subtask = await prisma.subtask.update({
         where: { id: subtaskId },
-        data,
+        data: {
+            ...(data.title !== undefined && { title: data.title }),
+            ...(data.completed !== undefined && { completed: data.completed }),
+        },
     });
     await emitBoardUpdateFromTask(subtask.taskId);
     return subtask;

@@ -11,10 +11,12 @@ import Dashboard from "@/pages/Dashboard";
 import Workspace from "@/pages/Workspace";
 import AuthGuard from "./components/auth/AuthGaurd";
 import Board from "./pages/Board";
+import NotificationToastAlert from "./components/notifications/NotificationToastAlert";
 
 function App() {
     return (
         <BrowserRouter>
+            <NotificationToastAlert />
             <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />

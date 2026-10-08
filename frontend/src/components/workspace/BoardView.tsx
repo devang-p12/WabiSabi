@@ -38,6 +38,7 @@ import DeleteTaskDialog from "../board/DeleteTaskDialog";
 import TaskDetailsDialog from "../board/TaskDetailsDialog";
 import EditTaskDialog from "../board/EditTaskDialog";
 import RenameListDialog from "../board/RenameListDialog";
+import { getWorkspaceMembers, type WorkspaceMember } from "@/api/workspace.api";
 
 import BoardDndContext from "../dnd/BoardDndContext";
 import { useSocket } from "@/contexts/SocketContext";
@@ -129,6 +130,17 @@ export default function BoardView({
 
     const [dueDateFilter, setDueDateFilter] =
         useState<DueDateFilter>("ALL");
+
+    const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceMember[]>([]);
+    const [assigneeFilter, setAssigneeFilter] = useState<string>("ALL");
+
+    useEffect(() => {
+        if (board.workspaceId) {
+            getWorkspaceMembers(board.workspaceId)
+                .then(setWorkspaceMembers)
+                .catch((err) => console.error("Failed to load workspace members:", err));
+        }
+    }, [board.workspaceId]);
 
     /* List dialogs */
     const [createListOpen, setCreateListOpen] =
@@ -450,6 +462,13 @@ export default function BoardView({
             });
         }
 
+        // Assignee filter
+        if (assigneeFilter === "ME" && user?.id) {
+            visibleTasks = visibleTasks.filter((task) => task.assigneeId === user.id);
+        } else if (assigneeFilter !== "ALL") {
+            visibleTasks = visibleTasks.filter((task) => task.assigneeId === assigneeFilter);
+        }
+
         // Sorting
         return [...visibleTasks].sort((a, b) => {
 
@@ -563,6 +582,7 @@ export default function BoardView({
         description: string | null,
         priority: TaskPriority,
         dueDate: string | null,
+        assigneeId?: string | null,
     ) => {
         if (!editingTask) return;
 
@@ -576,6 +596,7 @@ export default function BoardView({
                     description,
                     priority,
                     dueDate,
+                    assigneeId,
                 },
             );
 
@@ -661,6 +682,39 @@ export default function BoardView({
         } catch (err) {
             console.error("Failed to update priority in table:", err);
         }
+    };
+
+    const handleTableAssignTask = async (
+        taskId: string,
+        userId: string | null
+    ) => {
+        try {
+            const updated = await updateTask(taskId, { assigneeId: userId });
+            setTasks((current) => {
+                const next = { ...current };
+                for (const listId of Object.keys(next)) {
+                    next[listId] = (next[listId] ?? []).map((t) =>
+                        t.id === taskId ? updated : t
+                    );
+                }
+                return next;
+            });
+        } catch (err) {
+            console.error("Failed to assign task in table:", err);
+        }
+    };
+
+    const handleTaskUpdatedFromDialog = (updatedTask: Task) => {
+        setTasks((current) => {
+            const next = { ...current };
+            for (const listId of Object.keys(next)) {
+                next[listId] = (next[listId] ?? []).map((t) =>
+                    t.id === updatedTask.id ? updatedTask : t
+                );
+            }
+            return next;
+        });
+        setSelectedTask(updatedTask);
     };
 
     /**
@@ -789,6 +843,10 @@ export default function BoardView({
                 onDueDateFilterChange={setDueDateFilter}
                 statusFilter={statusFilter}
                 onStatusFilterChange={setStatusFilter}
+                assigneeFilter={assigneeFilter}
+                onAssigneeFilterChange={setAssigneeFilter}
+                workspaceMembers={workspaceMembers}
+                currentUserId={user?.id}
             />
 
             {error && (
@@ -809,7 +867,9 @@ export default function BoardView({
                     onCompletedChange={handleCompletedChange}
                     onMoveTask={handleTableMoveTask}
                     onUpdatePriority={handleUpdatePriority}
+                    onAssignTask={handleTableAssignTask}
                     onAddTask={(list) => setCreateTaskList(list)}
+                    workspaceMembers={workspaceMembers}
                     onCreateStarterColumns={handleAddStarterColumns}
                     isCreatingStarters={isCreatingStarters}
                 />
@@ -1000,6 +1060,7 @@ export default function BoardView({
                     ""
                 }
                 boardId={board.id}
+                workspaceMembers={workspaceMembers}
                 initialDueDate={calendarNewTaskDate}
                 onCreated={async () => {
                     await loadTasks(
@@ -1014,6 +1075,7 @@ export default function BoardView({
             <EditTaskDialog
                 task={editingTask}
                 boardId={board.id}
+                workspaceMembers={workspaceMembers}
                 open={editingTask !== null}
                 onOpenChange={(open) => {
                     if (!open) {
@@ -1035,6 +1097,7 @@ export default function BoardView({
             <TaskDetailsDialog
                 task={selectedTask}
                 boardId={board.id}
+                workspaceMembers={workspaceMembers}
                 open={selectedTask !== null}
                 onOpenChange={(open) => {
                     if (!open) {
@@ -1061,6 +1124,7 @@ export default function BoardView({
                     setSelectedTask(null);
                     setDeletingTask(task);
                 }}
+                onTaskUpdate={handleTaskUpdatedFromDialog}
             />
 
             {!selectedTask && (

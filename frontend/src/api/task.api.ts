@@ -10,6 +10,13 @@ export interface Label {
     createdAt: string;
 }
 
+export interface TaskAssignee {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+}
+
 export interface Task {
     id: string;
     title: string;
@@ -19,6 +26,8 @@ export interface Task {
     priority: TaskPriority;
     dueDate: string | null;
     completed: boolean;
+    assigneeId?: string | null;
+    assignee?: TaskAssignee | null;
     createdAt: string;
     updatedAt: string;
     labels: Label[];
@@ -30,6 +39,7 @@ export interface CreateTaskInput {
     description?: string;
     priority?: TaskPriority;
     dueDate?: string | null;
+    assigneeId?: string | null;
 }
 
 export interface UpdateTaskInput {
@@ -38,6 +48,7 @@ export interface UpdateTaskInput {
     priority?: TaskPriority;
     dueDate?: string | null;
     completed?: boolean;
+    assigneeId?: string | null;
 }
 
 export const getListTasks = async (

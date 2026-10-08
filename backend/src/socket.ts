@@ -37,7 +37,7 @@ function getColorForUser(userId: string): string {
         hash |= 0;
     }
     const index = Math.abs(hash) % CURSOR_COLORS.length;
-    return CURSOR_COLORS[index];
+    return CURSOR_COLORS[index] ?? "#3B82F6";
 }
 
 // In-memory presence state per board: boardId -> (socketId -> BoardUserPresence)
@@ -87,6 +87,12 @@ export const initSocket = (server: HttpServer) => {
 
     io.on("connection", (socket: Socket) => {
         console.log(`[Socket.io] Client connected: ${socket.id}`);
+        // @ts-ignore
+        const authenticatedUserId = socket.userId;
+        if (authenticatedUserId) {
+            socket.join(`user_${authenticatedUserId}`);
+            console.log(`[Socket.io] Socket ${socket.id} joined personal room user_${authenticatedUserId}`);
+        }
 
         socket.on(
             "join_board",

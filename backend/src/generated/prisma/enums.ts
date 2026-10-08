@@ -45,3 +45,13 @@ export const EntityType = {
 } as const
 
 export type EntityType = (typeof EntityType)[keyof typeof EntityType]
+
+
+export const NotificationType = {
+  TASK_ASSIGNED: 'TASK_ASSIGNED',
+  TASK_COMMENT: 'TASK_COMMENT',
+  TASK_MENTION: 'TASK_MENTION',
+  TASK_DUE_SOON: 'TASK_DUE_SOON'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

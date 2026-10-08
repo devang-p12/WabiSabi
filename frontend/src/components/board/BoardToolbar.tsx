@@ -5,9 +5,11 @@ import {
     Search,
     SlidersHorizontal,
     Table2,
+    User,
     X,
 } from "lucide-react";
 import { cn } from "cn";
+import type { WorkspaceMember } from "@/api/workspace.api";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LabelManager from "./LabelManager";
@@ -58,6 +61,10 @@ interface BoardToolbarProps {
     onDueDateFilterChange: (value: DueDateFilter) => void;
     statusFilter: StatusFilter;
     onStatusFilterChange: (value: StatusFilter) => void;
+    assigneeFilter?: string;
+    onAssigneeFilterChange?: (value: string) => void;
+    workspaceMembers?: WorkspaceMember[];
+    currentUserId?: string | null;
 }
 
 
@@ -76,18 +83,24 @@ export default function BoardToolbar({
     onDueDateFilterChange,
     statusFilter,
     onStatusFilterChange,
+    assigneeFilter = "ALL",
+    onAssigneeFilterChange,
+    workspaceMembers = [],
+    currentUserId,
 }: BoardToolbarProps) {
     const hasActiveFilters =
         searchQuery.trim().length > 0 ||
         priorityFilter !== "ALL" ||
         dueDateFilter !== "ALL" ||
-        statusFilter !== "ALL";
+        statusFilter !== "ALL" ||
+        (assigneeFilter !== "ALL" && Boolean(assigneeFilter));
 
     const handleClearFilters = () => {
         onSearchChange("");
         onPriorityFilterChange("ALL");
         onDueDateFilterChange("ALL");
         onStatusFilterChange("ALL");
+        onAssigneeFilterChange?.("ALL");
     };
 
     return (
@@ -179,6 +192,50 @@ export default function BoardToolbar({
             )}
 
             <div className="ml-auto flex items-center gap-1">
+                {/* Assignee Filter */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                                "h-8 text-xs",
+                                assigneeFilter && assigneeFilter !== "ALL" && "text-primary font-medium bg-primary/10"
+                            )}
+                        >
+                            <User className="mr-1.5 h-3.5 w-3.5" />
+                            {assigneeFilter === "ALL" || !assigneeFilter
+                                ? "Assignee"
+                                : assigneeFilter === "ME"
+                                ? "Assigned to me"
+                                : workspaceMembers?.find((m) => m.userId === assigneeFilter || m.user.id === assigneeFilter)?.user.name || "Assignee"}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onAssigneeFilterChange?.("ALL")}>
+                            All members
+                        </DropdownMenuItem>
+                        {currentUserId && (
+                            <DropdownMenuItem onClick={() => onAssigneeFilterChange?.("ME")}>
+                                Assigned to me
+                            </DropdownMenuItem>
+                        )}
+                        {workspaceMembers && workspaceMembers.length > 0 && (
+                            <>
+                                <DropdownMenuSeparator />
+                                {workspaceMembers.map((m) => (
+                                    <DropdownMenuItem
+                                        key={m.userId}
+                                        onClick={() => onAssigneeFilterChange?.(m.userId)}
+                                    >
+                                        {m.user.name}
+                                    </DropdownMenuItem>
+                                ))}
+                            </>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
                 {/* Filter */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

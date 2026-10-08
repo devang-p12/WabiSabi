@@ -17,6 +17,8 @@ import { cn } from "cn";
 
 import type { BoardList } from "@/api/list.api";
 import type { Task, TaskPriority } from "@/api/task.api";
+import type { WorkspaceMember } from "@/api/workspace.api";
+import TaskAssigneeSelector from "./TaskAssigneeSelector";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,7 +40,9 @@ interface BoardTableViewProps {
     onCompletedChange: (task: Task) => void;
     onMoveTask: (taskId: string, targetListId: string, position: number) => Promise<any>;
     onUpdatePriority: (taskId: string, priority: TaskPriority) => Promise<any>;
+    onAssignTask?: (taskId: string, userId: string | null) => Promise<any>;
     onAddTask: (list: BoardList) => void;
+    workspaceMembers?: WorkspaceMember[];
     onCreateStarterColumns?: () => void;
     isCreatingStarters?: boolean;
 }
@@ -79,7 +83,9 @@ export default function BoardTableView({
     onCompletedChange,
     onMoveTask,
     onUpdatePriority,
+    onAssignTask,
     onAddTask,
+    workspaceMembers = [],
     onCreateStarterColumns,
     isCreatingStarters,
 }: BoardTableViewProps) {
@@ -136,7 +142,7 @@ export default function BoardTableView({
             {/* Table Header Bar */}
             <div className="border-b bg-muted/20 px-4 py-2.5">
                 <div className="grid grid-cols-12 items-center gap-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    <div className="col-span-5 sm:col-span-4 flex items-center gap-2">
+                    <div className="col-span-4 sm:col-span-3 flex items-center gap-2">
                         <span>Task</span>
                     </div>
                     <div className="col-span-2 hidden md:block">
@@ -145,10 +151,13 @@ export default function BoardTableView({
                     <div className="col-span-2 sm:col-span-2">
                         <span>Priority</span>
                     </div>
-                    <div className="col-span-3 sm:col-span-2">
+                    <div className="col-span-2 hidden sm:block">
+                        <span>Assignee</span>
+                    </div>
+                    <div className="col-span-2 sm:col-span-2">
                         <span>Due Date</span>
                     </div>
-                    <div className="col-span-2 hidden lg:block">
+                    <div className="col-span-2 hidden xl:block">
                         <span>Labels & Subtasks</span>
                     </div>
                     <div className="col-span-2 sm:col-span-2 md:col-span-2 lg:col-span-1 text-right">
@@ -329,6 +338,17 @@ export default function BoardTableView({
                                                                 ))}
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
+                                                    </div>
+
+                                                    {/* Assignee */}
+                                                    <div className="col-span-2 hidden sm:flex items-center">
+                                                        <TaskAssigneeSelector
+                                                            compact
+                                                            members={workspaceMembers}
+                                                            assigneeId={task.assigneeId}
+                                                            assignee={task.assignee}
+                                                            onAssign={(userId) => onAssignTask?.(task.id, userId)}
+                                                        />
                                                     </div>
 
                                                     {/* Due Date */}

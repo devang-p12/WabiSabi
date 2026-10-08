@@ -12,6 +12,7 @@ import labelRouter from "./modules/labels/label.routes.js";
 import commentRouter from "./modules/comment/comment.routes.js";
 import activityRouter from "./modules/activity/activity.routes.js";
 import subtaskRouter from "./modules/subtask/subtask.routes.js";
+import notificationRouter from "./modules/notification/notification.routes.js";
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use("/api/v1", labelRouter);
 app.use("/api/v1", commentRouter);
 app.use("/api/v1", activityRouter);
 app.use("/api/v1", subtaskRouter);
+app.use("/api/v1/notifications", notificationRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

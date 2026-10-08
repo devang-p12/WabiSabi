@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import OnlineMembers, { type BoardUserPresence } from "./OnlineMembers";
+import NotificationBell from "../notifications/NotificationBell";
 
 interface BoardHeaderProps {
     board: Board;
@@ -83,6 +84,8 @@ export default function BoardHeader({
                     members={onlineMembers || []}
                     currentUserId={currentUserId}
                 />
+
+                <NotificationBell />
 
                 <Button
                     variant="outline"

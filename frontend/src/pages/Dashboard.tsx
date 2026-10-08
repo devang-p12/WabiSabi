@@ -22,6 +22,7 @@ import {
 } from "@/api/workspace.api";
 
 import { CreateWorkspaceDialog } from "@/components/workspace/CreateWorkspaceDialog";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -183,9 +184,12 @@ export default function Dashboard() {
                         </p>
                     </div>
 
-                    <CreateWorkspaceDialog
-                        onCreated={loadWorkspaces}
-                    />
+                    <div className="flex items-center gap-3">
+                        <NotificationBell />
+                        <CreateWorkspaceDialog
+                            onCreated={loadWorkspaces}
+                        />
+                    </div>
                 </header>
 
                 {/* Content */}

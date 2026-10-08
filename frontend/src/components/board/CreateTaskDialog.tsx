@@ -22,6 +22,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import RichTextEditor from "@/components/ui/rich-text-editor";
+import type { WorkspaceMember } from "@/api/workspace.api";
+import TaskAssigneeSelector from "./TaskAssigneeSelector";
 
 interface CreateTaskDialogProps {
     open: boolean;
@@ -30,6 +32,7 @@ interface CreateTaskDialogProps {
     listName: string;
     boardId: string;
     initialDueDate?: string;
+    workspaceMembers?: WorkspaceMember[];
     onCreated: () => void | Promise<void>;
 }
 
@@ -40,6 +43,7 @@ export default function CreateTaskDialog({
     listName,
     boardId,
     initialDueDate,
+    workspaceMembers = [],
     onCreated,
 }: CreateTaskDialogProps) {
     const [title, setTitle] = useState("");
@@ -47,6 +51,7 @@ export default function CreateTaskDialog({
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
     const [dueDate, setDueDate] = useState(initialDueDate || "");
+    const [assigneeId, setAssigneeId] = useState<string | null>(null);
     const [boardLabels, setBoardLabels] = useState<Label[]>([]);
     const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
 
@@ -73,6 +78,7 @@ export default function CreateTaskDialog({
                 dueDate: dueDate
                     ? new Date(`${dueDate}T23:59:59`).toISOString()
                     : null,
+                assigneeId: assigneeId || undefined,
             });
 
             console.log("Created task:", createdTask);
@@ -95,6 +101,7 @@ export default function CreateTaskDialog({
             setDescription("");
             setPriority("MEDIUM");
             setDueDate("");
+            setAssigneeId(null);
             setSelectedLabels([]);
             onOpenChange(false);
 
@@ -115,6 +122,7 @@ export default function CreateTaskDialog({
             setDescription("");
             setPriority("MEDIUM");
             setDueDate("");
+            setAssigneeId(null);
             setSelectedLabels([]);
             setError("");
         }
@@ -242,6 +250,23 @@ export default function CreateTaskDialog({
                             </option>
                         </select>
                         <p className="text-[11px] text-muted-foreground">Helps team know what to tackle first</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                            Assignee
+                            <span className="ml-1 font-normal text-muted-foreground">
+                                (optional)
+                            </span>
+                        </label>
+                        <div>
+                            <TaskAssigneeSelector
+                                members={workspaceMembers}
+                                assigneeId={assigneeId}
+                                onAssign={(newId) => setAssigneeId(newId)}
+                                disabled={loading}
+                            />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label

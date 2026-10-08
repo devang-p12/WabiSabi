@@ -4,7 +4,9 @@ import type {
     Task,
     TaskPriority,
 } from "@/api/task.api";
+import type { WorkspaceMember } from "@/api/workspace.api";
 import TaskLabelSelector from "./TaskLabelSelector";
+import TaskAssigneeSelector from "./TaskAssigneeSelector";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -20,6 +22,7 @@ import RichTextEditor from "@/components/ui/rich-text-editor";
 interface EditTaskDialogProps {
     task: Task | null;
     boardId: string;
+    workspaceMembers?: WorkspaceMember[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSave: (
@@ -27,6 +30,7 @@ interface EditTaskDialogProps {
         description: string | null,
         priority: TaskPriority,
         dueDate: string | null,
+        assigneeId?: string | null,
     ) => Promise<void>;
     onLabelsChange?: (labels: Task["labels"]) => void;
 }
@@ -34,6 +38,7 @@ interface EditTaskDialogProps {
 export default function EditTaskDialog({
     task,
     boardId,
+    workspaceMembers = [],
     open,
     onOpenChange,
     onSave,
@@ -44,6 +49,7 @@ export default function EditTaskDialog({
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
     const [dueDate, setDueDate] = useState("");
+    const [assigneeId, setAssigneeId] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -52,6 +58,7 @@ export default function EditTaskDialog({
         setTitle(task.title);
         setDescription(task.description ?? "");
         setPriority(task.priority ?? "MEDIUM");
+        setAssigneeId(task.assigneeId ?? null);
         setDueDate(
             task.dueDate
                 ? task.dueDate.slice(0, 10)
@@ -88,6 +95,7 @@ export default function EditTaskDialog({
                         `${dueDate}T23:59:59`,
                     ).toISOString()
                     : null,
+                assigneeId,
             );
 
             onOpenChange(false);
@@ -190,6 +198,23 @@ export default function EditTaskDialog({
                                 </option>
                             </select>
                             <p className="text-[11px] text-muted-foreground">Helps team know what to tackle first</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                                Assignee
+                                <span className="ml-1 font-normal text-muted-foreground">
+                                    (optional)
+                                </span>
+                            </label>
+                            <div>
+                                <TaskAssigneeSelector
+                                    members={workspaceMembers}
+                                    assigneeId={assigneeId}
+                                    onAssign={(newId) => setAssigneeId(newId)}
+                                    disabled={saving}
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">

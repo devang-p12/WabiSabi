@@ -52,7 +52,7 @@ export default function TaskComments({ taskId }: { taskId: string }) {
             <h4 className="text-sm font-medium">Comments</h4>
             <div className="flex flex-col gap-2">
                 <Textarea
-                    placeholder="Write a comment..."
+                    placeholder="Write a comment... (use @name to mention a teammate)"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     className="min-h-[80px]"
@@ -87,7 +87,20 @@ export default function TaskComments({ taskId }: { taskId: string }) {
                                         {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString()}
                                     </span>
                                 </div>
-                                <p className="whitespace-pre-wrap text-muted-foreground">{comment.text}</p>
+                                <p className="whitespace-pre-wrap text-foreground/90">
+                                    {comment.text.split(/(@[a-zA-Z0-9_\-\.]+)/g).map((part, i) =>
+                                        part.startsWith("@") ? (
+                                            <span
+                                                key={i}
+                                                className="font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1 py-0.5 rounded-sm"
+                                            >
+                                                {part}
+                                            </span>
+                                        ) : (
+                                            part
+                                        )
+                                    )}
+                                </p>
                             </div>
                             {user?.id === comment.userId && (
                                 <Button

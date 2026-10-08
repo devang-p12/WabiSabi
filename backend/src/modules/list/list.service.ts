@@ -113,7 +113,7 @@ export const updateList = async (
     listId: string,
     userId: string,
     data: {
-        name?: string;
+        name?: string | undefined;
     }
 ) => {
     const list = await prisma.boardList.findUnique({

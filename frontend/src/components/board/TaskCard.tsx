@@ -294,11 +294,30 @@ export default function TaskCard({
                     )}
                 </div>
 
-                <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${priority.className}`}
-                >
-                    {priority.label}
-                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                    {task.assignee && (
+                        <div
+                            className="relative flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[9px] font-semibold text-primary border border-primary/20 overflow-hidden shadow-2xs"
+                            title={`Assigned to ${task.assignee.name}`}
+                        >
+                            {task.assignee.avatarUrl ? (
+                                <img
+                                    src={task.assignee.avatarUrl}
+                                    alt={task.assignee.name}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <span>{task.assignee.name.slice(0, 2).toUpperCase()}</span>
+                            )}
+                        </div>
+                    )}
+
+                    <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${priority.className}`}
+                    >
+                        {priority.label}
+                    </span>
+                </div>
             </div>
         </div>
     );

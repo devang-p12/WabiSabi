@@ -62,6 +62,7 @@ import {
 } from "@/api/board.api";
 import CreateBoardDialog from "@/components/workspace/CreateBoardDialog";
 import BoardView from "@/components/workspace/BoardView";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -254,6 +255,7 @@ export default function Workspace() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        <NotificationBell />
                         {selectedBoard ? (
                             <Button
                                 variant="outline"

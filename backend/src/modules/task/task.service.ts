@@ -5,15 +5,17 @@ import {
     requireWorkspaceAdmin,
 } from "../workspace/workspace.authorization.js";
 import { getIO } from "../../socket.js";
+import { createNotification } from "../notification/notification.service.js";
 
 export const createTask = async (
     listId: string,
     userId: string,
     data: {
         title: string;
-        description?: string;
-        priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-        dueDate?: string | null;
+        description?: string | undefined;
+        priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | undefined;
+        dueDate?: string | null | undefined;
+        assigneeId?: string | null | undefined;
     }
 ) => {
     const list = await prisma.boardList.findUnique({
@@ -66,6 +68,23 @@ export const createTask = async (
             dueDate: data.dueDate
                 ? new Date(data.dueDate)
                 : null,
+            assigneeId: data.assigneeId ?? null,
+        },
+        include: {
+            assignee: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
+                },
+            },
+            labels: {
+                include: {
+                    label: true,
+                },
+            },
+            subtasks: true,
         },
     });
 
@@ -85,6 +104,27 @@ export const createTask = async (
         getIO().to(`board_${list.board.id}`).emit("board_updated");
     } catch (e) {
         console.error("Socket error on createTask:", e);
+    }
+
+    if (task.assigneeId && task.assigneeId !== userId) {
+        try {
+            const actor = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { name: true },
+            });
+            await createNotification({
+                userId: task.assigneeId,
+                actorId: userId,
+                type: "TASK_ASSIGNED",
+                title: "Assigned to a task",
+                message: `${actor?.name ?? "Someone"} assigned you to "${task.title}"`,
+                taskId: task.id,
+                boardId: list.board.id,
+                workspaceId: list.board.workspaceId,
+            });
+        } catch (e) {
+            console.error("Error creating assignment notification on createTask:", e);
+        }
     }
 
     return {
@@ -130,6 +170,14 @@ export const getListTasks = async (
             position: "asc",
         },
         include: {
+            assignee: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
+                },
+            },
             labels: {
                 include: {
                     label: true,
@@ -158,6 +206,14 @@ export const getTask = async (
             list: {
                 include: {
                     board: true,
+                },
+            },
+            assignee: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
                 },
             },
             labels: {
@@ -197,11 +253,12 @@ export const updateTask = async (
     taskId: string,
     userId: string,
     data: {
-        title?: string;
-        description?: string | null;
-        priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-        dueDate?: string | null;
-        completed?: boolean;
+        title?: string | undefined;
+        description?: string | null | undefined;
+        priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | undefined;
+        dueDate?: string | null | undefined;
+        completed?: boolean | undefined;
+        assigneeId?: string | null | undefined;
     }
 ) => {
     const task = await prisma.task.findUnique({
@@ -223,7 +280,7 @@ export const updateTask = async (
         } as const;
     }
 
-    const membership = await requireWorkspaceAdmin(
+    const membership = await getWorkspaceMembership(
         task.list.board.workspaceId,
         userId
     );
@@ -260,9 +317,21 @@ export const updateTask = async (
             ...(data.completed !== undefined && {
                 completed: data.completed,
             }),
+
+            ...(data.assigneeId !== undefined && {
+                assigneeId: data.assigneeId,
+            }),
         },
 
         include: {
+            assignee: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
+                },
+            },
             labels: {
                 include: {
                     label: true,
@@ -288,6 +357,31 @@ export const updateTask = async (
         getIO().to(`board_${task.list.board.id}`).emit("board_updated");
     } catch (e) {
         console.error("Socket error on updateTask:", e);
+    }
+
+    if (
+        data.assigneeId &&
+        data.assigneeId !== task.assigneeId &&
+        data.assigneeId !== userId
+    ) {
+        try {
+            const actor = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { name: true },
+            });
+            await createNotification({
+                userId: data.assigneeId,
+                actorId: userId,
+                type: "TASK_ASSIGNED",
+                title: "Assigned to a task",
+                message: `${actor?.name ?? "Someone"} assigned you to "${updatedTask.title}"`,
+                taskId: updatedTask.id,
+                boardId: task.list.board.id,
+                workspaceId: task.list.board.workspaceId,
+            });
+        } catch (e) {
+            console.error("Error creating assignment notification on updateTask:", e);
+        }
     }
 
     return {

@@ -8,14 +8,17 @@ import {
     Clock,
     MessageSquare,
     Activity,
+    User,
 } from "lucide-react";
 
 import TaskLabelSelector from "./TaskLabelSelector";
+import TaskAssigneeSelector from "./TaskAssigneeSelector";
 import TaskComments from "./TaskComments";
 import TaskActivity from "./TaskActivity";
 import TaskSubtasks from "./TaskSubtasks";
 
-import type { Task } from "@/api/task.api";
+import { type Task, updateTask } from "@/api/task.api";
+import type { WorkspaceMember } from "@/api/workspace.api";
 
 import { Button } from "@/components/ui/button";
 
@@ -29,11 +32,13 @@ import {
 interface TaskDetailsDialogProps {
     task: Task | null;
     boardId: string;
+    workspaceMembers?: WorkspaceMember[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onEdit: () => void;
     onDelete: () => void;
     onLabelsChange: (labels: Task["labels"]) => void;
+    onTaskUpdate?: (task: Task) => void;
 }
 
 const priorityConfig = {
@@ -62,15 +67,26 @@ const priorityConfig = {
 export default function TaskDetailsDialog({
     task,
     boardId,
+    workspaceMembers = [],
     open,
     onOpenChange,
     onEdit,
     onDelete,
     onLabelsChange,
+    onTaskUpdate,
 }: TaskDetailsDialogProps) {
     const [activeTab, setActiveTab] = useState<"comments" | "activity">("comments");
 
     if (!task) return null;
+
+    const handleAssigneeChange = async (userId: string | null) => {
+        try {
+            const updated = await updateTask(task.id, { assigneeId: userId });
+            onTaskUpdate?.(updated);
+        } catch (err) {
+            console.error("Failed to update task assignee:", err);
+        }
+    };
 
     const priority = priorityConfig[task.priority];
 
@@ -236,8 +252,21 @@ export default function TaskDetailsDialog({
                         </div>
                     </div>
 
-                    {/* Right sidebar: Labels */}
-                    <div className="sm:w-52 shrink-0 border-t sm:border-t-0 sm:border-l overflow-y-auto px-4 py-4 space-y-4 bg-muted/20">
+                    {/* Right sidebar: Assignee & Labels */}
+                    <div className="sm:w-56 shrink-0 border-t sm:border-t-0 sm:border-l overflow-y-auto px-4 py-4 space-y-5 bg-muted/20">
+                        <div>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                                <User className="h-3 w-3" />
+                                Assignee
+                            </h4>
+                            <TaskAssigneeSelector
+                                members={workspaceMembers}
+                                assigneeId={task.assigneeId}
+                                assignee={task.assignee}
+                                onAssign={handleAssigneeChange}
+                            />
+                        </div>
+
                         <div>
                             <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                                 <Tag className="h-3 w-3" />
