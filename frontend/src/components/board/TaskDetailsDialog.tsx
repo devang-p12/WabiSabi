@@ -18,7 +18,6 @@ import TaskSubtasks from "./TaskSubtasks";
 import type { Task } from "@/api/task.api";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 import {
     Dialog,

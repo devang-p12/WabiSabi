@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import type { Board } from "@/api/board.api";
 
@@ -38,6 +38,9 @@ import RenameListDialog from "../board/RenameListDialog";
 
 import BoardDndContext from "../dnd/BoardDndContext";
 import { useSocket } from "@/contexts/SocketContext";
+import { useAuth } from "@/context/AuthContext";
+import LiveCursors, { type RemoteCursor } from "../board/LiveCursors";
+import { type BoardUserPresence } from "../board/OnlineMembers";
 
 interface BoardViewProps {
     board: Board;
@@ -48,8 +51,8 @@ export default function BoardView({
     board,
     onBack,
 }: BoardViewProps) {
+    const { user } = useAuth();
     const [lists, setLists] = useState<BoardList[]>([]);
-
 
     const [tasks, setTasks] = useState<
         Record<string, Task[]>
@@ -61,6 +64,13 @@ export default function BoardView({
         null,
     );
     const [isCreatingStarters, setIsCreatingStarters] = useState(false);
+
+    // Live Collaboration Presence & Cursors
+    const [onlineMembers, setOnlineMembers] = useState<BoardUserPresence[]>([]);
+    const [remoteCursors, setRemoteCursors] = useState<Record<string, RemoteCursor>>({});
+    const [remoteDraggingMap, setRemoteDraggingMap] = useState<Record<string, { userName: string; color: string }>>({});
+    const boardCanvasRef = useRef<HTMLDivElement>(null);
+    const lastCursorEmit = useRef<number>(0);
 
     const handleAddStarterColumns = async () => {
         try {
@@ -201,7 +211,17 @@ export default function BoardView({
 
         const joinRoom = () => {
             console.log(`[BoardView] Joining room board_${board.id} (socket id: ${socket.id})`);
-            socket.emit("join_board", board.id);
+            socket.emit("join_board", {
+                boardId: board.id,
+                user: user
+                    ? {
+                          id: user.id,
+                          name: user.name,
+                          email: user.email,
+                          avatarUrl: user.avatarUrl,
+                      }
+                    : undefined,
+            });
         };
 
         if (socket.connected) {
@@ -215,14 +235,98 @@ export default function BoardView({
             loadLists(true); // Silent reload so board state refreshes seamlessly
         };
 
+        const handlePresenceState = (members: BoardUserPresence[]) => {
+            setOnlineMembers(members);
+            const memberSockets = new Set(members.map((m) => m.socketId));
+            setRemoteCursors((prev) => {
+                const next: Record<string, RemoteCursor> = {};
+                for (const [id, c] of Object.entries(prev)) {
+                    if (memberSockets.has(id)) next[id] = c;
+                }
+                return next;
+            });
+        };
+
+        const handleUserCursor = (data: {
+            socketId: string;
+            userId: string;
+            name: string;
+            color: string;
+            x: number;
+            y: number;
+            draggingTaskId?: string | null;
+            draggingTaskTitle?: string | null;
+        }) => {
+            if (data.userId === user?.id || data.socketId === socket.id) return;
+            setRemoteCursors((prev) => ({
+                ...prev,
+                [data.socketId]: {
+                    socketId: data.socketId,
+                    userId: data.userId,
+                    name: data.name,
+                    color: data.color,
+                    x: data.x,
+                    y: data.y,
+                    draggingTaskId: data.draggingTaskId,
+                    draggingTaskTitle: data.draggingTaskTitle,
+                },
+            }));
+        };
+
+        const handleUserCursorLeave = (data: { socketId: string; userId?: string }) => {
+            setRemoteCursors((prev) => {
+                const next = { ...prev };
+                delete next[data.socketId];
+                return next;
+            });
+        };
+
+        const handleCardDragStart = (data: {
+            socketId: string;
+            userId: string;
+            userName: string;
+            color: string;
+            taskId: string;
+            taskTitle?: string | null;
+        }) => {
+            if (data.userId === user?.id || data.socketId === socket.id) return;
+            setRemoteDraggingMap((prev) => ({
+                ...prev,
+                [data.taskId]: {
+                    userName: data.userName,
+                    color: data.color,
+                },
+            }));
+        };
+
+        const handleCardDragEnd = (data: { socketId: string; userId: string; taskId?: string }) => {
+            if (data.taskId) {
+                setRemoteDraggingMap((prev) => {
+                    const next = { ...prev };
+                    delete next[data.taskId!];
+                    return next;
+                });
+            }
+        };
+
         socket.on("board_updated", handleBoardUpdated);
+        socket.on("presence_state", handlePresenceState);
+        socket.on("user_cursor", handleUserCursor);
+        socket.on("user_cursor_leave", handleUserCursorLeave);
+        socket.on("card_drag_start", handleCardDragStart);
+        socket.on("card_drag_end", handleCardDragEnd);
 
         return () => {
             socket.off("connect", joinRoom);
             socket.off("board_updated", handleBoardUpdated);
+            socket.off("presence_state", handlePresenceState);
+            socket.off("user_cursor", handleUserCursor);
+            socket.off("user_cursor_leave", handleUserCursorLeave);
+            socket.off("card_drag_start", handleCardDragStart);
+            socket.off("card_drag_end", handleCardDragEnd);
             socket.emit("leave_board", board.id);
         };
-    }, [socket, board.id]);
+    }, [socket, board.id, user]);
 
     /**
      * Get tasks after search + sort.
@@ -560,6 +664,26 @@ export default function BoardView({
         setCreateTaskList(firstList);
     };
 
+    const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!socket || !board.id) return;
+        const container = boardCanvasRef.current;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left + container.scrollLeft;
+        const y = e.clientY - rect.top + container.scrollTop;
+
+        const now = Date.now();
+        if (now - lastCursorEmit.current > 35) {
+            lastCursorEmit.current = now;
+            socket.emit("cursor_move", { boardId: board.id, x, y });
+        }
+    };
+
+    const handleCanvasMouseLeave = () => {
+        if (!socket || !board.id) return;
+        socket.emit("cursor_leave", { boardId: board.id });
+    };
+
     return (
         <div className="flex h-[calc(100vh-4rem)] min-h-0 flex-col overflow-hidden">
 
@@ -576,6 +700,8 @@ export default function BoardView({
                 canAddTask={
                     lists.length > 0
                 }
+                onlineMembers={onlineMembers}
+                currentUserId={user?.id}
             />
 
             <BoardToolbar
@@ -599,8 +725,16 @@ export default function BoardView({
                 </div>
             )}
 
-            {/* Board */}
-            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden py-4">
+            {/* Board Canvas with Real-Time Multiplayer Cursors */}
+            <div
+                ref={boardCanvasRef}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseLeave={handleCanvasMouseLeave}
+                className="relative min-h-0 flex-1 overflow-x-auto overflow-y-hidden py-4"
+            >
+                {/* Live Cursors Layer */}
+                <LiveCursors cursors={Object.values(remoteCursors)} />
+
                 <div className="flex h-full min-w-0 gap-4 px-2">
 
                     {loading ? (
@@ -635,6 +769,7 @@ export default function BoardView({
                                 sortOption !==
                                 "position"
                             }
+                            boardId={board.id}
                         >
                             {lists.map(
                                 (list) => {
@@ -667,6 +802,7 @@ export default function BoardView({
                                                 setDeletingTask(task);
                                             }}
                                             onCompletedChange={handleCompletedChange}
+                                            remoteDraggingMap={remoteDraggingMap}
                                         />
                                     );
                                 },
@@ -798,7 +934,7 @@ export default function BoardView({
             <TaskDetailsDialog
                 task={selectedTask}
                 boardId={board.id}
-                open={true}
+                open={selectedTask !== null}
                 onOpenChange={(open) => {
                     if (!open) {
                         setSelectedTask(null);

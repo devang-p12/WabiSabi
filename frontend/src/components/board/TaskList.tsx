@@ -13,6 +13,7 @@ interface TaskListProps {
     onEdit: (task: Task) => void;
     onDelete: (task: Task) => void;
     onCompletedChange: (task: Task) => void;
+    remoteDraggingMap?: Record<string, { userName: string; color: string }>;
 }
 
 
@@ -22,6 +23,7 @@ export default function TaskList({
     onEdit,
     onDelete,
     onCompletedChange,
+    remoteDraggingMap,
 }: TaskListProps) {
     if (tasks.length === 0) {
         return null;
@@ -41,6 +43,7 @@ export default function TaskList({
                         onEdit={() => onEdit(task)}
                         onDelete={() => onDelete(task)}
                         onCompletedChange={onCompletedChange}
+                        remoteDraggingInfo={remoteDraggingMap?.[task.id]}
                     />
                 ))}
             </div>

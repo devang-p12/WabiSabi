@@ -22,6 +22,7 @@ import {
     type SetStateAction,
 } from "react";
 import type { Task } from "@/api/task.api";
+import { useSocket } from "@/contexts/SocketContext";
 
 interface BoardDndContextProps {
     tasks: Record<string, Task[]>;
@@ -29,6 +30,7 @@ interface BoardDndContextProps {
     onMoveTask: (taskId: string, listId: string, position: number) => Promise<Task>;
     children: ReactNode;
     disabled?: boolean;
+    boardId?: string;
 }
 
 export default function BoardDndContext({
@@ -37,7 +39,9 @@ export default function BoardDndContext({
     onMoveTask,
     children,
     disabled = false,
+    boardId,
 }: BoardDndContextProps) {
+    const { socket } = useSocket();
     const [activeTask, setActiveTask] = useState<Task | null>(null);
     const originalTasks = useRef<Record<string, Task[]> | null>(null);
 
@@ -78,11 +82,25 @@ export default function BoardDndContext({
         if (location?.task) {
             setActiveTask(location.task);
             originalTasks.current = tasks;
+            if (socket && boardId) {
+                socket.emit("card_drag_start", {
+                    boardId,
+                    taskId,
+                    taskTitle: location.task.title,
+                });
+            }
         }
     };
 
     const handleDragCancel = () => {
+        const draggingId = activeTask?.id;
         setActiveTask(null);
+        if (socket && boardId && draggingId) {
+            socket.emit("card_drag_end", {
+                boardId,
+                taskId: draggingId,
+            });
+        }
         if (originalTasks.current) {
             onTasksChange(originalTasks.current);
             originalTasks.current = null;
@@ -139,7 +157,14 @@ export default function BoardDndContext({
     };
 
     const handleDragEnd = async (event: DragEndEvent) => {
+        const draggingId = activeTask?.id;
         setActiveTask(null);
+        if (socket && boardId && draggingId) {
+            socket.emit("card_drag_end", {
+                boardId,
+                taskId: draggingId,
+            });
+        }
         if (disabled) return;
 
         const { active, over } = event;

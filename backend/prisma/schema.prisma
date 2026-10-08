@@ -81,8 +81,8 @@ model Board {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  lists  BoardList[]
-  labels Label[]
+  lists        BoardList[]
+  labels       Label[]
   activityLogs ActivityLog[]
 
   @@index([workspaceId])
@@ -123,8 +123,8 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  list   BoardList   @relation(fields: [listId], references: [id], onDelete: Cascade)
-  labels TaskLabel[]
+  list         BoardList     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  labels       TaskLabel[]
   comments     Comment[]
   activityLogs ActivityLog[]
   subtasks     Subtask[]
@@ -206,10 +206,10 @@ model ActivityLog {
   entityTitle String
   userId      String
   createdAt   DateTime   @default(now())
-  
+
   // To track where it happened
-  boardId     String?
-  taskId      String?
+  boardId String?
+  taskId  String?
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   task  Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)

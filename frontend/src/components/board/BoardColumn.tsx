@@ -34,6 +34,7 @@ interface BoardColumnProps {
     onEditTask: (task: Task) => void;
     onDeleteTask: (task: Task) => void;
     onCompletedChange: (task: Task) => void;
+    remoteDraggingMap?: Record<string, { userName: string; color: string }>;
 }
 
 export default function BoardColumn({
@@ -47,6 +48,7 @@ export default function BoardColumn({
     onEditTask,
     onDeleteTask,
     onCompletedChange,
+    remoteDraggingMap,
 }: BoardColumnProps) {
     const { setNodeRef, isOver } = useDroppable({
         id: list.id,
@@ -168,6 +170,7 @@ export default function BoardColumn({
                         onEdit={onEditTask}
                         onDelete={onDeleteTask}
                         onCompletedChange={onCompletedChange}
+                        remoteDraggingMap={remoteDraggingMap}
                     />
                 )}
             </div>

@@ -11,6 +11,7 @@ import type { Board } from "@/api/board.api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import OnlineMembers, { type BoardUserPresence } from "./OnlineMembers";
 
 interface BoardHeaderProps {
     board: Board;
@@ -19,6 +20,8 @@ interface BoardHeaderProps {
     onAddList: () => void;
     onRefresh: () => void;
     canAddTask: boolean;
+    onlineMembers?: BoardUserPresence[];
+    currentUserId?: string | null;
 }
 
 export default function BoardHeader({
@@ -28,6 +31,8 @@ export default function BoardHeader({
     onAddList,
     onRefresh,
     canAddTask,
+    onlineMembers,
+    currentUserId,
 }: BoardHeaderProps) {
     return (
         <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b px-2">
@@ -73,16 +78,11 @@ export default function BoardHeader({
             </div>
 
             {/* Right */}
-            <div className="flex shrink-0 items-center gap-1">
-                <div className="ml-1 hidden items-center sm:flex">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-primary text-[10px] font-medium text-primary-foreground">
-                        Y
-                    </div>
-
-                    <div className="-ml-2 flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium">
-                        A
-                    </div>
-                </div>
+            <div className="flex shrink-0 items-center gap-2">
+                <OnlineMembers
+                    members={onlineMembers || []}
+                    currentUserId={currentUserId}
+                />
 
                 <Button
                     variant="outline"
