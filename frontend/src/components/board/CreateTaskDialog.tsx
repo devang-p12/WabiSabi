@@ -29,6 +29,7 @@ interface CreateTaskDialogProps {
     listId: string;
     listName: string;
     boardId: string;
+    initialDueDate?: string;
     onCreated: () => void | Promise<void>;
 }
 
@@ -38,13 +39,14 @@ export default function CreateTaskDialog({
     listId,
     listName,
     boardId,
+    initialDueDate,
     onCreated,
 }: CreateTaskDialogProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
-    const [dueDate, setDueDate] = useState("");
+    const [dueDate, setDueDate] = useState(initialDueDate || "");
     const [boardLabels, setBoardLabels] = useState<Label[]>([]);
     const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
 
@@ -138,8 +140,11 @@ export default function CreateTaskDialog({
 
         if (open) {
             fetchLabels();
+            if (initialDueDate) {
+                setDueDate(initialDueDate);
+            }
         }
-    }, [open, boardId]);
+    }, [open, boardId, initialDueDate]);
 
     return (
         <Dialog

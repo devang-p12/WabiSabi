@@ -26,8 +26,11 @@ import BoardToolbar, {
     type SortOption,
     type PriorityFilter,
     type DueDateFilter,
-    type StatusFilter
+    type StatusFilter,
+    type BoardViewMode,
 } from "../board/BoardToolbar";
+import BoardTableView from "../board/BoardTableView";
+import BoardCalendarView from "../board/BoardCalendarView";
 import CreateListDialog from "../board/CreateListDialog";
 import CreateTaskDialog from "../board/CreateTaskDialog";
 import DeleteListDialog from "../board/DeleteListDialog";
@@ -89,6 +92,29 @@ export default function BoardView({
             setIsCreatingStarters(false);
         }
     };
+
+    // Multi-View state (Board / Table / Calendar)
+    const [viewMode, setViewMode] = useState<BoardViewMode>(() => {
+        try {
+            const saved =
+                localStorage.getItem(`wabi_board_view_${board.id}`) ||
+                localStorage.getItem("wabi_preferred_view");
+            if (saved === "table" || saved === "calendar" || saved === "board") {
+                return saved as BoardViewMode;
+            }
+        } catch {}
+        return "board";
+    });
+
+    const handleViewChange = (mode: BoardViewMode) => {
+        setViewMode(mode);
+        try {
+            localStorage.setItem(`wabi_board_view_${board.id}`, mode);
+            localStorage.setItem("wabi_preferred_view", mode);
+        } catch {}
+    };
+
+    const [calendarNewTaskDate, setCalendarNewTaskDate] = useState<string | undefined>(undefined);
 
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -593,6 +619,50 @@ export default function BoardView({
             return next;
         });
     };
+
+    const handleAddTaskForDate = (dateString: string) => {
+        if (lists.length === 0) {
+            setCreateListOpen(true);
+            return;
+        }
+        const firstList = [...lists].sort((a, b) => a.position - b.position)[0];
+        setCalendarNewTaskDate(dateString);
+        setCreateTaskList(firstList);
+    };
+
+    const handleTableMoveTask = async (
+        taskId: string,
+        targetListId: string,
+        position = 0
+    ) => {
+        try {
+            await moveTask(taskId, targetListId, position);
+            await loadLists(true);
+        } catch (err) {
+            console.error("Failed to move task in table:", err);
+        }
+    };
+
+    const handleUpdatePriority = async (
+        taskId: string,
+        priority: TaskPriority
+    ) => {
+        try {
+            await updateTask(taskId, { priority });
+            setTasks((current) => {
+                const next = { ...current };
+                for (const listId of Object.keys(next)) {
+                    next[listId] = (next[listId] ?? []).map((t) =>
+                        t.id === taskId ? { ...t, priority } : t
+                    );
+                }
+                return next;
+            });
+        } catch (err) {
+            console.error("Failed to update priority in table:", err);
+        }
+    };
+
     /**
      * Delete task.
      */
@@ -705,6 +775,8 @@ export default function BoardView({
             />
 
             <BoardToolbar
+                currentView={viewMode}
+                onViewChange={handleViewChange}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 sortOption={sortOption}
@@ -725,109 +797,136 @@ export default function BoardView({
                 </div>
             )}
 
-            {/* Board Canvas with Real-Time Multiplayer Cursors */}
-            <div
-                ref={boardCanvasRef}
-                onMouseMove={handleCanvasMouseMove}
-                onMouseLeave={handleCanvasMouseLeave}
-                className="relative min-h-0 flex-1 overflow-x-auto overflow-y-hidden py-4"
-            >
-                {/* Live Cursors Layer */}
-                <LiveCursors cursors={Object.values(remoteCursors)} />
+            {/* View Mode Content */}
+            {viewMode === "table" ? (
+                <BoardTableView
+                    lists={lists}
+                    tasks={tasks}
+                    getVisibleTasks={getVisibleTasks}
+                    onViewTask={(task) => setSelectedTask(task)}
+                    onEditTask={(task) => setEditingTask(task)}
+                    onDeleteTask={(task) => setDeletingTask(task)}
+                    onCompletedChange={handleCompletedChange}
+                    onMoveTask={handleTableMoveTask}
+                    onUpdatePriority={handleUpdatePriority}
+                    onAddTask={(list) => setCreateTaskList(list)}
+                    onCreateStarterColumns={handleAddStarterColumns}
+                    isCreatingStarters={isCreatingStarters}
+                />
+            ) : viewMode === "calendar" ? (
+                <BoardCalendarView
+                    lists={lists}
+                    tasks={tasks}
+                    getVisibleTasks={getVisibleTasks}
+                    onViewTask={(task) => setSelectedTask(task)}
+                    onCompletedChange={handleCompletedChange}
+                    onAddTaskForDate={handleAddTaskForDate}
+                />
+            ) : (
+                /* Board Canvas with Real-Time Multiplayer Cursors */
+                <div
+                    ref={boardCanvasRef}
+                    onMouseMove={handleCanvasMouseMove}
+                    onMouseLeave={handleCanvasMouseLeave}
+                    className="relative min-h-0 flex-1 overflow-x-auto overflow-y-hidden py-4"
+                >
+                    {/* Live Cursors Layer */}
+                    <LiveCursors cursors={Object.values(remoteCursors)} />
 
-                <div className="flex h-full min-w-0 gap-4 px-2">
+                    <div className="flex h-full min-w-0 gap-4 px-2">
 
-                    {loading ? (
-                        <div className="flex w-full items-center justify-center text-sm text-muted-foreground">
-                            Loading board...
-                        </div>
-                    ) : lists.length ===
-                        0 ? (
-                        <BoardEmptyState
-                            onCreateList={() =>
-                                setCreateListOpen(
-                                    true,
-                                )
-                            }
-                            onAddStarterColumns={handleAddStarterColumns}
-                            isCreatingStarters={isCreatingStarters}
-                        />
-                    ) : (
-                        <BoardDndContext
-                            tasks={tasks}
-                            onTasksChange={
-                                setTasks
-                            }
-                            onMoveTask={
-                                moveTask
-                            }
-                            disabled={
-                                searchQuery
-                                    .trim()
-                                    .length >
-                                0 ||
-                                sortOption !==
-                                "position"
-                            }
-                            boardId={board.id}
-                        >
-                            {lists.map(
-                                (list) => {
-                                    const listTasks =
-                                        tasks[
-                                        list.id
-                                        ] ?? [];
-
-                                    const visibleTasks =
-                                        getVisibleTasks(
-                                            listTasks,
-                                        );
-
-                                    return (
-                                        <BoardColumn
-                                            key={list.id}
-                                            list={list}
-                                            tasks={visibleTasks}
-                                            totalTasks={listTasks.length}
-                                            onAddTask={() => setCreateTaskList(list)}
-                                            onRename={() => setEditingList(list)}
-                                            onDelete={() => setDeletingList(list)}
-                                            onViewTask={(task) => {
-                                                setSelectedTask(task);
-                                            }}
-                                            onEditTask={(task) => {
-                                                setEditingTask(task);
-                                            }}
-                                            onDeleteTask={(task) => {
-                                                setDeletingTask(task);
-                                            }}
-                                            onCompletedChange={handleCompletedChange}
-                                            remoteDraggingMap={remoteDraggingMap}
-                                        />
-                                    );
-                                },
-                            )}
-
-                            {/* Add list */}
-                            <button
-                                onClick={() =>
+                        {loading ? (
+                            <div className="flex w-full items-center justify-center text-sm text-muted-foreground">
+                                Loading board...
+                            </div>
+                        ) : lists.length ===
+                            0 ? (
+                            <BoardEmptyState
+                                onCreateList={() =>
                                     setCreateListOpen(
                                         true,
                                     )
                                 }
-                                className="flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-lg border border-dashed text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                title="Add list"
+                                onAddStarterColumns={handleAddStarterColumns}
+                                isCreatingStarters={isCreatingStarters}
+                            />
+                        ) : (
+                            <BoardDndContext
+                                tasks={tasks}
+                                onTasksChange={
+                                    setTasks
+                                }
+                                onMoveTask={
+                                    moveTask
+                                }
+                                disabled={
+                                    searchQuery
+                                        .trim()
+                                        .length >
+                                    0 ||
+                                    sortOption !==
+                                    "position"
+                                }
+                                boardId={board.id}
                             >
-                                <span className="sr-only">
-                                    Add list
-                                </span>
-                                +
-                            </button>
-                        </BoardDndContext>
-                    )}
+                                {lists.map(
+                                    (list) => {
+                                        const listTasks =
+                                            tasks[
+                                            list.id
+                                            ] ?? [];
 
+                                        const visibleTasks =
+                                            getVisibleTasks(
+                                                listTasks,
+                                            );
+
+                                        return (
+                                            <BoardColumn
+                                                key={list.id}
+                                                list={list}
+                                                tasks={visibleTasks}
+                                                totalTasks={listTasks.length}
+                                                onAddTask={() => setCreateTaskList(list)}
+                                                onRename={() => setEditingList(list)}
+                                                onDelete={() => setDeletingList(list)}
+                                                onViewTask={(task) => {
+                                                    setSelectedTask(task);
+                                                }}
+                                                onEditTask={(task) => {
+                                                    setEditingTask(task);
+                                                }}
+                                                onDeleteTask={(task) => {
+                                                    setDeletingTask(task);
+                                                }}
+                                                onCompletedChange={handleCompletedChange}
+                                                remoteDraggingMap={remoteDraggingMap}
+                                            />
+                                        );
+                                    },
+                                )}
+
+                                {/* Add list */}
+                                <button
+                                    onClick={() =>
+                                        setCreateListOpen(
+                                            true,
+                                        )
+                                    }
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-lg border border-dashed text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                    title="Add list"
+                                >
+                                    <span className="sr-only">
+                                        Add list
+                                    </span>
+                                    +
+                                </button>
+                            </BoardDndContext>
+                        )}
+
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Create list */}
             <CreateListDialog
@@ -889,6 +988,7 @@ export default function BoardView({
                         setCreateTaskList(
                             null,
                         );
+                        setCalendarNewTaskDate(undefined);
                     }
                 }}
                 listId={
@@ -900,6 +1000,7 @@ export default function BoardView({
                     ""
                 }
                 boardId={board.id}
+                initialDueDate={calendarNewTaskDate}
                 onCreated={async () => {
                     await loadTasks(
                         lists,

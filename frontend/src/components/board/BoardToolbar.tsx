@@ -1,9 +1,13 @@
 import {
+    CalendarDays,
+    Columns3,
     Filter,
     Search,
     SlidersHorizontal,
+    Table2,
     X,
 } from "lucide-react";
+import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +19,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LabelManager from "./LabelManager";
+
+export type BoardViewMode = "board" | "table" | "calendar";
 
 export type SortOption =
     | "position"
@@ -38,6 +44,8 @@ export type DueDateFilter =
     | "NO_DATE";
 
 interface BoardToolbarProps {
+    currentView?: BoardViewMode;
+    onViewChange?: (view: BoardViewMode) => void;
     searchQuery: string;
     onSearchChange: (value: string) => void;
     sortOption: SortOption;
@@ -54,6 +62,8 @@ interface BoardToolbarProps {
 
 
 export default function BoardToolbar({
+    currentView = "board",
+    onViewChange,
     searchQuery,
     onSearchChange,
     sortOption,
@@ -81,9 +91,59 @@ export default function BoardToolbar({
     };
 
     return (
-        <div className="flex h-11 shrink-0 items-center gap-1.5 border-b px-3 bg-muted/10">
+        <div className="flex h-11 shrink-0 items-center gap-2 border-b px-3 bg-muted/10 overflow-x-auto">
+            {/* View Mode Toggle */}
+            <div className="flex items-center rounded-lg border bg-background/80 p-0.5 shadow-xs shrink-0">
+                <button
+                    type="button"
+                    onClick={() => onViewChange?.("board")}
+                    className={cn(
+                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer",
+                        currentView === "board"
+                            ? "bg-primary text-primary-foreground shadow-xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    )}
+                    title="Board / Kanban View"
+                >
+                    <Columns3 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Board</span>
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => onViewChange?.("table")}
+                    className={cn(
+                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer",
+                        currentView === "table"
+                            ? "bg-primary text-primary-foreground shadow-xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    )}
+                    title="Table / List View"
+                >
+                    <Table2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Table</span>
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => onViewChange?.("calendar")}
+                    className={cn(
+                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer",
+                        currentView === "calendar"
+                            ? "bg-primary text-primary-foreground shadow-xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    )}
+                    title="Calendar View"
+                >
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Calendar</span>
+                </button>
+            </div>
+
+            <div className="h-4 w-px bg-border/60 shrink-0 hidden sm:block" />
+
             {/* Search */}
-            <div className="relative w-36 sm:w-48 md:w-56">
+            <div className="relative w-36 sm:w-48 md:w-56 shrink-0">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
 
                 <Input
