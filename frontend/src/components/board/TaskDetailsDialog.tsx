@@ -9,6 +9,8 @@ import {
     MessageSquare,
     Activity,
     User,
+    Maximize2,
+    Minimize2,
 } from "lucide-react";
 
 import TaskLabelSelector from "./TaskLabelSelector";
@@ -23,6 +25,7 @@ import { resolveAssetUrl, setTaskCover } from "@/api/attachment.api";
 import type { WorkspaceMember } from "@/api/workspace.api";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import {
     Dialog,
@@ -78,8 +81,27 @@ export default function TaskDetailsDialog({
     onTaskUpdate,
 }: TaskDetailsDialogProps) {
     const [activeTab, setActiveTab] = useState<"comments" | "activity">("comments");
+    const [isExpanded, setIsExpanded] = useState<boolean>(() => {
+        try {
+            return localStorage.getItem("wabisabi_task_dialog_expanded") === "true";
+        } catch {
+            return false;
+        }
+    });
 
     if (!task) return null;
+
+    const toggleExpanded = () => {
+        setIsExpanded((prev) => {
+            const next = !prev;
+            try {
+                localStorage.setItem("wabisabi_task_dialog_expanded", String(next));
+            } catch {
+                // Ignore storage errors
+            }
+            return next;
+        });
+    };
 
     const handleAssigneeChange = async (userId: string | null) => {
         try {
@@ -121,16 +143,24 @@ export default function TaskDetailsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden">
+            <DialogContent
+                className={cn(
+                    "p-0 gap-0 overflow-hidden flex flex-col transition-all duration-200 border shadow-2xl",
+                    "w-[95vw] max-h-[90vh] max-h-[90dvh]",
+                    isExpanded
+                        ? "sm:max-w-5xl md:max-w-6xl h-[92vh] max-h-[92dvh]"
+                        : "sm:max-w-[760px] md:max-w-[820px] max-h-[90dvh]"
+                )}
+            >
                 {/* Hero Cover Image */}
                 {task.coverUrl && (
-                    <div className="relative w-full h-44 sm:h-52 bg-muted/60 overflow-hidden group">
+                    <div className="relative w-full h-32 sm:h-36 md:h-40 max-h-[22vh] shrink-0 bg-muted/60 overflow-hidden group">
                         <img
                             src={resolveAssetUrl(task.coverUrl)}
                             alt="Task cover"
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-3 right-3 flex items-center gap-2 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <Button
                                 variant="secondary"
                                 size="sm"
@@ -144,9 +174,9 @@ export default function TaskDetailsDialog({
                 )}
 
                 {/* Header */}
-                <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b">
-                    <div className="flex-1 min-w-0">
-                        <DialogTitle className="text-lg font-semibold leading-tight">
+                <div className="shrink-0 flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b bg-card/60 backdrop-blur-xs">
+                    <div className="flex-1 min-w-0 pr-2">
+                        <DialogTitle className="text-base sm:text-lg font-semibold leading-snug break-words">
                             {task.title}
                         </DialogTitle>
                         <DialogDescription className="sr-only">
@@ -192,23 +222,42 @@ export default function TaskDetailsDialog({
                         </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    {/* Action buttons + adjust size toggle */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 mr-7 sm:mr-8">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={toggleExpanded}
+                            className="h-8 px-2 sm:px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                            title={isExpanded ? "Collapse to standard size" : "Expand to wide view"}
+                        >
+                            {isExpanded ? (
+                                <Minimize2 className="h-3.5 w-3.5" />
+                            ) : (
+                                <Maximize2 className="h-3.5 w-3.5" />
+                            )}
+                            <span className="hidden md:inline ml-1.5 font-medium">
+                                {isExpanded ? "Collapse" : "Expand"}
+                            </span>
+                        </Button>
                         <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={onEdit}
+                            className="h-8 px-2 sm:px-2.5 text-xs cursor-pointer"
                         >
-                            <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                            Edit
+                            <Pencil className="mr-1 sm:mr-1.5 h-3.5 w-3.5" />
+                            <span className="hidden xs:inline">Edit</span>
                         </Button>
                         <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                             onClick={onDelete}
+                            title="Delete task"
                         >
                             <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -216,9 +265,9 @@ export default function TaskDetailsDialog({
                 </div>
 
                 {/* Body */}
-                <div className="flex flex-col sm:flex-row overflow-hidden" style={{ maxHeight: "65vh" }}>
-                    {/* Left: Description + Comments/Activity */}
-                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+                <div className="flex-1 min-h-0 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border">
+                    {/* Left: Description + Checklist + Attachments + Comments/Activity */}
+                    <div className="flex-1 min-h-0 md:overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 space-y-6">
                         {/* Description */}
                         <div>
                             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
@@ -233,7 +282,7 @@ export default function TaskDetailsDialog({
                                 <button
                                     type="button"
                                     onClick={onEdit}
-                                    className="w-full text-left rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground hover:bg-muted/40 transition-colors"
+                                    className="w-full text-left rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground hover:bg-muted/40 transition-colors cursor-pointer"
                                 >
                                     + Add a description…
                                 </button>
@@ -249,7 +298,7 @@ export default function TaskDetailsDialog({
                         </div>
 
                         {/* Attachments & Cover */}
-                        <div className="pt-1">
+                        <div>
                             <TaskAttachments
                                 taskId={task.id}
                                 coverUrl={task.coverUrl}
@@ -258,12 +307,12 @@ export default function TaskDetailsDialog({
                         </div>
 
                         {/* Comments / Activity tabs */}
-                        <div>
+                        <div className="pt-2">
                             <div className="flex items-center gap-1 border-b mb-3">
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("comments")}
-                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
                                         activeTab === "comments"
                                             ? "border-primary text-primary"
                                             : "border-transparent text-muted-foreground hover:text-foreground"
@@ -275,7 +324,7 @@ export default function TaskDetailsDialog({
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("activity")}
-                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
                                         activeTab === "activity"
                                             ? "border-primary text-primary"
                                             : "border-transparent text-muted-foreground hover:text-foreground"
@@ -295,10 +344,15 @@ export default function TaskDetailsDialog({
                     </div>
 
                     {/* Right sidebar: Assignee & Labels */}
-                    <div className="sm:w-56 shrink-0 border-t sm:border-t-0 sm:border-l overflow-y-auto px-4 py-4 space-y-5 bg-muted/20">
+                    <div
+                        className={cn(
+                            "shrink-0 md:overflow-y-auto px-5 py-4 sm:py-5 space-y-6 bg-muted/15",
+                            isExpanded ? "w-full md:w-72 lg:w-80" : "w-full md:w-60 lg:w-64"
+                        )}
+                    >
                         <div>
                             <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                                <User className="h-3 w-3" />
+                                <User className="h-3.5 w-3.5" />
                                 Assignee
                             </h4>
                             <TaskAssigneeSelector
@@ -311,7 +365,7 @@ export default function TaskDetailsDialog({
 
                         <div>
                             <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                                <Tag className="h-3 w-3" />
+                                <Tag className="h-3.5 w-3.5" />
                                 Labels
                             </h4>
                             <TaskLabelSelector
