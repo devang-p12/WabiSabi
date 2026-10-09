@@ -143,7 +143,7 @@ export default function TaskCard({
                     onView();
                 }
             }}
-            className={`group cursor-grab rounded-lg border bg-background p-3 shadow-sm transition-all hover:shadow-md active:cursor-grabbing ${
+            className={`group cursor-grab overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md active:cursor-grabbing ${
                 remoteDraggingInfo
                     ? "ring-2 ring-offset-1 scale-[1.01] shadow-md"
                     : ""
@@ -151,33 +151,34 @@ export default function TaskCard({
         >
             {/* Card Cover Image */}
             {task.coverUrl && (
-                <div className="relative -mx-3 -mt-3 mb-2.5 overflow-hidden rounded-t-lg bg-muted/40 aspect-video max-h-36">
+                <div className="relative h-36 w-full shrink-0 overflow-hidden bg-muted/40">
                     <img
                         src={resolveAssetUrl(task.coverUrl)}
                         alt={task.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-102"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                     />
                 </div>
             )}
 
-            {/* Remote collaborator dragging badge */}
-            {remoteDraggingInfo && (
-                <div
-                    className="mb-2.5 flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm w-fit animate-pulse select-none"
-                    style={{ backgroundColor: remoteDraggingInfo.color }}
-                >
-                    <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
-                    </span>
-                    <span>{remoteDraggingInfo.userName} is moving this</span>
-                </div>
-            )}
+            <div className="p-3">
+                {/* Remote collaborator dragging badge */}
+                {remoteDraggingInfo && (
+                    <div
+                        className="mb-2.5 flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm w-fit animate-pulse select-none"
+                        style={{ backgroundColor: remoteDraggingInfo.color }}
+                    >
+                        <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                        </span>
+                        <span>{remoteDraggingInfo.userName} is moving this</span>
+                    </div>
+                )}
 
-            <div className="flex items-start gap-2">
-                {/* Completion checkbox — stopPropagation prevents drag from starting here */}
-                <button
+                <div className="flex items-start gap-2">
+                    {/* Completion checkbox — stopPropagation prevents drag from starting here */}
+                    <button
                     type="button"
                     onClick={handleCompletedChange}
                     onPointerDown={(e) => e.stopPropagation()}
@@ -341,6 +342,7 @@ export default function TaskCard({
                         {priority.label}
                     </span>
                 </div>
+            </div>
             </div>
         </div>
     );
