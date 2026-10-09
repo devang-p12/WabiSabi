@@ -15,6 +15,7 @@ import subtaskRouter from "./modules/subtask/subtask.routes.js";
 import notificationRouter from "./modules/notification/notification.routes.js";
 import searchRouter from "./modules/search/search.routes.js";
 import attachmentRouter from "./modules/attachment/attachment.routes.js";
+import analyticsRouter from "./modules/analytics/analytics.routes.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -67,6 +68,7 @@ app.use("/api/v1", subtaskRouter);
 app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/search", searchRouter);
 app.use("/api/v1", attachmentRouter);
+app.use("/api/v1", analyticsRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

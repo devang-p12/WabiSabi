@@ -31,6 +31,7 @@ import BoardToolbar, {
 } from "../board/BoardToolbar";
 import BoardTableView from "../board/BoardTableView";
 import BoardCalendarView from "../board/BoardCalendarView";
+import WorkspaceAnalyticsDashboard from "../analytics/WorkspaceAnalyticsDashboard";
 import CreateListDialog from "../board/CreateListDialog";
 import CreateTaskDialog from "../board/CreateTaskDialog";
 import DeleteListDialog from "../board/DeleteListDialog";
@@ -100,7 +101,7 @@ export default function BoardView({
             const saved =
                 localStorage.getItem(`wabi_board_view_${board.id}`) ||
                 localStorage.getItem("wabi_preferred_view");
-            if (saved === "table" || saved === "calendar" || saved === "board") {
+            if (saved === "table" || saved === "calendar" || saved === "board" || saved === "analytics") {
                 return saved as BoardViewMode;
             }
         } catch {}
@@ -882,6 +883,14 @@ export default function BoardView({
                     onCompletedChange={handleCompletedChange}
                     onAddTaskForDate={handleAddTaskForDate}
                 />
+            ) : viewMode === "analytics" ? (
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                    <WorkspaceAnalyticsDashboard
+                        workspaceId={board.workspaceId}
+                        initialBoardId={board.id}
+                        isBoardView={true}
+                    />
+                </div>
             ) : (
                 /* Board Canvas with Real-Time Multiplayer Cursors */
                 <div

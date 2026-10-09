@@ -13,11 +13,14 @@ import {
     UserMinus,
     UserRound,
     Users,
+    BarChart3,
 } from "lucide-react";
 import {
     useNavigate,
     useParams,
 } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import WorkspaceAnalyticsDashboard from "@/components/analytics/WorkspaceAnalyticsDashboard";
 
 import {
     getWorkspace,
@@ -83,6 +86,7 @@ export default function Workspace() {
     const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [dismissGuide, setDismissGuide] = useState(false);
+    const [workspaceViewTab, setWorkspaceViewTab] = useState<"overview" | "analytics" | "members">("overview");
 
     const [error, setError] = useState("");
 
@@ -178,6 +182,146 @@ export default function Workspace() {
             .join("")
             .slice(0, 2)
             .toUpperCase();
+
+    const renderMembersSection = () => (
+        <section className="space-y-4">
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="text-base font-semibold">
+                                Members ({members.length})
+                            </CardTitle>
+                            <CardDescription className="text-xs mt-0.5">
+                                People who have access to collaborate in this workspace.
+                            </CardDescription>
+                        </div>
+
+                        {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && workspace && (
+                            <AddMemberDialog
+                                workspaceId={workspace.id}
+                                onAdded={loadWorkspace}
+                            />
+                        )}
+                    </div>
+                </CardHeader>
+
+                <CardContent>
+                    {members.length === 0 ? (
+                        <div className="flex min-h-24 flex-col items-center justify-center text-center">
+                            <Users className="mb-2 h-6 w-6 text-muted-foreground" />
+                            <p className="text-sm font-medium">No members yet</p>
+                        </div>
+                    ) : (
+                        <div className="divide-y border-t">
+                            {members.map((member) => (
+                                <div
+                                    key={member.userId}
+                                    className="flex items-center justify-between py-3.5"
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <Avatar className="h-9 w-9">
+                                            <AvatarFallback className="text-xs font-semibold">
+                                                {getInitials(member.user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium truncate">
+                                                {member.user.name}
+                                                {member.userId === user?.id && (
+                                                    <span className="ml-2 text-xs text-muted-foreground font-normal">
+                                                        (You)
+                                                    </span>
+                                                )}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                {member.user.email}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <Badge
+                                            variant={
+                                                member.role === "OWNER"
+                                                    ? "default"
+                                                    : member.role === "ADMIN"
+                                                    ? "secondary"
+                                                    : "outline"
+                                            }
+                                            className="text-xs"
+                                        >
+                                            {member.role.toLowerCase()}
+                                        </Badge>
+
+                                        {(currentUserRole === "OWNER" ||
+                                            (currentUserRole === "ADMIN" && member.role === "MEMBER")) &&
+                                            member.userId !== user?.id && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 cursor-pointer"
+                                                        >
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        {currentUserRole === "OWNER" && (
+                                                            <>
+                                                                {member.role !== "ADMIN" && (
+                                                                    <DropdownMenuItem
+                                                                        onClick={() =>
+                                                                            handleChangeRole(
+                                                                                member.userId,
+                                                                                "ADMIN"
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Shield className="mr-2 h-4 w-4" />
+                                                                        Make Admin
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                {member.role !== "MEMBER" && (
+                                                                    <DropdownMenuItem
+                                                                        onClick={() =>
+                                                                            handleChangeRole(
+                                                                                member.userId,
+                                                                                "MEMBER"
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <UserRound className="mr-2 h-4 w-4" />
+                                                                        Make Member
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                <DropdownMenuSeparator />
+                                                            </>
+                                                        )}
+
+                                                        <DropdownMenuItem
+                                                            className="text-destructive focus:text-destructive"
+                                                            onClick={() =>
+                                                                handleRemoveMember(member.userId)
+                                                            }
+                                                        >
+                                                            <UserMinus className="mr-2 h-4 w-4" />
+                                                            Remove Member
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </section>
+    );
 
     if (loading) {
         return (
@@ -352,373 +496,324 @@ export default function Workspace() {
                                 </div>
                             </div>
 
-                            {/* First-Time User Onboarding Guide Banner */}
-                            {!dismissGuide && (
-                                <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-5 sm:p-6 shadow-xs">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-                                                <Sparkles className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold text-base">
-                                                    Welcome to your workspace!
-                                                </h3>
-                                                <p className="text-xs text-muted-foreground mt-0.5">
-                                                    Here is how you can get started in 4 simple steps:
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => setDismissGuide(true)}
-                                            className="text-xs text-muted-foreground hover:text-foreground"
-                                        >
-                                            Dismiss
-                                        </button>
-                                    </div>
+                            {/* Segmented Workspace Tabs */}
+                            <div className="flex items-center gap-2 border-b pb-1 overflow-x-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => setWorkspaceViewTab("overview")}
+                                    className={cn(
+                                        "flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                                        workspaceViewTab === "overview"
+                                            ? "bg-primary text-primary-foreground shadow-xs"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                    )}
+                                >
+                                    <FolderKanban className="h-3.5 w-3.5" />
+                                    Boards & Overview
+                                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0 h-4">
+                                        {boards.length}
+                                    </Badge>
+                                </button>
 
-                                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2">
-                                        <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">1</span>
-                                                Create a Board
-                                            </div>
-                                            <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                                                Set up a board for each project, sprint, or workflow.
-                                            </p>
-                                        </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setWorkspaceViewTab("analytics")}
+                                    className={cn(
+                                        "flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                                        workspaceViewTab === "analytics"
+                                            ? "bg-primary text-primary-foreground shadow-xs"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                    )}
+                                >
+                                    <BarChart3 className="h-3.5 w-3.5" />
+                                    Analytics & Insights
+                                </button>
 
-                                        <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">2</span>
-                                                Set Up Columns
-                                            </div>
-                                            <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                                                Add stages like To Do, In Progress, Review, and Done.
-                                            </p>
-                                        </div>
-
-                                        <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">3</span>
-                                                Add & Drag Tasks
-                                            </div>
-                                            <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                                                Add cards with priorities, tags, and deadlines. Drag to move.
-                                            </p>
-                                        </div>
-
-                                        <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
-                                            <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">4</span>
-                                                Collaborate
-                                            </div>
-                                            <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                                                Invite teammates, post task comments, and check activity logs.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Workspace Quick Stats */}
-                            <div className="grid gap-4 sm:grid-cols-3">
-                                <Card className="hover:shadow-xs transition-shadow">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
-                                            <span>Boards</span>
-                                            <FolderKanban className="h-4 w-4 text-primary" />
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {boardsLoading ? (
-                                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                                            ) : (
-                                                boards.length
-                                            )}
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {boards.length === 1 ? "Active board" : "Active boards"}
-                                        </p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="hover:shadow-xs transition-shadow">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
-                                            <span>Team Members</span>
-                                            <Users className="h-4 w-4 text-primary" />
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {members.length}
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            People collaborating here
-                                        </p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="hover:shadow-xs transition-shadow">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
-                                            <span>Your Role</span>
-                                            <Shield className="h-4 w-4 text-primary" />
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold capitalize">
-                                            {currentUserRole?.toLowerCase() || "Member"}
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {currentUserRole === "OWNER" ? "Full administrative access" : currentUserRole === "ADMIN" ? "Can manage boards & members" : "Can view and edit tasks"}
-                                        </p>
-                                    </CardContent>
-                                </Card>
+                                <button
+                                    type="button"
+                                    onClick={() => setWorkspaceViewTab("members")}
+                                    className={cn(
+                                        "flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                                        workspaceViewTab === "members"
+                                            ? "bg-primary text-primary-foreground shadow-xs"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                    )}
+                                >
+                                    <Users className="h-3.5 w-3.5" />
+                                    Team Members
+                                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0 h-4">
+                                        {members.length}
+                                    </Badge>
+                                </button>
                             </div>
 
-                            {/* ───────────────── Boards Section ───────────────── */}
-                            <section className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-lg font-semibold tracking-tight">
-                                            Boards
-                                        </h2>
-                                        {!boardsLoading && (
-                                            <Badge variant="secondary" className="text-xs">
-                                                {boards.length}
-                                            </Badge>
-                                        )}
-                                    </div>
-
-                                    {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && boards.length > 0 && (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setCreateBoardOpen(true)}
-                                            className="text-xs"
-                                        >
-                                            <Plus className="mr-1.5 h-3.5 w-3.5" />
-                                            Add Board
-                                        </Button>
-                                    )}
-                                </div>
-
-                                {boardsLoading ? (
-                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {[1, 2, 3].map((n) => (
-                                            <div
-                                                key={n}
-                                                className="h-36 rounded-xl border border-dashed border-border/80 bg-muted/30 p-5 animate-pulse"
-                                            />
-                                        ))}
-                                    </div>
-                                ) : boards.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-card p-10 text-center shadow-xs">
-                                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                                            <FolderKanban className="h-6 w-6" />
-                                        </div>
-                                        <h3 className="text-base font-semibold">
-                                            No boards yet
-                                        </h3>
-                                        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
-                                            Boards are visual workspaces where you organize tasks into columns like To Do, In Progress, and Completed.
-                                        </p>
-                                        {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && (
-                                            <Button
-                                                onClick={() => setCreateBoardOpen(true)}
-                                                className="mt-5 shadow-xs"
-                                                size="sm"
-                                            >
-                                                <Plus className="mr-1.5 h-4 w-4" />
-                                                Create Your First Board
-                                            </Button>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {boards.map((b) => (
-                                            <div
-                                                key={b.id}
-                                                onClick={() => setSelectedBoard(b)}
-                                                className="group cursor-pointer rounded-xl border bg-card p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                                                        <FolderKanban className="h-5 w-5" />
+                            {workspaceViewTab === "analytics" ? (
+                                <WorkspaceAnalyticsDashboard
+                                    workspaceId={workspace.id}
+                                    boards={boards}
+                                />
+                            ) : workspaceViewTab === "members" ? (
+                                renderMembersSection()
+                            ) : (
+                                <>
+                                    {/* First-Time User Onboarding Guide Banner */}
+                                    {!dismissGuide && (
+                                        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-5 sm:p-6 shadow-xs">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
+                                                        <Sparkles className="h-5 w-5" />
                                                     </div>
-
-                                                    <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
-                                                        <span>Open</span>
-                                                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                                                    </span>
+                                                    <div>
+                                                        <h3 className="font-semibold text-base">
+                                                            Welcome to your workspace!
+                                                        </h3>
+                                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                                            Here is how you can get started in 4 simple steps:
+                                                        </p>
+                                                    </div>
                                                 </div>
+                                                <button
+                                                    onClick={() => setDismissGuide(true)}
+                                                    className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                                                >
+                                                    Dismiss
+                                                </button>
+                                            </div>
 
-                                                <div className="mt-4">
-                                                    <h3 className="font-semibold text-base tracking-tight truncate group-hover:text-primary transition-colors">
-                                                        {b.name}
-                                                    </h3>
-                                                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground leading-relaxed">
-                                                        {b.description || "Click to open columns, tasks, and view board activity."}
+                                            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2">
+                                                <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">1</span>
+                                                        Create a Board
+                                                    </div>
+                                                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                                                        Set up a board for each project, sprint, or workflow.
                                                     </p>
                                                 </div>
 
-                                                <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                                                    <span className="flex items-center gap-1 text-[11px]">
-                                                        <Columns3 className="h-3 w-3" />
-                                                        <span>Kanban Board</span>
-                                                    </span>
-                                                    <span className="text-[11px] text-primary/80 font-medium group-hover:underline">
-                                                        View board →
-                                                    </span>
+                                                <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">2</span>
+                                                        Set Up Columns
+                                                    </div>
+                                                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                                                        Add stages like To Do, In Progress, Review, and Done.
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">3</span>
+                                                        Add & Drag Tasks
+                                                    </div>
+                                                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                                                        Add cards with priorities, tags, and deadlines. Drag to move.
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-xl bg-background/80 p-3.5 border shadow-2xs backdrop-blur-xs">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px]">4</span>
+                                                        Collaborate
+                                                    </div>
+                                                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                                                        Invite teammates, post task comments, and check activity logs.
+                                                    </p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </section>
+                                        </div>
+                                    )}
 
-                            {/* ───────────────── Members Section ───────────────── */}
-                            <section className="space-y-4">
-                                <Card>
-                                    <CardHeader>
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <CardTitle className="text-base font-semibold">
-                                                    Members ({members.length})
+                                    {/* Workspace Quick Stats */}
+                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                        <Card
+                                            onClick={() => setWorkspaceViewTab("overview")}
+                                            className="hover:shadow-xs transition-shadow cursor-pointer hover:border-primary/40"
+                                        >
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                                    <span>Boards</span>
+                                                    <FolderKanban className="h-4 w-4 text-primary" />
                                                 </CardTitle>
-                                                <CardDescription className="text-xs mt-0.5">
-                                                    People who have access to collaborate in this workspace.
-                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold">
+                                                    {boardsLoading ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                                    ) : (
+                                                        boards.length
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {boards.length === 1 ? "Active board" : "Active boards"}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card
+                                            onClick={() => setWorkspaceViewTab("analytics")}
+                                            className="hover:shadow-xs transition-shadow cursor-pointer hover:border-primary/40 group"
+                                        >
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                                    <span>Analytics & Insights</span>
+                                                    <BarChart3 className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-sm font-semibold text-primary flex items-center gap-1">
+                                                    <span>View Dashboard</span>
+                                                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Velocity, completion & workload
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card
+                                            onClick={() => setWorkspaceViewTab("members")}
+                                            className="hover:shadow-xs transition-shadow cursor-pointer hover:border-primary/40"
+                                        >
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                                    <span>Team Members</span>
+                                                    <Users className="h-4 w-4 text-primary" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold">
+                                                    {members.length}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    People collaborating here
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="hover:shadow-xs transition-shadow">
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                                    <span>Your Role</span>
+                                                    <Shield className="h-4 w-4 text-primary" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold capitalize">
+                                                    {currentUserRole?.toLowerCase() || "Member"}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {currentUserRole === "OWNER" ? "Full administrative access" : currentUserRole === "ADMIN" ? "Can manage boards & members" : "Can view and edit tasks"}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    {/* ───────────────── Boards Section ───────────────── */}
+                                    <section className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <h2 className="text-lg font-semibold tracking-tight">
+                                                    Boards
+                                                </h2>
+                                                {!boardsLoading && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        {boards.length}
+                                                    </Badge>
+                                                )}
                                             </div>
 
-                                            {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && (
-                                                <AddMemberDialog
-                                                    workspaceId={workspace.id}
-                                                    onAdded={loadWorkspace}
-                                                />
+                                            {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && boards.length > 0 && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setCreateBoardOpen(true)}
+                                                    className="text-xs"
+                                                >
+                                                    <Plus className="mr-1.5 h-3.5 w-3.5" />
+                                                    Add Board
+                                                </Button>
                                             )}
                                         </div>
-                                    </CardHeader>
 
-                                    <CardContent>
-                                        {members.length === 0 ? (
-                                            <div className="flex min-h-24 flex-col items-center justify-center text-center">
-                                                <Users className="mb-2 h-6 w-6 text-muted-foreground" />
-                                                <p className="text-sm font-medium">No members yet</p>
+                                        {boardsLoading ? (
+                                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                                {[1, 2, 3].map((n) => (
+                                                    <div
+                                                        key={n}
+                                                        className="h-36 rounded-xl border border-dashed border-border/80 bg-muted/30 p-5 animate-pulse"
+                                                    />
+                                                ))}
+                                            </div>
+                                        ) : boards.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-card p-10 text-center shadow-xs">
+                                                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                                    <FolderKanban className="h-6 w-6" />
+                                                </div>
+                                                <h3 className="font-semibold text-base">
+                                                    No boards yet
+                                                </h3>
+                                                <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+                                                    Create your first Kanban board to start adding lists, tasks, and collaborating with your team.
+                                                </p>
+                                                {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && (
+                                                    <Button
+                                                        onClick={() => setCreateBoardOpen(true)}
+                                                        className="mt-4 shadow-xs"
+                                                    >
+                                                        <Plus className="mr-1.5 h-4 w-4" />
+                                                        Create your first board
+                                                    </Button>
+                                                )}
                                             </div>
                                         ) : (
-                                            <div className="divide-y border-t">
-                                                {members.map((member) => (
+                                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                                {boards.map((b) => (
                                                     <div
-                                                        key={member.userId}
-                                                        className="flex items-center justify-between py-3.5"
+                                                        key={b.id}
+                                                        onClick={() => setSelectedBoard(b)}
+                                                        className="group cursor-pointer rounded-xl border bg-card p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
                                                     >
-                                                        <div className="flex items-center gap-3 min-w-0">
-                                                            <Avatar className="h-9 w-9">
-                                                                <AvatarFallback className="text-xs font-semibold">
-                                                                    {getInitials(member.user.name)}
-                                                                </AvatarFallback>
-                                                            </Avatar>
-
-                                                            <div className="min-w-0">
-                                                                <p className="text-sm font-medium truncate">
-                                                                    {member.user.name}
-                                                                    {member.userId === user?.id && (
-                                                                        <span className="ml-2 text-xs text-muted-foreground font-normal">
-                                                                            (You)
-                                                                        </span>
-                                                                    )}
-                                                                </p>
-                                                                <p className="text-xs text-muted-foreground truncate">
-                                                                    {member.user.email}
-                                                                </p>
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                                                                <FolderKanban className="h-5 w-5" />
                                                             </div>
+
+                                                            <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                                                                <span>Open</span>
+                                                                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                                                            </span>
                                                         </div>
 
-                                                        <div className="flex items-center gap-3">
-                                                            <Badge
-                                                                variant={
-                                                                    member.role === "OWNER"
-                                                                        ? "default"
-                                                                        : member.role === "ADMIN"
-                                                                        ? "secondary"
-                                                                        : "outline"
-                                                                }
-                                                                className="text-xs"
-                                                            >
-                                                                {member.role.toLowerCase()}
-                                                            </Badge>
+                                                        <div className="mt-4">
+                                                            <h3 className="font-semibold text-base tracking-tight truncate group-hover:text-primary transition-colors">
+                                                                {b.name}
+                                                            </h3>
+                                                            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+                                                                {b.description || "Click to open columns, tasks, and view board activity."}
+                                                            </p>
+                                                        </div>
 
-                                                            {/* Member role & remove dropdown */}
-                                                            {(currentUserRole === "OWNER" ||
-                                                                (currentUserRole === "ADMIN" && member.role === "MEMBER")) &&
-                                                                member.userId !== user?.id && (
-                                                                    <DropdownMenu>
-                                                                        <DropdownMenuTrigger asChild>
-                                                                            <Button
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                className="h-8 w-8"
-                                                                            >
-                                                                                <MoreHorizontal className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </DropdownMenuTrigger>
-                                                                        <DropdownMenuContent align="end">
-                                                                            {currentUserRole === "OWNER" && (
-                                                                                <>
-                                                                                    {member.role !== "ADMIN" && (
-                                                                                        <DropdownMenuItem
-                                                                                            onClick={() =>
-                                                                                                handleChangeRole(
-                                                                                                    member.userId,
-                                                                                                    "ADMIN"
-                                                                                                )
-                                                                                            }
-                                                                                        >
-                                                                                            <Shield className="mr-2 h-4 w-4" />
-                                                                                            Make Admin
-                                                                                        </DropdownMenuItem>
-                                                                                    )}
-                                                                                    {member.role !== "MEMBER" && (
-                                                                                        <DropdownMenuItem
-                                                                                            onClick={() =>
-                                                                                                handleChangeRole(
-                                                                                                    member.userId,
-                                                                                                    "MEMBER"
-                                                                                                )
-                                                                                            }
-                                                                                        >
-                                                                                            <UserRound className="mr-2 h-4 w-4" />
-                                                                                            Make Member
-                                                                                        </DropdownMenuItem>
-                                                                                    )}
-                                                                                    <DropdownMenuSeparator />
-                                                                                </>
-                                                                            )}
-
-                                                                            <DropdownMenuItem
-                                                                                className="text-destructive focus:text-destructive"
-                                                                                onClick={() =>
-                                                                                    handleRemoveMember(member.userId)
-                                                                                }
-                                                                            >
-                                                                                <UserMinus className="mr-2 h-4 w-4" />
-                                                                                Remove Member
-                                                                            </DropdownMenuItem>
-                                                                        </DropdownMenuContent>
-                                                                    </DropdownMenu>
-                                                                )}
+                                                        <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+                                                            <span className="flex items-center gap-1 text-[11px]">
+                                                                <Columns3 className="h-3 w-3" />
+                                                                <span>Kanban Board</span>
+                                                            </span>
+                                                            <span className="text-[11px] text-primary/80 font-medium group-hover:underline">
+                                                                View board →
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
-                                    </CardContent>
-                                </Card>
-                            </section>
+                                    </section>
+
+                                    {/* Members Section */}
+                                    {renderMembersSection()}
+                                </>
+                            )}
                         </div>
                     )}
                 </main>

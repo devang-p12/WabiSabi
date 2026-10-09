@@ -7,6 +7,7 @@ import {
     Table2,
     User,
     X,
+    BarChart3,
 } from "lucide-react";
 import { cn } from "cn";
 import type { WorkspaceMember } from "@/api/workspace.api";
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import LabelManager from "./LabelManager";
 
-export type BoardViewMode = "board" | "table" | "calendar";
+export type BoardViewMode = "board" | "table" | "calendar" | "analytics";
 
 export type SortOption =
     | "position"
@@ -150,6 +151,21 @@ export default function BoardToolbar({
                 >
                     <CalendarDays className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Calendar</span>
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => onViewChange?.("analytics")}
+                    className={cn(
+                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer",
+                        currentView === "analytics"
+                            ? "bg-primary text-primary-foreground shadow-xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    )}
+                    title="Analytics & Insights View"
+                >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Analytics</span>
                 </button>
             </div>
 
