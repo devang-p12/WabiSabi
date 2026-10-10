@@ -19,8 +19,10 @@ import TaskComments from "./TaskComments";
 import TaskActivity from "./TaskActivity";
 import TaskSubtasks from "./TaskSubtasks";
 import TaskAttachments from "./TaskAttachments";
+import TaskPlanningFields from "./TaskPlanningFields";
+import TaskDependencies from "./TaskDependencies";
 
-import { type Task, updateTask } from "@/api/task.api";
+import { type Task, updateTask, getTask } from "@/api/task.api";
 import { resolveAssetUrl, setTaskCover } from "@/api/attachment.api";
 import type { WorkspaceMember } from "@/api/workspace.api";
 
@@ -378,6 +380,30 @@ export default function TaskDetailsDialog({
                                     No labels assigned. Click "+ Label" to add one.
                                 </p>
                             )}
+                        </div>
+
+                        {/* Planning & Time Tracking */}
+                        <div className="pt-4 border-t">
+                            <TaskPlanningFields
+                                task={task}
+                                onTaskUpdate={onTaskUpdate}
+                            />
+                        </div>
+
+                        {/* Dependencies */}
+                        <div className="pt-4 border-t">
+                            <TaskDependencies
+                                task={task}
+                                boardId={boardId}
+                                onTaskUpdate={async () => {
+                                    try {
+                                        const fresh = await getTask(task.id);
+                                        onTaskUpdate?.(fresh);
+                                    } catch (err) {
+                                        console.error("Failed to reload task after dependency update:", err);
+                                    }
+                                }}
+                            />
                         </div>
                     </div>
                 </div>

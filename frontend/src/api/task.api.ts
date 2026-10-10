@@ -19,6 +19,27 @@ export interface TaskAssignee {
 
 import type { TaskAttachment } from "./attachment.api";
 
+export interface TaskDependency {
+    id: string;
+    taskId: string;
+    dependsOnId: string;
+    createdAt: string;
+    task?: {
+        id: string;
+        title: string;
+        completed: boolean;
+        priority?: TaskPriority;
+        dueDate?: string | null;
+    };
+    dependsOn?: {
+        id: string;
+        title: string;
+        completed: boolean;
+        priority?: TaskPriority;
+        dueDate?: string | null;
+    };
+}
+
 export interface Task {
     id: string;
     title: string;
@@ -29,8 +50,19 @@ export interface Task {
     dueDate: string | null;
     completed: boolean;
     coverUrl?: string | null;
+    estimatedMinutes?: number | null;
+    actualMinutes?: number | null;
+    startedAt?: string | null;
+    completedAt?: string | null;
     assigneeId?: string | null;
     assignee?: TaskAssignee | null;
+    projectId?: string | null;
+    project?: { id: string; name: string } | null;
+    milestoneId?: string | null;
+    milestone?: { id: string; title: string; position: number } | null;
+    list?: { id: string; name: string } | null;
+    dependencies?: TaskDependency[];
+    dependedOnBy?: TaskDependency[];
     createdAt: string;
     updatedAt: string;
     labels: Label[];
@@ -45,6 +77,12 @@ export interface CreateTaskInput {
     dueDate?: string | null;
     assigneeId?: string | null;
     coverUrl?: string | null;
+    projectId?: string | null;
+    milestoneId?: string | null;
+    estimatedMinutes?: number | null;
+    actualMinutes?: number | null;
+    startedAt?: string | null;
+    completedAt?: string | null;
 }
 
 export interface UpdateTaskInput {
@@ -55,6 +93,12 @@ export interface UpdateTaskInput {
     completed?: boolean;
     assigneeId?: string | null;
     coverUrl?: string | null;
+    projectId?: string | null;
+    milestoneId?: string | null;
+    estimatedMinutes?: number | null;
+    actualMinutes?: number | null;
+    startedAt?: string | null;
+    completedAt?: string | null;
 }
 
 export const getListTasks = async (
@@ -123,4 +167,33 @@ export const moveTask = async (
     );
 
     return response.data.data;
+};
+
+export const createTaskDependency = async (
+    taskId: string,
+    dependsOnId: string
+): Promise<TaskDependency> => {
+    const response = await api.post(
+        `/tasks/${taskId}/dependencies`,
+        { dependsOnId }
+    );
+    return response.data.data;
+};
+
+export const getTaskDependencies = async (
+    taskId: string
+): Promise<{ dependencies: TaskDependency[]; dependedOnBy: TaskDependency[] }> => {
+    const response = await api.get(
+        `/tasks/${taskId}/dependencies`
+    );
+    return response.data.data;
+};
+
+export const deleteTaskDependency = async (
+    taskId: string,
+    dependsOnId: string
+): Promise<void> => {
+    await api.delete(
+        `/tasks/${taskId}/dependencies/${dependsOnId}`
+    );
 };

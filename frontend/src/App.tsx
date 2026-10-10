@@ -14,6 +14,10 @@ import Board from "./pages/Board";
 import NotificationToastAlert from "./components/notifications/NotificationToastAlert";
 import CommandPalette from "./components/command/CommandPalette";
 
+import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
+import Today from "./pages/Today";
+
 function App() {
     return (
         <BrowserRouter>
@@ -27,8 +31,12 @@ function App() {
                 {/* Protected routes */}
                 <Route element={<AuthGuard />}>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/today" element={<Today />} />
                     <Route path="/workspaces/:workspaceId" element={<Workspace />} />
+                    <Route path="/workspaces/:workspaceId/today" element={<Today />} />
                     <Route path="/workspaces/:workspaceId/boards/:boardId" element={<Board />} />
+                    <Route path="/workspaces/:workspaceId/projects" element={<Projects />} />
+                    <Route path="/workspaces/:workspaceId/projects/:projectId" element={<ProjectDetail />} />
                 </Route>
 
                 {/* Fallbacks */}

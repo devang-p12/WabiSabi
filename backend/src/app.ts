@@ -16,6 +16,8 @@ import notificationRouter from "./modules/notification/notification.routes.js";
 import searchRouter from "./modules/search/search.routes.js";
 import attachmentRouter from "./modules/attachment/attachment.routes.js";
 import analyticsRouter from "./modules/analytics/analytics.routes.js";
+import projectRouter from "./modules/project/project.routes.js";
+import plannerRouter from "./modules/planner/planner.routes.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -69,6 +71,8 @@ app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/search", searchRouter);
 app.use("/api/v1", attachmentRouter);
 app.use("/api/v1", analyticsRouter);
+app.use("/api/v1", projectRouter);
+app.use("/api/v1/planner", plannerRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

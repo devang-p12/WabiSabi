@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
     ArrowLeft,
     ArrowRight,
+    Briefcase,
     Columns3,
     FolderKanban,
     LayoutDashboard,
@@ -21,6 +22,13 @@ import {
 } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import WorkspaceAnalyticsDashboard from "@/components/analytics/WorkspaceAnalyticsDashboard";
+
+import {
+    getWorkspaceProjects,
+    type Project,
+} from "@/api/project.api";
+import ProjectCard from "@/components/project/ProjectCard";
+import CreateProjectDialog from "@/components/project/CreateProjectDialog";
 
 import {
     getWorkspace,
@@ -86,7 +94,11 @@ export default function Workspace() {
     const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [dismissGuide, setDismissGuide] = useState(false);
-    const [workspaceViewTab, setWorkspaceViewTab] = useState<"overview" | "analytics" | "members">("overview");
+    const [workspaceViewTab, setWorkspaceViewTab] = useState<"overview" | "projects" | "analytics" | "members">("overview");
+
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [projectsLoading, setProjectsLoading] = useState(true);
+    const [createProjectOpen, setCreateProjectOpen] = useState(false);
 
     const [error, setError] = useState("");
 
@@ -101,6 +113,20 @@ export default function Workspace() {
             console.error("Failed to load boards:", err);
         } finally {
             setBoardsLoading(false);
+        }
+    };
+
+    const loadProjects = async () => {
+        if (!workspaceId) return;
+
+        try {
+            setProjectsLoading(true);
+            const data = await getWorkspaceProjects(workspaceId);
+            setProjects(data);
+        } catch (err) {
+            console.error("Failed to load projects:", err);
+        } finally {
+            setProjectsLoading(false);
         }
     };
 
@@ -132,6 +158,7 @@ export default function Workspace() {
 
         loadWorkspace();
         loadBoards();
+        loadProjects();
     }, [workspaceId, loadWorkspace]);
 
     const handleChangeRole = async (
@@ -323,6 +350,82 @@ export default function Workspace() {
         </section>
     );
 
+    const renderProjectsSection = () => {
+        if (!workspace) return null;
+        return (
+            <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold tracking-tight">
+                            Projects
+                        </h2>
+                        {!projectsLoading && (
+                            <Badge variant="secondary" className="text-xs">
+                                {projects.length}
+                            </Badge>
+                        )}
+                    </div>
+
+                    {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && (
+                        <Button
+                            size="sm"
+                            onClick={() => setCreateProjectOpen(true)}
+                            className="text-xs shadow-xs"
+                        >
+                            <Plus className="mr-1.5 h-3.5 w-3.5" />
+                            Add Project
+                        </Button>
+                    )}
+                </div>
+
+                {projectsLoading ? (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {[1, 2, 3].map((n) => (
+                            <div
+                                key={n}
+                                className="h-44 rounded-xl border border-dashed border-border/80 bg-muted/30 p-5 animate-pulse"
+                            />
+                        ))}
+                    </div>
+                ) : projects.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-card p-10 text-center shadow-xs">
+                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                            <Briefcase className="h-6 w-6" />
+                        </div>
+                        <h3 className="font-semibold text-base">
+                            No projects yet
+                        </h3>
+                        <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+                            Create your first project to define execution goals, milestones, and deliverable tracking.
+                        </p>
+                        {(currentUserRole === "OWNER" || currentUserRole === "ADMIN") && (
+                            <Button
+                                onClick={() => setCreateProjectOpen(true)}
+                                className="mt-4 shadow-xs"
+                            >
+                                <Plus className="mr-1.5 h-4 w-4" />
+                                Create your first project
+                            </Button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {projects.map((p) => (
+                            <ProjectCard
+                                key={p.id}
+                                project={p}
+                                workspaceId={workspace.id}
+                                onDeleted={(id) =>
+                                    setProjects((prev) => prev.filter((item) => item.id !== id))
+                                }
+                            />
+                        ))}
+                    </div>
+                )}
+            </section>
+        );
+    };
+
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-background">
@@ -446,6 +549,12 @@ export default function Workspace() {
                     onToggleCollapse={() =>
                         setSidebarCollapsed((value) => !value)
                     }
+                    onSelectProjects={() => {
+                        setSelectedBoard(null);
+                        setWorkspaceViewTab("projects");
+                    }}
+                    isProjectsSelected={selectedBoard === null && workspaceViewTab === "projects"}
+                    onSelectToday={() => navigate(`/workspaces/${workspaceId}/today`)}
                 />
 
                 {/* Main Content Area */}
@@ -484,13 +593,23 @@ export default function Workspace() {
                                                 workspaceId={workspace.id}
                                                 onAdded={loadWorkspace}
                                             />
-                                            <Button
-                                                onClick={() => setCreateBoardOpen(true)}
-                                                className="shadow-xs"
-                                            >
-                                                <Plus className="mr-1.5 h-4 w-4" />
-                                                Create Board
-                                            </Button>
+                                            {workspaceViewTab === "projects" ? (
+                                                <Button
+                                                    onClick={() => setCreateProjectOpen(true)}
+                                                    className="shadow-xs"
+                                                >
+                                                    <Plus className="mr-1.5 h-4 w-4" />
+                                                    Create Project
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    onClick={() => setCreateBoardOpen(true)}
+                                                    className="shadow-xs"
+                                                >
+                                                    <Plus className="mr-1.5 h-4 w-4" />
+                                                    Create Board
+                                                </Button>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -512,6 +631,23 @@ export default function Workspace() {
                                     Boards & Overview
                                     <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0 h-4">
                                         {boards.length}
+                                    </Badge>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setWorkspaceViewTab("projects")}
+                                    className={cn(
+                                        "flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                                        workspaceViewTab === "projects"
+                                            ? "bg-primary text-primary-foreground shadow-xs"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                    )}
+                                >
+                                    <Briefcase className="h-3.5 w-3.5" />
+                                    Projects
+                                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0 h-4">
+                                        {projects.length}
                                     </Badge>
                                 </button>
 
@@ -554,6 +690,8 @@ export default function Workspace() {
                                 />
                             ) : workspaceViewTab === "members" ? (
                                 renderMembersSection()
+                            ) : workspaceViewTab === "projects" ? (
+                                renderProjectsSection()
                             ) : (
                                 <>
                                     {/* First-Time User Onboarding Guide Banner */}
@@ -647,6 +785,30 @@ export default function Workspace() {
                                                 </div>
                                                 <p className="text-xs text-muted-foreground mt-1">
                                                     {boards.length === 1 ? "Active board" : "Active boards"}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card
+                                            onClick={() => setWorkspaceViewTab("projects")}
+                                            className="hover:shadow-xs transition-shadow cursor-pointer hover:border-primary/40 group"
+                                        >
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                                    <span>Projects</span>
+                                                    <Briefcase className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold">
+                                                    {projectsLoading ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                                    ) : (
+                                                        projects.length
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {projects.length === 1 ? "Active project" : "Active projects"}
                                                 </p>
                                             </CardContent>
                                         </Card>
@@ -825,6 +987,14 @@ export default function Workspace() {
                 onOpenChange={setCreateBoardOpen}
                 workspaceId={workspace.id}
                 onCreated={loadBoards}
+            />
+
+            {/* Create Project Dialog */}
+            <CreateProjectDialog
+                open={createProjectOpen}
+                onOpenChange={setCreateProjectOpen}
+                workspaceId={workspace.id}
+                onCreated={loadProjects}
             />
         </div>
     );

@@ -8,19 +8,17 @@ import {
     getListTasks,
     getTask,
     updateTask,
+    moveTask,
+    createTaskDependency,
+    getTaskDependencies,
+    deleteTaskDependency,
 } from "./task.service.js";
 
 import {
     createTaskSchema,
     updateTaskSchema,
-} from "./task.validation.js";
-
-import {
-    moveTask,
-} from "./task.service.js";
-
-import {
     moveTaskSchema,
+    createTaskDependencySchema,
 } from "./task.validation.js";
 
 export const createTaskController = async (
@@ -358,6 +356,152 @@ export const moveTaskController = async (
                 error instanceof Error
                     ? error.message
                     : "Failed to move task.",
+        });
+    }
+};
+
+export const createTaskDependencyController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required.",
+            });
+        }
+
+        const taskId = req.params.taskId;
+        if (!taskId || Array.isArray(taskId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid task ID.",
+            });
+        }
+
+        const parsed = createTaskDependencySchema.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(400).json({
+                success: false,
+                message: parsed.error.issues[0]?.message,
+            });
+        }
+
+        const result = await createTaskDependency(
+            taskId,
+            parsed.data.dependsOnId,
+            req.userId
+        );
+
+        if ("error" in result) {
+            const status = result.error === "Dependency already exists." ? 409 : 400;
+            return res.status(status).json({
+                success: false,
+                message: result.error,
+            });
+        }
+
+        return res.status(201).json({
+            success: true,
+            data: result.dependency,
+        });
+    } catch (error) {
+        console.error("Create task dependency error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error.",
+        });
+    }
+};
+
+export const getTaskDependenciesController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required.",
+            });
+        }
+
+        const taskId = req.params.taskId;
+        if (!taskId || Array.isArray(taskId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid task ID.",
+            });
+        }
+
+        const result = await getTaskDependencies(taskId, req.userId);
+        if ("error" in result) {
+            const status = result.error === "Task not found." ? 404 : 403;
+            return res.status(status).json({
+                success: false,
+                message: result.error,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        console.error("Get task dependencies error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error.",
+        });
+    }
+};
+
+export const deleteTaskDependencyController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required.",
+            });
+        }
+
+        const taskId = req.params.taskId;
+        const dependsOnId = req.params.dependsOnId;
+
+        if (!taskId || Array.isArray(taskId) || !dependsOnId || Array.isArray(dependsOnId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid task ID or dependsOn ID.",
+            });
+        }
+
+        const result = await deleteTaskDependency(
+            taskId,
+            dependsOnId,
+            req.userId
+        );
+
+        if ("error" in result) {
+            const status = result.error === "Dependency not found." ? 404 : 403;
+            return res.status(status).json({
+                success: false,
+                message: result.error,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Task dependency deleted successfully.",
+        });
+    } catch (error) {
+        console.error("Delete task dependency error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error.",
         });
     }
 };

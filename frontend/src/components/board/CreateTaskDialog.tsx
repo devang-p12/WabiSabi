@@ -51,6 +51,7 @@ export default function CreateTaskDialog({
     const [priority, setPriority] =
         useState<TaskPriority>("MEDIUM");
     const [dueDate, setDueDate] = useState(initialDueDate || "");
+    const [estimatedMinutes, setEstimatedMinutes] = useState("");
     const [assigneeId, setAssigneeId] = useState<string | null>(null);
     const [boardLabels, setBoardLabels] = useState<Label[]>([]);
     const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
@@ -70,6 +71,10 @@ export default function CreateTaskDialog({
             setLoading(true);
             setError("");
 
+            const estMinutes = estimatedMinutes.trim()
+                ? parseInt(estimatedMinutes, 10)
+                : undefined;
+
             const createdTask = await createTask(listId, {
                 title: trimmedTitle,
                 description:
@@ -79,6 +84,7 @@ export default function CreateTaskDialog({
                     ? new Date(`${dueDate}T23:59:59`).toISOString()
                     : null,
                 assigneeId: assigneeId || undefined,
+                estimatedMinutes: Number.isNaN(estMinutes) ? undefined : estMinutes,
             });
 
             console.log("Created task:", createdTask);
@@ -101,6 +107,7 @@ export default function CreateTaskDialog({
             setDescription("");
             setPriority("MEDIUM");
             setDueDate("");
+            setEstimatedMinutes("");
             setAssigneeId(null);
             setSelectedLabels([]);
             onOpenChange(false);
@@ -122,6 +129,7 @@ export default function CreateTaskDialog({
             setDescription("");
             setPriority("MEDIUM");
             setDueDate("");
+            setEstimatedMinutes("");
             setAssigneeId(null);
             setSelectedLabels([]);
             setError("");
@@ -289,6 +297,31 @@ export default function CreateTaskDialog({
                             disabled={loading}
                         />
                         <p className="text-[11px] text-muted-foreground">Set a target completion date</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label
+                            htmlFor="task-estimated-minutes"
+                            className="text-sm font-medium"
+                        >
+                            Estimated Time (minutes)
+                            <span className="ml-1 font-normal text-muted-foreground">
+                                (optional)
+                            </span>
+                        </label>
+
+                        <Input
+                            id="task-estimated-minutes"
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 60 for 1 hour"
+                            value={estimatedMinutes}
+                            onChange={(event) =>
+                                setEstimatedMinutes(event.target.value)
+                            }
+                            disabled={loading}
+                        />
+                        <p className="text-[11px] text-muted-foreground">Helps with scheduling and project planning</p>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">

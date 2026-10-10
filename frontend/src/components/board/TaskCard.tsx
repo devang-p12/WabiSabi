@@ -5,6 +5,8 @@ import {
     CalendarDays,
     ListChecks,
     Paperclip,
+    Clock,
+    Link2,
 } from "lucide-react";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -314,6 +316,28 @@ export default function TaskCard({
                         >
                             <Paperclip className="h-3 w-3" />
                             {task.attachments.length}
+                        </span>
+                    )}
+                    {task.estimatedMinutes !== null && task.estimatedMinutes !== undefined && (
+                        <span
+                            className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground"
+                            title={`Estimated: ${task.estimatedMinutes} mins`}
+                        >
+                            <Clock className="h-3 w-3" />
+                            {task.estimatedMinutes < 60
+                                ? `${task.estimatedMinutes}m`
+                                : `${Math.floor(task.estimatedMinutes / 60)}h${
+                                      task.estimatedMinutes % 60 ? ` ${task.estimatedMinutes % 60}m` : ""
+                                  }`}
+                        </span>
+                    )}
+                    {task.dependencies && task.dependencies.length > 0 && (
+                        <span
+                            className="flex items-center gap-1 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+                            title={`${task.dependencies.length} dependenc${task.dependencies.length > 1 ? "ies" : "y"}`}
+                        >
+                            <Link2 className="h-3 w-3" />
+                            {task.dependencies.length}
                         </span>
                     )}
                 </div>

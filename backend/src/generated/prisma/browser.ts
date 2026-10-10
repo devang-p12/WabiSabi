@@ -33,6 +33,16 @@ export type RefreshToken = Prisma.RefreshTokenModel
  */
 export type Workspace = Prisma.WorkspaceModel
 /**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model Milestone
+ * 
+ */
+export type Milestone = Prisma.MilestoneModel
+/**
  * Model WorkspaceMember
  * 
  */
@@ -52,6 +62,11 @@ export type BoardList = Prisma.BoardListModel
  * 
  */
 export type Task = Prisma.TaskModel
+/**
+ * Model TaskDependency
+ * 
+ */
+export type TaskDependency = Prisma.TaskDependencyModel
 /**
  * Model Subtask
  * 

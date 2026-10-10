@@ -1,4 +1,6 @@
 import {
+    Briefcase,
+    Calendar,
     ChevronLeft,
     ChevronRight,
     Home,
@@ -29,6 +31,10 @@ interface WorkspaceSidebarProps {
     onSelectBoard: (board: Board) => void;
     onCreateBoard: () => void;
     onToggleCollapse: () => void;
+    onSelectProjects?: () => void;
+    isProjectsSelected?: boolean;
+    onSelectToday?: () => void;
+    isTodaySelected?: boolean;
 }
 
 export function WorkspaceSidebar({
@@ -41,6 +47,10 @@ export function WorkspaceSidebar({
     onSelectBoard,
     onCreateBoard,
     onToggleCollapse,
+    onSelectProjects,
+    isProjectsSelected,
+    onSelectToday,
+    isTodaySelected,
 }: WorkspaceSidebarProps) {
     const isHome = selectedBoardId === null;
 
@@ -108,6 +118,72 @@ export function WorkspaceSidebar({
                         </TooltipContent>
                     )}
                 </Tooltip>
+
+                {/* Today Planner */}
+                {onSelectToday && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={onSelectToday}
+                                className={`mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors cursor-pointer ${
+                                    isTodaySelected
+                                        ? "bg-accent font-medium text-accent-foreground"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                } ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : ""
+                                }`}
+                            >
+                                <Calendar className="h-4 w-4 shrink-0 text-primary" />
+
+                                {!collapsed && (
+                                    <span>Today</span>
+                                )}
+                            </button>
+                        </TooltipTrigger>
+
+                        {collapsed && (
+                            <TooltipContent side="right">
+                                Today
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
+
+                {/* Projects */}
+                {onSelectProjects && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={onSelectProjects}
+                                className={`mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                                    isProjectsSelected
+                                        ? "bg-accent font-medium text-accent-foreground"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                } ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : ""
+                                }`}
+                            >
+                                <Briefcase className="h-4 w-4 shrink-0" />
+
+                                {!collapsed && (
+                                    <span>Projects</span>
+                                )}
+                            </button>
+                        </TooltipTrigger>
+
+                        {collapsed && (
+                            <TooltipContent side="right">
+                                Projects
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
 
                 {/* Boards */}
                 <div className="mt-6">

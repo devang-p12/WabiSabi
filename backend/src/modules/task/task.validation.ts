@@ -54,6 +54,44 @@ export const createTaskSchema = z.object({
         .string()
         .nullable()
         .optional(),
+
+    projectId: z
+        .string()
+        .uuid("Invalid project ID")
+        .nullable()
+        .optional(),
+
+    milestoneId: z
+        .string()
+        .uuid("Invalid milestone ID")
+        .nullable()
+        .optional(),
+
+    estimatedMinutes: z
+        .number()
+        .int()
+        .min(0, "Estimated minutes cannot be negative")
+        .nullable()
+        .optional(),
+
+    actualMinutes: z
+        .number()
+        .int()
+        .min(0, "Actual minutes cannot be negative")
+        .nullable()
+        .optional(),
+
+    startedAt: z
+        .string()
+        .datetime({ message: "Invalid startedAt datetime" })
+        .nullable()
+        .optional(),
+
+    completedAt: z
+        .string()
+        .datetime({ message: "Invalid completedAt datetime" })
+        .nullable()
+        .optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -99,6 +137,50 @@ export const updateTaskSchema = z.object({
 
     completed:
         z.boolean().optional(),
+
+    projectId: z
+        .string()
+        .uuid("Invalid project ID")
+        .nullable()
+        .optional(),
+
+    milestoneId: z
+        .string()
+        .uuid("Invalid milestone ID")
+        .nullable()
+        .optional(),
+
+    estimatedMinutes: z
+        .number()
+        .int()
+        .min(0, "Estimated minutes cannot be negative")
+        .nullable()
+        .optional(),
+
+    actualMinutes: z
+        .number()
+        .int()
+        .min(0, "Actual minutes cannot be negative")
+        .nullable()
+        .optional(),
+
+    startedAt: z
+        .string()
+        .datetime({ message: "Invalid startedAt datetime" })
+        .nullable()
+        .optional(),
+
+    completedAt: z
+        .string()
+        .datetime({ message: "Invalid completedAt datetime" })
+        .nullable()
+        .optional(),
+});
+
+export const createTaskDependencySchema = z.object({
+    dependsOnId: z
+        .string()
+        .uuid("Invalid dependsOn task ID"),
 });
 
 export const moveTaskSchema = z.object({

@@ -53,8 +53,38 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members WorkspaceMember[]
-  boards  Board[]
+  members  WorkspaceMember[]
+  boards   Board[]
+  projects Project[]
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  workspaceId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  milestones Milestone[]
+  tasks      Task[]
+
+  @@index([workspaceId])
+}
+
+model Milestone {
+  id        String   @id @default(uuid())
+  title     String
+  position  Int      @default(0)
+  projectId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([projectId])
 }
 
 model WorkspaceMember {
@@ -124,6 +154,19 @@ model Task {
   completed   Boolean      @default(false)
   coverUrl    String?
 
+  estimatedMinutes Int?
+  actualMinutes    Int?
+  startedAt        DateTime?
+  completedAt      DateTime?
+
+  projectId   String?
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  milestoneId String?
+  milestone   Milestone?   @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  dependencies TaskDependency[] @relation("TaskDependencies")
+  dependedOnBy TaskDependency[] @relation("TaskDependedOnBy")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -138,6 +181,22 @@ model Task {
 
   @@index([listId])
   @@index([assigneeId])
+  @@index([projectId])
+  @@index([milestoneId])
+}
+
+model TaskDependency {
+  id          String   @id @default(uuid())
+  taskId      String
+  dependsOnId String
+  createdAt   DateTime @default(now())
+
+  task      Task @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn Task @relation("TaskDependedOnBy", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnId])
+  @@index([taskId])
+  @@index([dependsOnId])
 }
 
 model Subtask {

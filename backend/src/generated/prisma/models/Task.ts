@@ -28,10 +28,14 @@ export type AggregateTask = {
 
 export type TaskAvgAggregateOutputType = {
   position: number | null
+  estimatedMinutes: number | null
+  actualMinutes: number | null
 }
 
 export type TaskSumAggregateOutputType = {
   position: number | null
+  estimatedMinutes: number | null
+  actualMinutes: number | null
 }
 
 export type TaskMinAggregateOutputType = {
@@ -44,6 +48,12 @@ export type TaskMinAggregateOutputType = {
   dueDate: Date | null
   completed: boolean | null
   coverUrl: string | null
+  estimatedMinutes: number | null
+  actualMinutes: number | null
+  startedAt: Date | null
+  completedAt: Date | null
+  projectId: string | null
+  milestoneId: string | null
   createdAt: Date | null
   updatedAt: Date | null
   assigneeId: string | null
@@ -59,6 +69,12 @@ export type TaskMaxAggregateOutputType = {
   dueDate: Date | null
   completed: boolean | null
   coverUrl: string | null
+  estimatedMinutes: number | null
+  actualMinutes: number | null
+  startedAt: Date | null
+  completedAt: Date | null
+  projectId: string | null
+  milestoneId: string | null
   createdAt: Date | null
   updatedAt: Date | null
   assigneeId: string | null
@@ -74,6 +90,12 @@ export type TaskCountAggregateOutputType = {
   dueDate: number
   completed: number
   coverUrl: number
+  estimatedMinutes: number
+  actualMinutes: number
+  startedAt: number
+  completedAt: number
+  projectId: number
+  milestoneId: number
   createdAt: number
   updatedAt: number
   assigneeId: number
@@ -83,10 +105,14 @@ export type TaskCountAggregateOutputType = {
 
 export type TaskAvgAggregateInputType = {
   position?: true
+  estimatedMinutes?: true
+  actualMinutes?: true
 }
 
 export type TaskSumAggregateInputType = {
   position?: true
+  estimatedMinutes?: true
+  actualMinutes?: true
 }
 
 export type TaskMinAggregateInputType = {
@@ -99,6 +125,12 @@ export type TaskMinAggregateInputType = {
   dueDate?: true
   completed?: true
   coverUrl?: true
+  estimatedMinutes?: true
+  actualMinutes?: true
+  startedAt?: true
+  completedAt?: true
+  projectId?: true
+  milestoneId?: true
   createdAt?: true
   updatedAt?: true
   assigneeId?: true
@@ -114,6 +146,12 @@ export type TaskMaxAggregateInputType = {
   dueDate?: true
   completed?: true
   coverUrl?: true
+  estimatedMinutes?: true
+  actualMinutes?: true
+  startedAt?: true
+  completedAt?: true
+  projectId?: true
+  milestoneId?: true
   createdAt?: true
   updatedAt?: true
   assigneeId?: true
@@ -129,6 +167,12 @@ export type TaskCountAggregateInputType = {
   dueDate?: true
   completed?: true
   coverUrl?: true
+  estimatedMinutes?: true
+  actualMinutes?: true
+  startedAt?: true
+  completedAt?: true
+  projectId?: true
+  milestoneId?: true
   createdAt?: true
   updatedAt?: true
   assigneeId?: true
@@ -231,6 +275,12 @@ export type TaskGroupByOutputType = {
   dueDate: Date | null
   completed: boolean
   coverUrl: string | null
+  estimatedMinutes: number | null
+  actualMinutes: number | null
+  startedAt: Date | null
+  completedAt: Date | null
+  projectId: string | null
+  milestoneId: string | null
   createdAt: Date
   updatedAt: Date
   assigneeId: string | null
@@ -269,9 +319,19 @@ export type TaskWhereInput = {
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   completed?: Prisma.BoolFilter<"Task"> | boolean
   coverUrl?: Prisma.StringNullableFilter<"Task"> | string | null
+  estimatedMinutes?: Prisma.IntNullableFilter<"Task"> | number | null
+  actualMinutes?: Prisma.IntNullableFilter<"Task"> | number | null
+  startedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  projectId?: Prisma.StringNullableFilter<"Task"> | string | null
+  milestoneId?: Prisma.StringNullableFilter<"Task"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   assigneeId?: Prisma.StringNullableFilter<"Task"> | string | null
+  project?: Prisma.XOR<Prisma.ProjectNullableScalarRelationFilter, Prisma.ProjectWhereInput> | null
+  milestone?: Prisma.XOR<Prisma.MilestoneNullableScalarRelationFilter, Prisma.MilestoneWhereInput> | null
+  dependencies?: Prisma.TaskDependencyListRelationFilter
+  dependedOnBy?: Prisma.TaskDependencyListRelationFilter
   list?: Prisma.XOR<Prisma.BoardListScalarRelationFilter, Prisma.BoardListWhereInput>
   assignee?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   labels?: Prisma.TaskLabelListRelationFilter
@@ -291,9 +351,19 @@ export type TaskOrderByWithRelationInput = {
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   completed?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  milestoneId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assigneeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  project?: Prisma.ProjectOrderByWithRelationInput
+  milestone?: Prisma.MilestoneOrderByWithRelationInput
+  dependencies?: Prisma.TaskDependencyOrderByRelationAggregateInput
+  dependedOnBy?: Prisma.TaskDependencyOrderByRelationAggregateInput
   list?: Prisma.BoardListOrderByWithRelationInput
   assignee?: Prisma.UserOrderByWithRelationInput
   labels?: Prisma.TaskLabelOrderByRelationAggregateInput
@@ -316,9 +386,19 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   completed?: Prisma.BoolFilter<"Task"> | boolean
   coverUrl?: Prisma.StringNullableFilter<"Task"> | string | null
+  estimatedMinutes?: Prisma.IntNullableFilter<"Task"> | number | null
+  actualMinutes?: Prisma.IntNullableFilter<"Task"> | number | null
+  startedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  projectId?: Prisma.StringNullableFilter<"Task"> | string | null
+  milestoneId?: Prisma.StringNullableFilter<"Task"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   assigneeId?: Prisma.StringNullableFilter<"Task"> | string | null
+  project?: Prisma.XOR<Prisma.ProjectNullableScalarRelationFilter, Prisma.ProjectWhereInput> | null
+  milestone?: Prisma.XOR<Prisma.MilestoneNullableScalarRelationFilter, Prisma.MilestoneWhereInput> | null
+  dependencies?: Prisma.TaskDependencyListRelationFilter
+  dependedOnBy?: Prisma.TaskDependencyListRelationFilter
   list?: Prisma.XOR<Prisma.BoardListScalarRelationFilter, Prisma.BoardListWhereInput>
   assignee?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   labels?: Prisma.TaskLabelListRelationFilter
@@ -338,6 +418,12 @@ export type TaskOrderByWithAggregationInput = {
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   completed?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  milestoneId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assigneeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -361,6 +447,12 @@ export type TaskScalarWhereWithAggregatesInput = {
   dueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   completed?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
   coverUrl?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
+  estimatedMinutes?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
+  actualMinutes?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
+  startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+  projectId?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
+  milestoneId?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   assigneeId?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
@@ -375,8 +467,16 @@ export type TaskCreateInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
@@ -396,9 +496,17 @@ export type TaskUncheckedCreateInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
@@ -415,8 +523,16 @@ export type TaskUpdateInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
@@ -436,9 +552,17 @@ export type TaskUncheckedUpdateInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
@@ -456,6 +580,12 @@ export type TaskCreateManyInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
@@ -470,6 +600,10 @@ export type TaskUpdateManyMutationInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -484,6 +618,12 @@ export type TaskUncheckedUpdateManyInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -509,6 +649,12 @@ export type TaskCountOrderByAggregateInput = {
   dueDate?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
+  milestoneId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assigneeId?: Prisma.SortOrder
@@ -516,6 +662,8 @@ export type TaskCountOrderByAggregateInput = {
 
 export type TaskAvgOrderByAggregateInput = {
   position?: Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrder
 }
 
 export type TaskMaxOrderByAggregateInput = {
@@ -528,6 +676,12 @@ export type TaskMaxOrderByAggregateInput = {
   dueDate?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
+  milestoneId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assigneeId?: Prisma.SortOrder
@@ -543,6 +697,12 @@ export type TaskMinOrderByAggregateInput = {
   dueDate?: Prisma.SortOrder
   completed?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
+  milestoneId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assigneeId?: Prisma.SortOrder
@@ -550,6 +710,8 @@ export type TaskMinOrderByAggregateInput = {
 
 export type TaskSumOrderByAggregateInput = {
   position?: Prisma.SortOrder
+  estimatedMinutes?: Prisma.SortOrder
+  actualMinutes?: Prisma.SortOrder
 }
 
 export type TaskScalarRelationFilter = {
@@ -604,6 +766,90 @@ export type TaskUncheckedUpdateManyWithoutAssigneeNestedInput = {
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
 }
 
+export type TaskCreateNestedManyWithoutProjectInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutProjectInput, Prisma.TaskUncheckedCreateWithoutProjectInput> | Prisma.TaskCreateWithoutProjectInput[] | Prisma.TaskUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutProjectInput | Prisma.TaskCreateOrConnectWithoutProjectInput[]
+  createMany?: Prisma.TaskCreateManyProjectInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUncheckedCreateNestedManyWithoutProjectInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutProjectInput, Prisma.TaskUncheckedCreateWithoutProjectInput> | Prisma.TaskCreateWithoutProjectInput[] | Prisma.TaskUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutProjectInput | Prisma.TaskCreateOrConnectWithoutProjectInput[]
+  createMany?: Prisma.TaskCreateManyProjectInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUpdateManyWithoutProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutProjectInput, Prisma.TaskUncheckedCreateWithoutProjectInput> | Prisma.TaskCreateWithoutProjectInput[] | Prisma.TaskUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutProjectInput | Prisma.TaskCreateOrConnectWithoutProjectInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutProjectInput | Prisma.TaskUpsertWithWhereUniqueWithoutProjectInput[]
+  createMany?: Prisma.TaskCreateManyProjectInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutProjectInput | Prisma.TaskUpdateWithWhereUniqueWithoutProjectInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutProjectInput | Prisma.TaskUpdateManyWithWhereWithoutProjectInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type TaskUncheckedUpdateManyWithoutProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutProjectInput, Prisma.TaskUncheckedCreateWithoutProjectInput> | Prisma.TaskCreateWithoutProjectInput[] | Prisma.TaskUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutProjectInput | Prisma.TaskCreateOrConnectWithoutProjectInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutProjectInput | Prisma.TaskUpsertWithWhereUniqueWithoutProjectInput[]
+  createMany?: Prisma.TaskCreateManyProjectInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutProjectInput | Prisma.TaskUpdateWithWhereUniqueWithoutProjectInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutProjectInput | Prisma.TaskUpdateManyWithWhereWithoutProjectInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type TaskCreateNestedManyWithoutMilestoneInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutMilestoneInput, Prisma.TaskUncheckedCreateWithoutMilestoneInput> | Prisma.TaskCreateWithoutMilestoneInput[] | Prisma.TaskUncheckedCreateWithoutMilestoneInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutMilestoneInput | Prisma.TaskCreateOrConnectWithoutMilestoneInput[]
+  createMany?: Prisma.TaskCreateManyMilestoneInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUncheckedCreateNestedManyWithoutMilestoneInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutMilestoneInput, Prisma.TaskUncheckedCreateWithoutMilestoneInput> | Prisma.TaskCreateWithoutMilestoneInput[] | Prisma.TaskUncheckedCreateWithoutMilestoneInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutMilestoneInput | Prisma.TaskCreateOrConnectWithoutMilestoneInput[]
+  createMany?: Prisma.TaskCreateManyMilestoneInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUpdateManyWithoutMilestoneNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutMilestoneInput, Prisma.TaskUncheckedCreateWithoutMilestoneInput> | Prisma.TaskCreateWithoutMilestoneInput[] | Prisma.TaskUncheckedCreateWithoutMilestoneInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutMilestoneInput | Prisma.TaskCreateOrConnectWithoutMilestoneInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutMilestoneInput | Prisma.TaskUpsertWithWhereUniqueWithoutMilestoneInput[]
+  createMany?: Prisma.TaskCreateManyMilestoneInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutMilestoneInput | Prisma.TaskUpdateWithWhereUniqueWithoutMilestoneInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutMilestoneInput | Prisma.TaskUpdateManyWithWhereWithoutMilestoneInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type TaskUncheckedUpdateManyWithoutMilestoneNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutMilestoneInput, Prisma.TaskUncheckedCreateWithoutMilestoneInput> | Prisma.TaskCreateWithoutMilestoneInput[] | Prisma.TaskUncheckedCreateWithoutMilestoneInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutMilestoneInput | Prisma.TaskCreateOrConnectWithoutMilestoneInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutMilestoneInput | Prisma.TaskUpsertWithWhereUniqueWithoutMilestoneInput[]
+  createMany?: Prisma.TaskCreateManyMilestoneInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutMilestoneInput | Prisma.TaskUpdateWithWhereUniqueWithoutMilestoneInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutMilestoneInput | Prisma.TaskUpdateManyWithWhereWithoutMilestoneInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
 export type TaskCreateNestedManyWithoutListInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutListInput, Prisma.TaskUncheckedCreateWithoutListInput> | Prisma.TaskCreateWithoutListInput[] | Prisma.TaskUncheckedCreateWithoutListInput[]
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutListInput | Prisma.TaskCreateOrConnectWithoutListInput[]
@@ -652,6 +898,42 @@ export type EnumTaskPriorityFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type TaskCreateNestedOneWithoutDependenciesInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutDependenciesInput, Prisma.TaskUncheckedCreateWithoutDependenciesInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutDependenciesInput
+  connect?: Prisma.TaskWhereUniqueInput
+}
+
+export type TaskCreateNestedOneWithoutDependedOnByInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutDependedOnByInput, Prisma.TaskUncheckedCreateWithoutDependedOnByInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutDependedOnByInput
+  connect?: Prisma.TaskWhereUniqueInput
+}
+
+export type TaskUpdateOneRequiredWithoutDependenciesNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutDependenciesInput, Prisma.TaskUncheckedCreateWithoutDependenciesInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutDependenciesInput
+  upsert?: Prisma.TaskUpsertWithoutDependenciesInput
+  connect?: Prisma.TaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutDependenciesInput, Prisma.TaskUpdateWithoutDependenciesInput>, Prisma.TaskUncheckedUpdateWithoutDependenciesInput>
+}
+
+export type TaskUpdateOneRequiredWithoutDependedOnByNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutDependedOnByInput, Prisma.TaskUncheckedCreateWithoutDependedOnByInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutDependedOnByInput
+  upsert?: Prisma.TaskUpsertWithoutDependedOnByInput
+  connect?: Prisma.TaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutDependedOnByInput, Prisma.TaskUpdateWithoutDependedOnByInput>, Prisma.TaskUncheckedUpdateWithoutDependedOnByInput>
 }
 
 export type TaskCreateNestedOneWithoutSubtasksInput = {
@@ -735,8 +1017,16 @@ export type TaskCreateWithoutAssigneeInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
@@ -755,8 +1045,16 @@ export type TaskUncheckedCreateWithoutAssigneeInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
@@ -803,9 +1101,175 @@ export type TaskScalarWhereInput = {
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   completed?: Prisma.BoolFilter<"Task"> | boolean
   coverUrl?: Prisma.StringNullableFilter<"Task"> | string | null
+  estimatedMinutes?: Prisma.IntNullableFilter<"Task"> | number | null
+  actualMinutes?: Prisma.IntNullableFilter<"Task"> | number | null
+  startedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  projectId?: Prisma.StringNullableFilter<"Task"> | string | null
+  milestoneId?: Prisma.StringNullableFilter<"Task"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   assigneeId?: Prisma.StringNullableFilter<"Task"> | string | null
+}
+
+export type TaskCreateWithoutProjectInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
+  list: Prisma.BoardListCreateNestedOneWithoutTasksInput
+  assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
+  labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutTaskInput
+}
+
+export type TaskUncheckedCreateWithoutProjectInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  listId: string
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  milestoneId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
+  labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutTaskInput
+}
+
+export type TaskCreateOrConnectWithoutProjectInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutProjectInput, Prisma.TaskUncheckedCreateWithoutProjectInput>
+}
+
+export type TaskCreateManyProjectInputEnvelope = {
+  data: Prisma.TaskCreateManyProjectInput | Prisma.TaskCreateManyProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type TaskUpsertWithWhereUniqueWithoutProjectInput = {
+  where: Prisma.TaskWhereUniqueInput
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutProjectInput, Prisma.TaskUncheckedUpdateWithoutProjectInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutProjectInput, Prisma.TaskUncheckedCreateWithoutProjectInput>
+}
+
+export type TaskUpdateWithWhereUniqueWithoutProjectInput = {
+  where: Prisma.TaskWhereUniqueInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutProjectInput, Prisma.TaskUncheckedUpdateWithoutProjectInput>
+}
+
+export type TaskUpdateManyWithWhereWithoutProjectInput = {
+  where: Prisma.TaskScalarWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateManyMutationInput, Prisma.TaskUncheckedUpdateManyWithoutProjectInput>
+}
+
+export type TaskCreateWithoutMilestoneInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
+  list: Prisma.BoardListCreateNestedOneWithoutTasksInput
+  assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
+  labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutTaskInput
+}
+
+export type TaskUncheckedCreateWithoutMilestoneInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  listId: string
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
+  labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutTaskInput
+}
+
+export type TaskCreateOrConnectWithoutMilestoneInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutMilestoneInput, Prisma.TaskUncheckedCreateWithoutMilestoneInput>
+}
+
+export type TaskCreateManyMilestoneInputEnvelope = {
+  data: Prisma.TaskCreateManyMilestoneInput | Prisma.TaskCreateManyMilestoneInput[]
+  skipDuplicates?: boolean
+}
+
+export type TaskUpsertWithWhereUniqueWithoutMilestoneInput = {
+  where: Prisma.TaskWhereUniqueInput
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutMilestoneInput, Prisma.TaskUncheckedUpdateWithoutMilestoneInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutMilestoneInput, Prisma.TaskUncheckedCreateWithoutMilestoneInput>
+}
+
+export type TaskUpdateWithWhereUniqueWithoutMilestoneInput = {
+  where: Prisma.TaskWhereUniqueInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutMilestoneInput, Prisma.TaskUncheckedUpdateWithoutMilestoneInput>
+}
+
+export type TaskUpdateManyWithWhereWithoutMilestoneInput = {
+  where: Prisma.TaskScalarWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateManyMutationInput, Prisma.TaskUncheckedUpdateManyWithoutMilestoneInput>
 }
 
 export type TaskCreateWithoutListInput = {
@@ -817,8 +1281,16 @@ export type TaskCreateWithoutListInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
@@ -836,9 +1308,17 @@ export type TaskUncheckedCreateWithoutListInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
@@ -872,6 +1352,254 @@ export type TaskUpdateManyWithWhereWithoutListInput = {
   data: Prisma.XOR<Prisma.TaskUpdateManyMutationInput, Prisma.TaskUncheckedUpdateManyWithoutListInput>
 }
 
+export type TaskCreateWithoutDependenciesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
+  list: Prisma.BoardListCreateNestedOneWithoutTasksInput
+  assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
+  labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutTaskInput
+}
+
+export type TaskUncheckedCreateWithoutDependenciesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  listId: string
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assigneeId?: string | null
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
+  labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutTaskInput
+}
+
+export type TaskCreateOrConnectWithoutDependenciesInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutDependenciesInput, Prisma.TaskUncheckedCreateWithoutDependenciesInput>
+}
+
+export type TaskCreateWithoutDependedOnByInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  list: Prisma.BoardListCreateNestedOneWithoutTasksInput
+  assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
+  labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutTaskInput
+}
+
+export type TaskUncheckedCreateWithoutDependedOnByInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  listId: string
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
+  subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutTaskInput
+}
+
+export type TaskCreateOrConnectWithoutDependedOnByInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutDependedOnByInput, Prisma.TaskUncheckedCreateWithoutDependedOnByInput>
+}
+
+export type TaskUpsertWithoutDependenciesInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutDependenciesInput, Prisma.TaskUncheckedUpdateWithoutDependenciesInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutDependenciesInput, Prisma.TaskUncheckedCreateWithoutDependenciesInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutDependenciesInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutDependenciesInput, Prisma.TaskUncheckedUpdateWithoutDependenciesInput>
+}
+
+export type TaskUpdateWithoutDependenciesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
+  list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
+  assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
+  labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutDependenciesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  listId?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
+  labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUpsertWithoutDependedOnByInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutDependedOnByInput, Prisma.TaskUncheckedUpdateWithoutDependedOnByInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutDependedOnByInput, Prisma.TaskUncheckedCreateWithoutDependedOnByInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutDependedOnByInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutDependedOnByInput, Prisma.TaskUncheckedUpdateWithoutDependedOnByInput>
+}
+
+export type TaskUpdateWithoutDependedOnByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
+  assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
+  labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutDependedOnByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  listId?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutTaskNestedInput
+}
+
 export type TaskCreateWithoutSubtasksInput = {
   id?: string
   title: string
@@ -881,8 +1609,16 @@ export type TaskCreateWithoutSubtasksInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
@@ -901,9 +1637,17 @@ export type TaskUncheckedCreateWithoutSubtasksInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
@@ -935,8 +1679,16 @@ export type TaskUpdateWithoutSubtasksInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
@@ -955,9 +1707,17 @@ export type TaskUncheckedUpdateWithoutSubtasksInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
@@ -973,8 +1733,16 @@ export type TaskCreateWithoutAttachmentsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
@@ -993,9 +1761,17 @@ export type TaskUncheckedCreateWithoutAttachmentsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
@@ -1027,8 +1803,16 @@ export type TaskUpdateWithoutAttachmentsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
@@ -1047,9 +1831,17 @@ export type TaskUncheckedUpdateWithoutAttachmentsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
@@ -1065,8 +1857,16 @@ export type TaskCreateWithoutLabelsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   comments?: Prisma.CommentCreateNestedManyWithoutTaskInput
@@ -1085,9 +1885,17 @@ export type TaskUncheckedCreateWithoutLabelsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
   subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
@@ -1119,8 +1927,16 @@ export type TaskUpdateWithoutLabelsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
@@ -1139,9 +1955,17 @@ export type TaskUncheckedUpdateWithoutLabelsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
   subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
@@ -1157,8 +1981,16 @@ export type TaskCreateWithoutCommentsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
@@ -1177,9 +2009,17 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutTaskInput
   subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
@@ -1211,8 +2051,16 @@ export type TaskUpdateWithoutCommentsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
@@ -1231,9 +2079,17 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
   subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
@@ -1249,8 +2105,16 @@ export type TaskCreateWithoutActivityLogsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutTasksInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutTasksInput
+  dependencies?: Prisma.TaskDependencyCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyCreateNestedManyWithoutDependsOnInput
   list: Prisma.BoardListCreateNestedOneWithoutTasksInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedTasksInput
   labels?: Prisma.TaskLabelCreateNestedManyWithoutTaskInput
@@ -1269,9 +2133,17 @@ export type TaskUncheckedCreateWithoutActivityLogsInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
+  dependencies?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutTaskInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedCreateNestedManyWithoutDependsOnInput
   labels?: Prisma.TaskLabelUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutTaskInput
   subtasks?: Prisma.SubtaskUncheckedCreateNestedManyWithoutTaskInput
@@ -1303,8 +2175,16 @@ export type TaskUpdateWithoutActivityLogsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
@@ -1323,9 +2203,17 @@ export type TaskUncheckedUpdateWithoutActivityLogsInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
@@ -1342,6 +2230,12 @@ export type TaskCreateManyAssigneeInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1355,8 +2249,16 @@ export type TaskUpdateWithoutAssigneeInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
@@ -1375,8 +2277,16 @@ export type TaskUncheckedUpdateWithoutAssigneeInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
@@ -1394,8 +2304,202 @@ export type TaskUncheckedUpdateManyWithoutAssigneeInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TaskCreateManyProjectInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  listId: string
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  milestoneId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assigneeId?: string | null
+}
+
+export type TaskUpdateWithoutProjectInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
+  list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
+  assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
+  labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutProjectInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  listId?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
+  labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateManyWithoutProjectInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  listId?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type TaskCreateManyMilestoneInput = {
+  id?: string
+  title: string
+  description?: string | null
+  position?: number
+  listId: string
+  priority?: $Enums.TaskPriority
+  dueDate?: Date | string | null
+  completed?: boolean
+  coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assigneeId?: string | null
+}
+
+export type TaskUpdateWithoutMilestoneInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
+  list?: Prisma.BoardListUpdateOneRequiredWithoutTasksNestedInput
+  assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
+  labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutMilestoneInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  listId?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
+  labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
+  subtasks?: Prisma.SubtaskUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateManyWithoutMilestoneInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  listId?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumTaskPriorityFieldUpdateOperationsInput | $Enums.TaskPriority
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskCreateManyListInput = {
@@ -1407,6 +2511,12 @@ export type TaskCreateManyListInput = {
   dueDate?: Date | string | null
   completed?: boolean
   coverUrl?: string | null
+  estimatedMinutes?: number | null
+  actualMinutes?: number | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  projectId?: string | null
+  milestoneId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assigneeId?: string | null
@@ -1421,8 +2531,16 @@ export type TaskUpdateWithoutListInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutTasksNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutTasksNestedInput
+  dependencies?: Prisma.TaskDependencyUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUpdateManyWithoutDependsOnNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedTasksNestedInput
   labels?: Prisma.TaskLabelUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUpdateManyWithoutTaskNestedInput
@@ -1440,9 +2558,17 @@ export type TaskUncheckedUpdateWithoutListInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependencies?: Prisma.TaskDependencyUncheckedUpdateManyWithoutTaskNestedInput
+  dependedOnBy?: Prisma.TaskDependencyUncheckedUpdateManyWithoutDependsOnNestedInput
   labels?: Prisma.TaskLabelUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutTaskNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutTaskNestedInput
@@ -1459,6 +2585,12 @@ export type TaskUncheckedUpdateManyWithoutListInput = {
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  actualMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assigneeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1470,6 +2602,8 @@ export type TaskUncheckedUpdateManyWithoutListInput = {
  */
 
 export type TaskCountOutputType = {
+  dependencies: number
+  dependedOnBy: number
   labels: number
   comments: number
   activityLogs: number
@@ -1478,6 +2612,8 @@ export type TaskCountOutputType = {
 }
 
 export type TaskCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dependencies?: boolean | TaskCountOutputTypeCountDependenciesArgs
+  dependedOnBy?: boolean | TaskCountOutputTypeCountDependedOnByArgs
   labels?: boolean | TaskCountOutputTypeCountLabelsArgs
   comments?: boolean | TaskCountOutputTypeCountCommentsArgs
   activityLogs?: boolean | TaskCountOutputTypeCountActivityLogsArgs
@@ -1493,6 +2629,20 @@ export type TaskCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the TaskCountOutputType
    */
   select?: Prisma.TaskCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TaskCountOutputType without action
+ */
+export type TaskCountOutputTypeCountDependenciesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskDependencyWhereInput
+}
+
+/**
+ * TaskCountOutputType without action
+ */
+export type TaskCountOutputTypeCountDependedOnByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskDependencyWhereInput
 }
 
 /**
@@ -1541,9 +2691,19 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   dueDate?: boolean
   completed?: boolean
   coverUrl?: boolean
+  estimatedMinutes?: boolean
+  actualMinutes?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  projectId?: boolean
+  milestoneId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   assigneeId?: boolean
+  project?: boolean | Prisma.Task$projectArgs<ExtArgs>
+  milestone?: boolean | Prisma.Task$milestoneArgs<ExtArgs>
+  dependencies?: boolean | Prisma.Task$dependenciesArgs<ExtArgs>
+  dependedOnBy?: boolean | Prisma.Task$dependedOnByArgs<ExtArgs>
   list?: boolean | Prisma.BoardListDefaultArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
   labels?: boolean | Prisma.Task$labelsArgs<ExtArgs>
@@ -1564,9 +2724,17 @@ export type TaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   dueDate?: boolean
   completed?: boolean
   coverUrl?: boolean
+  estimatedMinutes?: boolean
+  actualMinutes?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  projectId?: boolean
+  milestoneId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   assigneeId?: boolean
+  project?: boolean | Prisma.Task$projectArgs<ExtArgs>
+  milestone?: boolean | Prisma.Task$milestoneArgs<ExtArgs>
   list?: boolean | Prisma.BoardListDefaultArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
 }, ExtArgs["result"]["task"]>
@@ -1581,9 +2749,17 @@ export type TaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   dueDate?: boolean
   completed?: boolean
   coverUrl?: boolean
+  estimatedMinutes?: boolean
+  actualMinutes?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  projectId?: boolean
+  milestoneId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   assigneeId?: boolean
+  project?: boolean | Prisma.Task$projectArgs<ExtArgs>
+  milestone?: boolean | Prisma.Task$milestoneArgs<ExtArgs>
   list?: boolean | Prisma.BoardListDefaultArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
 }, ExtArgs["result"]["task"]>
@@ -1598,13 +2774,23 @@ export type TaskSelectScalar = {
   dueDate?: boolean
   completed?: boolean
   coverUrl?: boolean
+  estimatedMinutes?: boolean
+  actualMinutes?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  projectId?: boolean
+  milestoneId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   assigneeId?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "position" | "listId" | "priority" | "dueDate" | "completed" | "coverUrl" | "createdAt" | "updatedAt" | "assigneeId", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "position" | "listId" | "priority" | "dueDate" | "completed" | "coverUrl" | "estimatedMinutes" | "actualMinutes" | "startedAt" | "completedAt" | "projectId" | "milestoneId" | "createdAt" | "updatedAt" | "assigneeId", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.Task$projectArgs<ExtArgs>
+  milestone?: boolean | Prisma.Task$milestoneArgs<ExtArgs>
+  dependencies?: boolean | Prisma.Task$dependenciesArgs<ExtArgs>
+  dependedOnBy?: boolean | Prisma.Task$dependedOnByArgs<ExtArgs>
   list?: boolean | Prisma.BoardListDefaultArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
   labels?: boolean | Prisma.Task$labelsArgs<ExtArgs>
@@ -1615,10 +2801,14 @@ export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.Task$projectArgs<ExtArgs>
+  milestone?: boolean | Prisma.Task$milestoneArgs<ExtArgs>
   list?: boolean | Prisma.BoardListDefaultArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
 }
 export type TaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.Task$projectArgs<ExtArgs>
+  milestone?: boolean | Prisma.Task$milestoneArgs<ExtArgs>
   list?: boolean | Prisma.BoardListDefaultArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
 }
@@ -1626,6 +2816,10 @@ export type TaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Task"
   objects: {
+    project: Prisma.$ProjectPayload<ExtArgs> | null
+    milestone: Prisma.$MilestonePayload<ExtArgs> | null
+    dependencies: Prisma.$TaskDependencyPayload<ExtArgs>[]
+    dependedOnBy: Prisma.$TaskDependencyPayload<ExtArgs>[]
     list: Prisma.$BoardListPayload<ExtArgs>
     assignee: Prisma.$UserPayload<ExtArgs> | null
     labels: Prisma.$TaskLabelPayload<ExtArgs>[]
@@ -1644,6 +2838,12 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     dueDate: Date | null
     completed: boolean
     coverUrl: string | null
+    estimatedMinutes: number | null
+    actualMinutes: number | null
+    startedAt: Date | null
+    completedAt: Date | null
+    projectId: string | null
+    milestoneId: string | null
     createdAt: Date
     updatedAt: Date
     assigneeId: string | null
@@ -2041,6 +3241,10 @@ readonly fields: TaskFieldRefs;
  */
 export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  project<T extends Prisma.Task$projectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$projectArgs<ExtArgs>>): Prisma.Prisma__ProjectClient<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  milestone<T extends Prisma.Task$milestoneArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$milestoneArgs<ExtArgs>>): Prisma.Prisma__MilestoneClient<runtime.Types.Result.GetResult<Prisma.$MilestonePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  dependencies<T extends Prisma.Task$dependenciesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$dependenciesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskDependencyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dependedOnBy<T extends Prisma.Task$dependedOnByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$dependedOnByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskDependencyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   list<T extends Prisma.BoardListDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BoardListDefaultArgs<ExtArgs>>): Prisma.Prisma__BoardListClient<runtime.Types.Result.GetResult<Prisma.$BoardListPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   assignee<T extends Prisma.Task$assigneeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$assigneeArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   labels<T extends Prisma.Task$labelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$labelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2086,6 +3290,12 @@ export interface TaskFieldRefs {
   readonly dueDate: Prisma.FieldRef<"Task", 'DateTime'>
   readonly completed: Prisma.FieldRef<"Task", 'Boolean'>
   readonly coverUrl: Prisma.FieldRef<"Task", 'String'>
+  readonly estimatedMinutes: Prisma.FieldRef<"Task", 'Int'>
+  readonly actualMinutes: Prisma.FieldRef<"Task", 'Int'>
+  readonly startedAt: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly completedAt: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly projectId: Prisma.FieldRef<"Task", 'String'>
+  readonly milestoneId: Prisma.FieldRef<"Task", 'String'>
   readonly createdAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly assigneeId: Prisma.FieldRef<"Task", 'String'>
@@ -2487,6 +3697,92 @@ export type TaskDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Tasks to delete.
    */
   limit?: number
+}
+
+/**
+ * Task.project
+ */
+export type Task$projectArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Project
+   */
+  select?: Prisma.ProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Project
+   */
+  omit?: Prisma.ProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProjectInclude<ExtArgs> | null
+  where?: Prisma.ProjectWhereInput
+}
+
+/**
+ * Task.milestone
+ */
+export type Task$milestoneArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Milestone
+   */
+  select?: Prisma.MilestoneSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Milestone
+   */
+  omit?: Prisma.MilestoneOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MilestoneInclude<ExtArgs> | null
+  where?: Prisma.MilestoneWhereInput
+}
+
+/**
+ * Task.dependencies
+ */
+export type Task$dependenciesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskDependency
+   */
+  select?: Prisma.TaskDependencySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskDependency
+   */
+  omit?: Prisma.TaskDependencyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskDependencyInclude<ExtArgs> | null
+  where?: Prisma.TaskDependencyWhereInput
+  orderBy?: Prisma.TaskDependencyOrderByWithRelationInput | Prisma.TaskDependencyOrderByWithRelationInput[]
+  cursor?: Prisma.TaskDependencyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskDependencyScalarFieldEnum | Prisma.TaskDependencyScalarFieldEnum[]
+}
+
+/**
+ * Task.dependedOnBy
+ */
+export type Task$dependedOnByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskDependency
+   */
+  select?: Prisma.TaskDependencySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskDependency
+   */
+  omit?: Prisma.TaskDependencyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskDependencyInclude<ExtArgs> | null
+  where?: Prisma.TaskDependencyWhereInput
+  orderBy?: Prisma.TaskDependencyOrderByWithRelationInput | Prisma.TaskDependencyOrderByWithRelationInput[]
+  cursor?: Prisma.TaskDependencyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskDependencyScalarFieldEnum | Prisma.TaskDependencyScalarFieldEnum[]
 }
 
 /**

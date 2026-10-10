@@ -17,6 +17,12 @@ export const createTask = async (
         dueDate?: string | null | undefined;
         assigneeId?: string | null | undefined;
         coverUrl?: string | null | undefined;
+        projectId?: string | null | undefined;
+        milestoneId?: string | null | undefined;
+        estimatedMinutes?: number | null | undefined;
+        actualMinutes?: number | null | undefined;
+        startedAt?: string | null | undefined;
+        completedAt?: string | null | undefined;
     }
 ) => {
     const list = await prisma.boardList.findUnique({
@@ -71,6 +77,12 @@ export const createTask = async (
                 : null,
             assigneeId: data.assigneeId ?? null,
             coverUrl: data.coverUrl ?? null,
+            projectId: data.projectId ?? null,
+            milestoneId: data.milestoneId ?? null,
+            estimatedMinutes: data.estimatedMinutes ?? null,
+            actualMinutes: data.actualMinutes ?? null,
+            startedAt: data.startedAt ? new Date(data.startedAt) : null,
+            completedAt: data.completedAt ? new Date(data.completedAt) : null,
         },
         include: {
             assignee: {
@@ -79,6 +91,45 @@ export const createTask = async (
                     name: true,
                     email: true,
                     avatarUrl: true,
+                },
+            },
+            project: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            milestone: {
+                select: {
+                    id: true,
+                    title: true,
+                    position: true,
+                },
+            },
+            dependencies: {
+                include: {
+                    dependsOn: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
+                },
+            },
+            dependedOnBy: {
+                include: {
+                    task: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
                 },
             },
             labels: {
@@ -181,6 +232,45 @@ export const getListTasks = async (
                     avatarUrl: true,
                 },
             },
+            project: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            milestone: {
+                select: {
+                    id: true,
+                    title: true,
+                    position: true,
+                },
+            },
+            dependencies: {
+                include: {
+                    dependsOn: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
+                },
+            },
+            dependedOnBy: {
+                include: {
+                    task: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
+                },
+            },
             labels: {
                 include: {
                     label: true,
@@ -218,6 +308,45 @@ export const getTask = async (
                     name: true,
                     email: true,
                     avatarUrl: true,
+                },
+            },
+            project: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            milestone: {
+                select: {
+                    id: true,
+                    title: true,
+                    position: true,
+                },
+            },
+            dependencies: {
+                include: {
+                    dependsOn: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
+                },
+            },
+            dependedOnBy: {
+                include: {
+                    task: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
                 },
             },
             labels: {
@@ -265,6 +394,12 @@ export const updateTask = async (
         completed?: boolean | undefined;
         assigneeId?: string | null | undefined;
         coverUrl?: string | null | undefined;
+        projectId?: string | null | undefined;
+        milestoneId?: string | null | undefined;
+        estimatedMinutes?: number | null | undefined;
+        actualMinutes?: number | null | undefined;
+        startedAt?: string | null | undefined;
+        completedAt?: string | null | undefined;
     }
 ) => {
     const task = await prisma.task.findUnique({
@@ -297,6 +432,17 @@ export const updateTask = async (
         } as const;
     }
 
+    let nextCompletedAt = undefined;
+    if (data.completedAt !== undefined) {
+        nextCompletedAt = data.completedAt ? new Date(data.completedAt) : null;
+    } else if (data.completed !== undefined) {
+        if (data.completed && !task.completed) {
+            nextCompletedAt = new Date();
+        } else if (!data.completed && task.completed) {
+            nextCompletedAt = null;
+        }
+    }
+
     const updatedTask = await prisma.task.update({
         where: {
             id: taskId,
@@ -323,6 +469,21 @@ export const updateTask = async (
             ...(data.completed !== undefined && {
                 completed: data.completed,
             }),
+            ...(nextCompletedAt !== undefined && {
+                completedAt: nextCompletedAt,
+            }),
+
+            ...(data.startedAt !== undefined && {
+                startedAt: data.startedAt ? new Date(data.startedAt) : null,
+            }),
+
+            ...(data.estimatedMinutes !== undefined && {
+                estimatedMinutes: data.estimatedMinutes,
+            }),
+
+            ...(data.actualMinutes !== undefined && {
+                actualMinutes: data.actualMinutes,
+            }),
 
             ...(data.assigneeId !== undefined && {
                 assigneeId: data.assigneeId,
@@ -330,6 +491,14 @@ export const updateTask = async (
 
             ...(data.coverUrl !== undefined && {
                 coverUrl: data.coverUrl,
+            }),
+
+            ...(data.projectId !== undefined && {
+                projectId: data.projectId,
+            }),
+
+            ...(data.milestoneId !== undefined && {
+                milestoneId: data.milestoneId,
             }),
         },
 
@@ -340,6 +509,45 @@ export const updateTask = async (
                     name: true,
                     email: true,
                     avatarUrl: true,
+                },
+            },
+            project: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            milestone: {
+                select: {
+                    id: true,
+                    title: true,
+                    position: true,
+                },
+            },
+            dependencies: {
+                include: {
+                    dependsOn: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
+                },
+            },
+            dependedOnBy: {
+                include: {
+                    task: {
+                        select: {
+                            id: true,
+                            title: true,
+                            completed: true,
+                            priority: true,
+                            dueDate: true,
+                        },
+                    },
                 },
             },
             labels: {
@@ -708,4 +916,225 @@ export const moveTask = async (
     }
 
     return result;
+};
+
+export const createTaskDependency = async (
+    taskId: string,
+    dependsOnId: string,
+    userId: string
+) => {
+    if (taskId === dependsOnId) {
+        return {
+            error: "A task cannot depend on itself.",
+        } as const;
+    }
+
+    const [taskA, taskB] = await Promise.all([
+        prisma.task.findUnique({
+            where: { id: taskId },
+            include: { list: { include: { board: true } } },
+        }),
+        prisma.task.findUnique({
+            where: { id: dependsOnId },
+            include: { list: { include: { board: true } } },
+        }),
+    ]);
+
+    if (!taskA || !taskB) {
+        return {
+            error: "One or both tasks not found.",
+        } as const;
+    }
+
+    const membership = await getWorkspaceMembership(
+        taskA.list.board.workspaceId,
+        userId
+    );
+
+    if (!membership) {
+        return {
+            error: "You do not have permission to manage dependencies for this task.",
+        } as const;
+    }
+
+    // Check if duplicate
+    const existing = await prisma.taskDependency.findUnique({
+        where: {
+            taskId_dependsOnId: {
+                taskId,
+                dependsOnId,
+            },
+        },
+    });
+
+    if (existing) {
+        return {
+            error: "Dependency already exists.",
+        } as const;
+    }
+
+    // Check direct circular dependency: Task B depending on Task A
+    const circular = await prisma.taskDependency.findUnique({
+        where: {
+            taskId_dependsOnId: {
+                taskId: dependsOnId,
+                dependsOnId: taskId,
+            },
+        },
+    });
+
+    if (circular) {
+        return {
+            error: "Circular dependency detected: target task already depends on this task.",
+        } as const;
+    }
+
+    const dependency = await prisma.taskDependency.create({
+        data: {
+            taskId,
+            dependsOnId,
+        },
+        include: {
+            task: {
+                select: {
+                    id: true,
+                    title: true,
+                    completed: true,
+                },
+            },
+            dependsOn: {
+                select: {
+                    id: true,
+                    title: true,
+                    completed: true,
+                    priority: true,
+                    dueDate: true,
+                },
+            },
+        },
+    });
+
+    try {
+        getIO().to(`board_${taskA.list.board.id}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on createTaskDependency:", e);
+    }
+
+    return { dependency } as const;
+};
+
+export const getTaskDependencies = async (
+    taskId: string,
+    userId: string
+) => {
+    const task = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: { list: { include: { board: true } } },
+    });
+
+    if (!task) {
+        return {
+            error: "Task not found.",
+        } as const;
+    }
+
+    const membership = await getWorkspaceMembership(
+        task.list.board.workspaceId,
+        userId
+    );
+
+    if (!membership) {
+        return {
+            error: "You are not a member of this workspace.",
+        } as const;
+    }
+
+    const [dependencies, dependedOnBy] = await Promise.all([
+        prisma.taskDependency.findMany({
+            where: { taskId },
+            include: {
+                dependsOn: {
+                    select: {
+                        id: true,
+                        title: true,
+                        completed: true,
+                        priority: true,
+                        dueDate: true,
+                    },
+                },
+            },
+        }),
+        prisma.taskDependency.findMany({
+            where: { dependsOnId: taskId },
+            include: {
+                task: {
+                    select: {
+                        id: true,
+                        title: true,
+                        completed: true,
+                        priority: true,
+                        dueDate: true,
+                    },
+                },
+            },
+        }),
+    ]);
+
+    return { dependencies, dependedOnBy } as const;
+};
+
+export const deleteTaskDependency = async (
+    taskId: string,
+    dependsOnId: string,
+    userId: string
+) => {
+    const dependency = await prisma.taskDependency.findUnique({
+        where: {
+            taskId_dependsOnId: {
+                taskId,
+                dependsOnId,
+            },
+        },
+        include: {
+            task: {
+                include: {
+                    list: { include: { board: true } },
+                },
+            },
+        },
+    });
+
+    if (!dependency) {
+        return {
+            error: "Dependency not found.",
+        } as const;
+    }
+
+    const membership = await getWorkspaceMembership(
+        dependency.task.list.board.workspaceId,
+        userId
+    );
+
+    if (!membership) {
+        return {
+            error: "You do not have permission to delete this dependency.",
+        } as const;
+    }
+
+    await prisma.taskDependency.delete({
+        where: {
+            taskId_dependsOnId: {
+                taskId,
+                dependsOnId,
+            },
+        },
+    });
+
+    try {
+        getIO().to(`board_${dependency.task.list.board.id}`).emit("board_updated");
+    } catch (e) {
+        console.error("Socket error on deleteTaskDependency:", e);
+    }
+
+    return { success: true } as const;
 };

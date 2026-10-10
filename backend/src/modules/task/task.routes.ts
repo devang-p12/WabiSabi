@@ -8,7 +8,10 @@ import {
     getListTasksController,
     getTaskController,
     updateTaskController,
-    moveTaskController
+    moveTaskController,
+    createTaskDependencyController,
+    getTaskDependenciesController,
+    deleteTaskDependencyController,
 } from "./task.controller.js";
 
 const router = Router();
@@ -47,6 +50,25 @@ router.patch(
     "/tasks/:taskId/move",
     authenticate,
     moveTaskController
+);
+
+// Task dependencies
+router.post(
+    "/tasks/:taskId/dependencies",
+    authenticate,
+    createTaskDependencyController
+);
+
+router.get(
+    "/tasks/:taskId/dependencies",
+    authenticate,
+    getTaskDependenciesController
+);
+
+router.delete(
+    "/tasks/:taskId/dependencies/:dependsOnId",
+    authenticate,
+    deleteTaskDependencyController
 );
 
 export default router;

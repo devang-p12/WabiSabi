@@ -54,10 +54,13 @@ export const ModelName = {
   User: 'User',
   RefreshToken: 'RefreshToken',
   Workspace: 'Workspace',
+  Project: 'Project',
+  Milestone: 'Milestone',
   WorkspaceMember: 'WorkspaceMember',
   Board: 'Board',
   BoardList: 'BoardList',
   Task: 'Task',
+  TaskDependency: 'TaskDependency',
   Subtask: 'Subtask',
   Attachment: 'Attachment',
   Label: 'Label',
@@ -119,6 +122,30 @@ export const WorkspaceScalarFieldEnum = {
 export type WorkspaceScalarFieldEnum = (typeof WorkspaceScalarFieldEnum)[keyof typeof WorkspaceScalarFieldEnum]
 
 
+export const ProjectScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  workspaceId: 'workspaceId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const MilestoneScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  position: 'position',
+  projectId: 'projectId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MilestoneScalarFieldEnum = (typeof MilestoneScalarFieldEnum)[keyof typeof MilestoneScalarFieldEnum]
+
+
 export const WorkspaceMemberScalarFieldEnum = {
   id: 'id',
   workspaceId: 'workspaceId',
@@ -165,12 +192,28 @@ export const TaskScalarFieldEnum = {
   dueDate: 'dueDate',
   completed: 'completed',
   coverUrl: 'coverUrl',
+  estimatedMinutes: 'estimatedMinutes',
+  actualMinutes: 'actualMinutes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  projectId: 'projectId',
+  milestoneId: 'milestoneId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   assigneeId: 'assigneeId'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskDependencyScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  dependsOnId: 'dependsOnId',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskDependencyScalarFieldEnum = (typeof TaskDependencyScalarFieldEnum)[keyof typeof TaskDependencyScalarFieldEnum]
 
 
 export const SubtaskScalarFieldEnum = {
