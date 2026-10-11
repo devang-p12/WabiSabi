@@ -7,12 +7,24 @@ import {
     applyAdaptiveReplanController,
     getAIHealthController,
     testAIPromptController,
+    orchestratePromptController,
+    listToolsController,
 } from "./ai.controller.js";
 
 const router = Router();
 
 // GET /api/v1/ai/health - Health check endpoint verifying Ollama / AI provider reachability
 router.get("/health", getAIHealthController);
+
+// GET /api/v1/ai/tools - List available backend tools
+router.get("/tools", listToolsController);
+
+// POST /api/v1/ai/workspaces/:workspaceId/orchestrate - Phase 13 tool orchestration cycle
+router.post(
+    "/workspaces/:workspaceId/orchestrate",
+    authenticate,
+    orchestratePromptController
+);
 
 // POST /api/v1/ai/projects/analyze - Analyzes project idea and produces structured project plan (analysis only)
 router.post("/projects/analyze", analyzeProjectController);

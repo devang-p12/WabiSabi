@@ -7,6 +7,7 @@ import {
     applyProjectPlanSchema,
     applyAdaptiveReplanSchema,
 } from "./ai.schemas.js";
+import { toolOrchestrator } from "./tools/tool.orchestrator.js";
 
 /**
  * GET /api/v1/ai/health
@@ -310,3 +311,62 @@ export const testAIPromptController = async (
         });
     }
 };
+
+/**
+ * POST /api/v1/ai/workspaces/:workspaceId/orchestrate
+ * Phase 13: Understands user request, decides if a tool is needed, executes allowed tool,
+ * and synthesizes final response.
+ */
+export const orchestratePromptController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    try {
+        const workspaceId = req.params.workspaceId as string;
+        const userId = req.userId;
+        const { prompt, projectId } = req.body || {};
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+            res.status(400).json({ success: false, message: "A non-empty prompt is required." });
+            return;
+        }
+
+        const result = await toolOrchestrator.orchestrate(
+            prompt.trim(),
+            { userId, workspaceId },
+            { ...(projectId ? { projectId } : {}) }
+        );
+
+        res.json({
+            success: true,
+            data: result,
+        });
+    } catch (error: any) {
+        console.error("AI tool orchestration failed:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to orchestrate AI tool execution.",
+        });
+    }
+};
+
+/**
+ * GET /api/v1/ai/tools
+ * Lists registered backend tools available to the AI system
+ */
+export const listToolsController = async (
+    _req: Request,
+    res: Response
+) => {
+    const tools = toolOrchestrator.getAvailableTools().map((t) => ({
+        name: t.name,
+        description: t.description,
+    }));
+    res.json({ success: true, data: tools });
+};
+

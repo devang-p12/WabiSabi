@@ -4,6 +4,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Brain,
+    Bot,
     FileText,
     Home,
     LayoutDashboard,
@@ -44,6 +45,8 @@ interface WorkspaceSidebarProps {
     isDocumentsSelected?: boolean;
     onSelectKnowledge?: () => void;
     isKnowledgeSelected?: boolean;
+    onSelectAIAssistant?: () => void;
+    isAIAssistantSelected?: boolean;
 }
 
 export function WorkspaceSidebar({
@@ -66,6 +69,8 @@ export function WorkspaceSidebar({
     isDocumentsSelected,
     onSelectKnowledge,
     isKnowledgeSelected,
+    onSelectAIAssistant,
+    isAIAssistantSelected,
 }: WorkspaceSidebarProps) {
     const isHome = selectedBoardId === null;
 
@@ -294,6 +299,39 @@ export function WorkspaceSidebar({
                         {collapsed && (
                             <TooltipContent side="right">
                                 Knowledge & RAG
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
+
+                {/* AI Assistant & Tools */}
+                {onSelectAIAssistant && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={onSelectAIAssistant}
+                                className={`mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors cursor-pointer ${
+                                    isAIAssistantSelected
+                                        ? "bg-accent font-medium text-accent-foreground"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                } ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : ""
+                                }`}
+                            >
+                                <Bot className="h-4 w-4 shrink-0 text-primary" />
+
+                                {!collapsed && (
+                                    <span>AI Assistant</span>
+                                )}
+                            </button>
+                        </TooltipTrigger>
+
+                        {collapsed && (
+                            <TooltipContent side="right">
+                                AI Assistant
                             </TooltipContent>
                         )}
                     </Tooltip>

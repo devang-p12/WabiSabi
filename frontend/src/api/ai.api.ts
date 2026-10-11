@@ -185,3 +185,57 @@ export const applyAdaptiveReplan = async (
     });
     return res.data.data;
 };
+
+// ==========================================
+// Phase 13: Tool Orchestration Frontend Types
+// ==========================================
+
+export interface ToolExecutionRecord {
+    toolName: string;
+    params: any;
+    result?: any;
+    error?: string;
+    durationMs: number;
+}
+
+export interface OrchestrationResult {
+    thought?: string;
+    toolUsed?: string;
+    toolInput?: any;
+    toolOutput?: any;
+    response: string;
+    executionHistory: ToolExecutionRecord[];
+}
+
+export interface AIToolInfo {
+    name: string;
+    description: string;
+}
+
+/**
+ * Sends a natural language prompt to the AI tool orchestrator
+ */
+export const orchestratePrompt = async (
+    workspaceId: string,
+    prompt: string,
+    projectId?: string
+): Promise<OrchestrationResult> => {
+    const res = await api.post<{ success: boolean; data: OrchestrationResult }>(
+        `/ai/workspaces/${workspaceId}/orchestrate`,
+        {
+            prompt,
+            ...(projectId ? { projectId } : {}),
+        },
+        { timeout: 90000 }
+    );
+    return res.data.data;
+};
+
+/**
+ * Fetch available tools description
+ */
+export const getAvailableTools = async (): Promise<AIToolInfo[]> => {
+    const res = await api.get<{ success: boolean; data: AIToolInfo[] }>("/ai/tools");
+    return res.data.data;
+};
+

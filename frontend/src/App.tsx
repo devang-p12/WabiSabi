@@ -20,6 +20,7 @@ import Today from "./pages/Today";
 import PagesPage from "./pages/PagesPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import KnowledgeSearchPage from "./pages/KnowledgeSearchPage";
+import AIToolAssistantPage from "./pages/AIToolAssistantPage";
 
 function App() {
     return (
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/workspaces/:workspaceId/pages/:pageId" element={<PagesPage />} />
                     <Route path="/workspaces/:workspaceId/documents" element={<DocumentsPage />} />
                     <Route path="/workspaces/:workspaceId/knowledge" element={<KnowledgeSearchPage />} />
+                    <Route path="/workspaces/:workspaceId/ai-assistant" element={<AIToolAssistantPage />} />
                 </Route>
 
                 {/* Fallbacks */}

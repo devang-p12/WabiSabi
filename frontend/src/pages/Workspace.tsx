@@ -561,6 +561,8 @@ export default function Workspace() {
                     isDocumentsSelected={false}
                     onSelectKnowledge={() => navigate(`/workspaces/${workspaceId}/knowledge`)}
                     isKnowledgeSelected={false}
+                    onSelectAIAssistant={() => navigate(`/workspaces/${workspaceId}/ai-assistant`)}
+                    isAIAssistantSelected={false}
                 />
 
                 {/* Main Content Area */}
