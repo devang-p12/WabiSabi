@@ -8,6 +8,7 @@ import {
     applyAdaptiveReplanSchema,
 } from "./ai.schemas.js";
 import { toolOrchestrator } from "./tools/tool.orchestrator.js";
+import { wabiAgentService } from "./agent/wabi-agent.service.js";
 
 /**
  * GET /api/v1/ai/health
@@ -369,4 +370,100 @@ export const listToolsController = async (
     }));
     res.json({ success: true, data: tools });
 };
+
+/**
+ * POST /api/v1/ai/workspaces/:workspaceId/agent/chat
+ * Phase 14: Controlled Wabi Agent reasoning loop across project state, tasks, dependencies,
+ * today plan, and workspace knowledge.
+ */
+export const runAgentController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    try {
+        const workspaceId = req.params.workspaceId as string;
+        const userId = req.userId;
+        const { message, projectId, conversationHistory } = req.body || {};
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        if (!message || typeof message !== "string" || !message.trim()) {
+            res.status(400).json({ success: false, message: "A message string is required." });
+            return;
+        }
+
+        const result = await wabiAgentService.runAgent(
+            message.trim(),
+            { userId, workspaceId },
+            {
+                ...(projectId ? { projectId } : {}),
+                ...(conversationHistory ? { conversationHistory } : {}),
+            }
+        );
+
+        res.json({
+            success: true,
+            data: result,
+        });
+    } catch (error: any) {
+        console.error("Wabi Agent execution failed:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to execute Wabi Agent reasoning.",
+        });
+    }
+};
+
+/**
+ * POST /api/v1/ai/workspaces/:workspaceId/agent/confirm
+ * Phase 14: Confirms and executes an action flagged for user approval
+ */
+export const confirmAgentActionController = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    try {
+        const workspaceId = req.params.workspaceId as string;
+        const userId = req.userId;
+        const { confirmationId } = req.body || {};
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        if (!confirmationId) {
+            res.status(400).json({ success: false, message: "confirmationId is required." });
+            return;
+        }
+
+        const result = await wabiAgentService.executeConfirmedAction(
+            confirmationId,
+            { userId, workspaceId }
+        );
+
+        if (!result.success) {
+            res.status(400).json({
+                success: false,
+                message: result.error || "Confirmation failed.",
+            });
+            return;
+        }
+
+        res.json({
+            success: true,
+            data: result.result,
+        });
+    } catch (error: any) {
+        console.error("Wabi Agent confirmation failed:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to execute confirmed agent action.",
+        });
+    }
+};
+
 

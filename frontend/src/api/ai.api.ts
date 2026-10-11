@@ -239,3 +239,74 @@ export const getAvailableTools = async (): Promise<AIToolInfo[]> => {
     return res.data.data;
 };
 
+// ==========================================
+// Phase 14: Controlled Wabi Agent Types & API
+// ==========================================
+
+export interface AgentReasoningStep {
+    stepNumber: number;
+    thought: string;
+    action?: string;
+    actionInput?: any;
+    observation?: any;
+    durationMs?: number;
+}
+
+export interface AgentConfirmationRequest {
+    confirmationId: string;
+    toolName: string;
+    params: any;
+    message: string;
+}
+
+export interface WabiAgentResponse {
+    answer: string;
+    thoughtProcess: string;
+    requiresConfirmation?: boolean;
+    confirmation?: AgentConfirmationRequest;
+    steps: AgentReasoningStep[];
+    toolLogs: Array<{
+        timestamp: string;
+        toolName: string;
+        params: any;
+        result?: any;
+        error?: string;
+        durationMs: number;
+    }>;
+}
+
+/**
+ * Runs the controlled Wabi agent reasoning loop
+ */
+export const runWabiAgent = async (
+    workspaceId: string,
+    message: string,
+    projectId?: string
+): Promise<WabiAgentResponse> => {
+    const res = await api.post<{ success: boolean; data: WabiAgentResponse }>(
+        `/ai/workspaces/${workspaceId}/agent/chat`,
+        {
+            message,
+            ...(projectId ? { projectId } : {}),
+        },
+        { timeout: 120000 }
+    );
+    return res.data.data;
+};
+
+/**
+ * Confirms and executes an agent-proposed major or destructive action
+ */
+export const confirmAgentAction = async (
+    workspaceId: string,
+    confirmationId: string
+): Promise<any> => {
+    const res = await api.post<{ success: boolean; data: any }>(
+        `/ai/workspaces/${workspaceId}/agent/confirm`,
+        {
+            confirmationId,
+        }
+    );
+    return res.data.data;
+};
+

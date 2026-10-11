@@ -10,6 +10,7 @@ import {
     createTaskDependency as createTaskDependencyService,
 } from "../../task/task.service.js";
 import { getTodayPlan } from "../../planner/planner.service.js";
+import { knowledgeRagService } from "../../knowledge/knowledge-rag.service.js";
 import { aiService } from "../ai.service.js";
 import { prisma } from "../../../config/prisma.js";
 
@@ -293,9 +294,10 @@ export const createTaskTool: ToolDefinition = {
 // ==========================================
 export const updateTaskTool: ToolDefinition = {
     name: "updateTask",
-    description: "Update task properties such as title, description, priority, estimates, or due date.",
+    description: "Update task properties such as title, description, priority, estimates, or due date. Can find task by UUID or title.",
     parameters: z.object({
-        taskId: z.string().uuid("Valid taskId UUID is required"),
+        taskId: z.string().optional(),
+        taskTitle: z.string().optional(),
         title: z.string().optional(),
         description: z.string().optional(),
         priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
@@ -304,11 +306,34 @@ export const updateTaskTool: ToolDefinition = {
         dueDate: z.string().optional(),
     }),
     execute: async (params, context) => {
-        const { taskId, ...updateData } = params;
+        let targetTaskId = params.taskId;
+
+        // If taskId not provided or not valid UUID, search by title in workspace
+        if (!targetTaskId && params.taskTitle) {
+            const found = await prisma.task.findFirst({
+                where: {
+                    title: { contains: params.taskTitle, mode: "insensitive" },
+                    list: { board: { workspaceId: context.workspaceId } },
+                },
+            });
+            if (found) targetTaskId = found.id;
+        }
+
+        if (!targetTaskId) {
+            throw new Error("Target task ID or title not specified or not found in this workspace.");
+        }
+
+        const updateData: any = {};
+        if (params.title) updateData.title = params.title;
+        if (params.description !== undefined) updateData.description = params.description;
+        if (params.priority) updateData.priority = params.priority;
+        if (params.estimatedMinutes) updateData.estimatedMinutes = params.estimatedMinutes;
+        if (params.actualMinutes) updateData.actualMinutes = params.actualMinutes;
+        if (params.dueDate) updateData.dueDate = params.dueDate;
 
         // Verify task workspace membership
         const task = await prisma.task.findUnique({
-            where: { id: taskId },
+            where: { id: targetTaskId },
             include: { list: { include: { board: true } } },
         });
 
@@ -316,7 +341,7 @@ export const updateTaskTool: ToolDefinition = {
             throw new Error("Task not found in this workspace.");
         }
 
-        const result = await updateTaskService(taskId, context.userId, updateData);
+        const result = await updateTaskService(targetTaskId, context.userId, updateData);
         if ("error" in result && result.error) {
             throw new Error(result.error);
         }
@@ -325,8 +350,9 @@ export const updateTaskTool: ToolDefinition = {
             id: result.task.id,
             title: result.task.title,
             priority: result.task.priority,
+            dueDate: result.task.dueDate,
             completed: result.task.completed,
-            message: "Task updated successfully.",
+            message: `Task "${result.task.title}" updated successfully.`,
         };
     },
 };
@@ -336,14 +362,31 @@ export const updateTaskTool: ToolDefinition = {
 // ==========================================
 export const completeTaskTool: ToolDefinition = {
     name: "completeTask",
-    description: "Mark a task as completed or uncompleted.",
+    description: "Mark a task as completed or uncompleted by taskId or title.",
     parameters: z.object({
-        taskId: z.string().uuid("Valid taskId UUID is required"),
+        taskId: z.string().optional(),
+        taskTitle: z.string().optional(),
         completed: z.boolean().default(true),
     }),
-    execute: async ({ taskId, completed }, context) => {
+    execute: async (params, context) => {
+        let targetTaskId = params.taskId;
+
+        if (!targetTaskId && params.taskTitle) {
+            const found = await prisma.task.findFirst({
+                where: {
+                    title: { contains: params.taskTitle, mode: "insensitive" },
+                    list: { board: { workspaceId: context.workspaceId } },
+                },
+            });
+            if (found) targetTaskId = found.id;
+        }
+
+        if (!targetTaskId) {
+            throw new Error("Target task ID or title not specified or not found in this workspace.");
+        }
+
         const task = await prisma.task.findUnique({
-            where: { id: taskId },
+            where: { id: targetTaskId },
             include: { list: { include: { board: true } } },
         });
 
@@ -351,7 +394,7 @@ export const completeTaskTool: ToolDefinition = {
             throw new Error("Task not found in this workspace.");
         }
 
-        const result = await updateTaskService(taskId, context.userId, { completed });
+        const result = await updateTaskService(targetTaskId, context.userId, { completed: params.completed });
         if ("error" in result && result.error) {
             throw new Error(result.error);
         }
@@ -361,7 +404,7 @@ export const completeTaskTool: ToolDefinition = {
             title: result.task.title,
             completed: result.task.completed,
             completedAt: result.task.completedAt,
-            message: `Task "${result.task.title}" marked as ${completed ? "completed" : "incomplete"}.`,
+            message: `Task "${result.task.title}" marked as ${params.completed ? "completed" : "incomplete"}.`,
         };
     },
 };
@@ -471,5 +514,74 @@ export const replanProjectTool: ToolDefinition = {
         }
 
         return result.replan;
+    },
+};
+
+// ==========================================
+// 12. searchWorkspaceKnowledge
+// ==========================================
+export const searchWorkspaceKnowledgeTool: ToolDefinition = {
+    name: "searchWorkspaceKnowledge",
+    description: "Perform semantic search across workspace documents, specifications, and pages.",
+    parameters: z.object({
+        query: z.string().min(1, "Search query is required"),
+        limit: z.number().int().positive().max(10).optional(),
+    }),
+    execute: async ({ query, limit = 5 }, context) => {
+        const results = await knowledgeRagService.semanticSearch(
+            context.workspaceId,
+            query,
+            limit
+        );
+
+        return results.map((r) => ({
+            title: r.title,
+            sourceType: r.sourceType,
+            score: r.score,
+            content: r.content,
+        }));
+    },
+};
+
+// ==========================================
+// 13. applyReplanChanges (Destructive/Major Change - Requires Confirmation)
+// ==========================================
+export const applyReplanChangesTool: ToolDefinition = {
+    name: "applyReplanChanges",
+    description: "Apply major plan changes and priority adjustments to tasks across a project. Requires explicit user confirmation.",
+    parameters: z.object({
+        projectId: z.string().uuid("Valid projectId UUID is required"),
+        changes: z.array(
+            z.object({
+                taskId: z.string().uuid(),
+                priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
+                estimatedMinutes: z.number().int().positive().optional(),
+                dueDate: z.string().nullable().optional(),
+                milestoneId: z.string().uuid().nullable().optional(),
+            })
+        ),
+    }),
+    requiresConfirmation: true,
+    getConfirmationMessage: (params) =>
+        `Are you sure you want to apply ${params.changes.length} suggested plan change(s) to this project? This will adjust deadlines, priorities, and estimates.`,
+    execute: async (params, context) => {
+        const result = await aiService.applyAdaptiveReplanChanges(
+            params.projectId,
+            context.userId,
+            {
+                projectId: params.projectId,
+                changes: params.changes,
+            }
+        );
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        return {
+            success: true,
+            updatedCount: result.updatedCount,
+            message: `Successfully applied ${result.updatedCount} plan change(s) across the project.`,
+        };
     },
 };

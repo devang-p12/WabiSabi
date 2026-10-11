@@ -9,6 +9,8 @@ import {
     testAIPromptController,
     orchestratePromptController,
     listToolsController,
+    runAgentController,
+    confirmAgentActionController,
 } from "./ai.controller.js";
 
 const router = Router();
@@ -24,6 +26,20 @@ router.post(
     "/workspaces/:workspaceId/orchestrate",
     authenticate,
     orchestratePromptController
+);
+
+// POST /api/v1/ai/workspaces/:workspaceId/agent/chat - Phase 14 Wabi Agent reasoning loop
+router.post(
+    "/workspaces/:workspaceId/agent/chat",
+    authenticate,
+    runAgentController
+);
+
+// POST /api/v1/ai/workspaces/:workspaceId/agent/confirm - Phase 14 Confirm action execution
+router.post(
+    "/workspaces/:workspaceId/agent/confirm",
+    authenticate,
+    confirmAgentActionController
 );
 
 // POST /api/v1/ai/projects/analyze - Analyzes project idea and produces structured project plan (analysis only)

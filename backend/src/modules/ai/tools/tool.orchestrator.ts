@@ -11,6 +11,8 @@ import {
     createMilestoneTool,
     createDependencyTool,
     replanProjectTool,
+    searchWorkspaceKnowledgeTool,
+    applyReplanChangesTool,
 } from "./tool.registry.js";
 import { aiService } from "../ai.service.js";
 import { getWorkspaceMembership } from "../../workspace/workspace.authorization.js";
@@ -47,6 +49,8 @@ export class ToolOrchestrator {
         this.registerTool(createMilestoneTool);
         this.registerTool(createDependencyTool);
         this.registerTool(replanProjectTool);
+        this.registerTool(searchWorkspaceKnowledgeTool);
+        this.registerTool(applyReplanChangesTool);
     }
 
     registerTool(tool: ToolDefinition): void {
