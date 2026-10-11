@@ -67,7 +67,12 @@ export const ModelName = {
   TaskLabel: 'TaskLabel',
   Comment: 'Comment',
   ActivityLog: 'ActivityLog',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  Page: 'Page',
+  Block: 'Block',
+  Document: 'Document',
+  DocumentExtractedText: 'DocumentExtractedText',
+  KnowledgeChunk: 'KnowledgeChunk'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -305,12 +310,97 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+export const PageScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  icon: 'icon',
+  workspaceId: 'workspaceId',
+  parentId: 'parentId',
+  position: 'position',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PageScalarFieldEnum = (typeof PageScalarFieldEnum)[keyof typeof PageScalarFieldEnum]
+
+
+export const BlockScalarFieldEnum = {
+  id: 'id',
+  pageId: 'pageId',
+  parentId: 'parentId',
+  type: 'type',
+  position: 'position',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlockScalarFieldEnum = (typeof BlockScalarFieldEnum)[keyof typeof BlockScalarFieldEnum]
+
+
+export const DocumentScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  name: 'name',
+  originalName: 'originalName',
+  mimeType: 'mimeType',
+  fileSize: 'fileSize',
+  filePath: 'filePath',
+  documentType: 'documentType',
+  processingStatus: 'processingStatus',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const DocumentExtractedTextScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  content: 'content',
+  wordCount: 'wordCount',
+  characterCount: 'characterCount',
+  metadata: 'metadata',
+  extractedAt: 'extractedAt'
+} as const
+
+export type DocumentExtractedTextScalarFieldEnum = (typeof DocumentExtractedTextScalarFieldEnum)[keyof typeof DocumentExtractedTextScalarFieldEnum]
+
+
+export const KnowledgeChunkScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  sourceType: 'sourceType',
+  documentId: 'documentId',
+  pageId: 'pageId',
+  chunkIndex: 'chunkIndex',
+  content: 'content',
+  wordCount: 'wordCount',
+  embedding: 'embedding',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeChunkScalarFieldEnum = (typeof KnowledgeChunkScalarFieldEnum)[keyof typeof KnowledgeChunkScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -327,4 +417,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

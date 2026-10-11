@@ -17,6 +17,9 @@ import CommandPalette from "./components/command/CommandPalette";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Today from "./pages/Today";
+import PagesPage from "./pages/PagesPage";
+import DocumentsPage from "./pages/DocumentsPage";
+import KnowledgeSearchPage from "./pages/KnowledgeSearchPage";
 
 function App() {
     return (
@@ -37,6 +40,10 @@ function App() {
                     <Route path="/workspaces/:workspaceId/boards/:boardId" element={<Board />} />
                     <Route path="/workspaces/:workspaceId/projects" element={<Projects />} />
                     <Route path="/workspaces/:workspaceId/projects/:projectId" element={<ProjectDetail />} />
+                    <Route path="/workspaces/:workspaceId/pages" element={<PagesPage />} />
+                    <Route path="/workspaces/:workspaceId/pages/:pageId" element={<PagesPage />} />
+                    <Route path="/workspaces/:workspaceId/documents" element={<DocumentsPage />} />
+                    <Route path="/workspaces/:workspaceId/knowledge" element={<KnowledgeSearchPage />} />
                 </Route>
 
                 {/* Fallbacks */}

@@ -18,6 +18,10 @@ import attachmentRouter from "./modules/attachment/attachment.routes.js";
 import analyticsRouter from "./modules/analytics/analytics.routes.js";
 import projectRouter from "./modules/project/project.routes.js";
 import plannerRouter from "./modules/planner/planner.routes.js";
+import aiRouter from "./modules/ai/ai.routes.js";
+import pageRouter from "./modules/page/page.routes.js";
+import documentRouter from "./modules/document/document.routes.js";
+import knowledgeRouter from "./modules/knowledge/knowledge.routes.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -47,6 +51,7 @@ app.get("/api/v1/health", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/ai", aiRouter);
 app.use(
     "/api/v1/workspaces",
     workspaceRouter
@@ -73,6 +78,9 @@ app.use("/api/v1", attachmentRouter);
 app.use("/api/v1", analyticsRouter);
 app.use("/api/v1", projectRouter);
 app.use("/api/v1/planner", plannerRouter);
+app.use("/api/v1", pageRouter);
+app.use("/api/v1", documentRouter);
+app.use("/api/v1", knowledgeRouter);
 
 // Always keep this LAST
 app.use(errorHandler);

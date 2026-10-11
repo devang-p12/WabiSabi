@@ -22,6 +22,7 @@ import ProjectHeader, { type ProjectViewTab } from "@/components/project/Project
 import ProjectProgressSummary from "@/components/project/ProjectProgressSummary";
 import MilestoneDisplay from "@/components/project/MilestoneDisplay";
 import CreateMilestoneDialog from "@/components/project/CreateMilestoneDialog";
+import AdaptiveReplanDialog from "@/components/project/AdaptiveReplanDialog";
 import BoardView from "@/components/workspace/BoardView";
 import CreateBoardDialog from "@/components/workspace/CreateBoardDialog";
 import {
@@ -52,6 +53,9 @@ export default function ProjectDetail() {
 
     // Milestone dialog
     const [createMilestoneOpen, setCreateMilestoneOpen] = useState(false);
+
+    // Adaptive Replan dialog
+    const [adaptiveReplanOpen, setAdaptiveReplanOpen] = useState(false);
 
     const loadProject = useCallback(async () => {
         if (!projectId) return;
@@ -164,6 +168,7 @@ export default function ProjectDetail() {
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 onAddMilestoneClick={() => setCreateMilestoneOpen(true)}
+                onAdaptiveReplanClick={() => setAdaptiveReplanOpen(true)}
             />
 
             {/* Main Tab Content */}
@@ -439,6 +444,14 @@ export default function ProjectDetail() {
                 onOpenChange={setCreateBoardOpen}
                 workspaceId={project.workspaceId}
                 onCreated={handleBoardCreated}
+            />
+
+            <AdaptiveReplanDialog
+                open={adaptiveReplanOpen}
+                onOpenChange={setAdaptiveReplanOpen}
+                projectId={project.id}
+                projectName={project.name}
+                onReplanApplied={loadProject}
             />
         </div>
     );

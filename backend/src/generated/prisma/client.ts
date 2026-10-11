@@ -126,3 +126,28 @@ export type ActivityLog = Prisma.ActivityLogModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model Page
+ * 
+ */
+export type Page = Prisma.PageModel
+/**
+ * Model Block
+ * 
+ */
+export type Block = Prisma.BlockModel
+/**
+ * Model Document
+ * 
+ */
+export type Document = Prisma.DocumentModel
+/**
+ * Model DocumentExtractedText
+ * 
+ */
+export type DocumentExtractedText = Prisma.DocumentExtractedTextModel
+/**
+ * Model KnowledgeChunk
+ * 
+ */
+export type KnowledgeChunk = Prisma.KnowledgeChunkModel

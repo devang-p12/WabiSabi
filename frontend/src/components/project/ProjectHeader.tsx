@@ -6,6 +6,7 @@ import {
     Flag,
     LayoutDashboard,
     Plus,
+    Sparkles,
 } from "lucide-react";
 
 import { type Project } from "@/api/project.api";
@@ -21,6 +22,7 @@ interface ProjectHeaderProps {
     activeTab: ProjectViewTab;
     onTabChange: (tab: ProjectViewTab) => void;
     onAddMilestoneClick?: () => void;
+    onAdaptiveReplanClick?: () => void;
 }
 
 export default function ProjectHeader({
@@ -29,6 +31,7 @@ export default function ProjectHeader({
     activeTab,
     onTabChange,
     onAddMilestoneClick,
+    onAdaptiveReplanClick,
 }: ProjectHeaderProps) {
     const navigate = useNavigate();
 
@@ -57,6 +60,18 @@ export default function ProjectHeader({
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {onAdaptiveReplanClick && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={onAdaptiveReplanClick}
+                                className="h-8 text-xs font-medium border-primary/30 text-primary hover:bg-primary/10 shadow-xs"
+                            >
+                                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                                AI Replan
+                            </Button>
+                        )}
+
                         {onAddMilestoneClick && activeTab === "plan" && (
                             <Button
                                 size="sm"

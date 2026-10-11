@@ -3,8 +3,11 @@ import {
     Calendar,
     ChevronLeft,
     ChevronRight,
+    Brain,
+    FileText,
     Home,
     LayoutDashboard,
+    Paperclip,
     Plus,
     Settings,
     Users,
@@ -35,6 +38,12 @@ interface WorkspaceSidebarProps {
     isProjectsSelected?: boolean;
     onSelectToday?: () => void;
     isTodaySelected?: boolean;
+    onSelectPages?: () => void;
+    isPagesSelected?: boolean;
+    onSelectDocuments?: () => void;
+    isDocumentsSelected?: boolean;
+    onSelectKnowledge?: () => void;
+    isKnowledgeSelected?: boolean;
 }
 
 export function WorkspaceSidebar({
@@ -51,6 +60,12 @@ export function WorkspaceSidebar({
     isProjectsSelected,
     onSelectToday,
     isTodaySelected,
+    onSelectPages,
+    isPagesSelected,
+    onSelectDocuments,
+    isDocumentsSelected,
+    onSelectKnowledge,
+    isKnowledgeSelected,
 }: WorkspaceSidebarProps) {
     const isHome = selectedBoardId === null;
 
@@ -180,6 +195,105 @@ export function WorkspaceSidebar({
                         {collapsed && (
                             <TooltipContent side="right">
                                 Projects
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
+
+                {/* Pages */}
+                {onSelectPages && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={onSelectPages}
+                                className={`mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors cursor-pointer ${
+                                    isPagesSelected
+                                        ? "bg-accent font-medium text-accent-foreground"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                } ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : ""
+                                }`}
+                            >
+                                <FileText className="h-4 w-4 shrink-0 text-primary" />
+
+                                {!collapsed && (
+                                    <span>Pages</span>
+                                )}
+                            </button>
+                        </TooltipTrigger>
+
+                        {collapsed && (
+                            <TooltipContent side="right">
+                                Pages
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
+
+                {/* Documents */}
+                {onSelectDocuments && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={onSelectDocuments}
+                                className={`mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors cursor-pointer ${
+                                    isDocumentsSelected
+                                        ? "bg-accent font-medium text-accent-foreground"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                } ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : ""
+                                }`}
+                            >
+                                <Paperclip className="h-4 w-4 shrink-0 text-primary" />
+
+                                {!collapsed && (
+                                    <span>Documents</span>
+                                )}
+                            </button>
+                        </TooltipTrigger>
+
+                        {collapsed && (
+                            <TooltipContent side="right">
+                                Documents
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
+
+                {/* Knowledge & RAG */}
+                {onSelectKnowledge && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                type="button"
+                                onClick={onSelectKnowledge}
+                                className={`mt-1 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors cursor-pointer ${
+                                    isKnowledgeSelected
+                                        ? "bg-accent font-medium text-accent-foreground"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                } ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : ""
+                                }`}
+                            >
+                                <Brain className="h-4 w-4 shrink-0 text-primary" />
+
+                                {!collapsed && (
+                                    <span>Knowledge & RAG</span>
+                                )}
+                            </button>
+                        </TooltipTrigger>
+
+                        {collapsed && (
+                            <TooltipContent side="right">
+                                Knowledge & RAG
                             </TooltipContent>
                         )}
                     </Tooltip>

@@ -555,6 +555,12 @@ export default function Workspace() {
                     }}
                     isProjectsSelected={selectedBoard === null && workspaceViewTab === "projects"}
                     onSelectToday={() => navigate(`/workspaces/${workspaceId}/today`)}
+                    onSelectPages={() => navigate(`/workspaces/${workspaceId}/pages`)}
+                    isPagesSelected={false}
+                    onSelectDocuments={() => navigate(`/workspaces/${workspaceId}/documents`)}
+                    isDocumentsSelected={false}
+                    onSelectKnowledge={() => navigate(`/workspaces/${workspaceId}/knowledge`)}
+                    isKnowledgeSelected={false}
                 />
 
                 {/* Main Content Area */}

@@ -56,6 +56,9 @@ model Workspace {
   members  WorkspaceMember[]
   boards   Board[]
   projects Project[]
+  pages    Page[]
+  documents Document[]
+  knowledgeChunks KnowledgeChunk[]
 }
 
 model Project {
@@ -327,5 +330,142 @@ model Notification {
 
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+enum BlockType {
+  PARAGRAPH
+  HEADING_1
+  HEADING_2
+  HEADING_3
+  BULLETED_LIST
+  NUMBERED_LIST
+  TODO
+  QUOTE
+  CODE
+  DIVIDER
+  IMAGE
+  LINK
+  CALLOUT
+}
+
+model Page {
+  id          String   @id @default(uuid())
+  title       String   @default("Untitled")
+  icon        String?
+  workspaceId String
+  parentId    String?
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent     Page?     @relation("PageHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Page[]    @relation("PageHierarchy")
+  blocks     Block[]
+  knowledgeChunks KnowledgeChunk[]
+
+  @@index([workspaceId])
+  @@index([parentId])
+}
+
+model Block {
+  id        String    @id @default(uuid())
+  pageId    String
+  parentId  String?
+  type      BlockType @default(PARAGRAPH)
+  position  Int       @default(0)
+  content   Json?     @default("{}")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  page     Page    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  parent   Block?  @relation("BlockHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Block[] @relation("BlockHierarchy")
+
+  @@index([pageId])
+  @@index([parentId])
+  @@index([pageId, position])
+}
+
+enum DocumentType {
+  PDF
+  DOCX
+  TXT
+  IMAGE
+  OTHER
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Document {
+  id               String           @id @default(uuid())
+  workspaceId      String
+  name             String
+  originalName     String
+  mimeType         String
+  fileSize         Int
+  filePath         String
+  documentType     DocumentType
+  processingStatus ProcessingStatus @default(PENDING)
+  errorMessage     String?
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  extractedText    DocumentExtractedText?
+  knowledgeChunks  KnowledgeChunk[]
+
+  @@index([workspaceId])
+  @@index([documentType])
+  @@index([processingStatus])
+}
+
+model DocumentExtractedText {
+  id           String   @id @default(uuid())
+  documentId   String   @unique
+  content      String   @db.Text
+  wordCount    Int      @default(0)
+  characterCount Int    @default(0)
+  metadata     Json?    @default("{}")
+  extractedAt  DateTime @default(now())
+
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+enum ChunkSourceType {
+  DOCUMENT
+  PAGE
+}
+
+model KnowledgeChunk {
+  id           String          @id @default(uuid())
+  workspaceId  String
+  sourceType   ChunkSourceType
+  documentId   String?
+  pageId       String?
+  chunkIndex   Int             @default(0)
+  content      String          @db.Text
+  wordCount    Int             @default(0)
+  embedding    Float[]
+  metadata     Json?           @default("{}")
+
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  document     Document?       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  page         Page?           @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([sourceType])
+  @@index([documentId])
+  @@index([pageId])
+  @@index([workspaceId, sourceType])
 }
 

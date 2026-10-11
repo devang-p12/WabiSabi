@@ -55,3 +55,51 @@ export const NotificationType = {
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const BlockType = {
+  PARAGRAPH: 'PARAGRAPH',
+  HEADING_1: 'HEADING_1',
+  HEADING_2: 'HEADING_2',
+  HEADING_3: 'HEADING_3',
+  BULLETED_LIST: 'BULLETED_LIST',
+  NUMBERED_LIST: 'NUMBERED_LIST',
+  TODO: 'TODO',
+  QUOTE: 'QUOTE',
+  CODE: 'CODE',
+  DIVIDER: 'DIVIDER',
+  IMAGE: 'IMAGE',
+  LINK: 'LINK',
+  CALLOUT: 'CALLOUT'
+} as const
+
+export type BlockType = (typeof BlockType)[keyof typeof BlockType]
+
+
+export const DocumentType = {
+  PDF: 'PDF',
+  DOCX: 'DOCX',
+  TXT: 'TXT',
+  IMAGE: 'IMAGE',
+  OTHER: 'OTHER'
+} as const
+
+export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType]
+
+
+export const ProcessingStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type ProcessingStatus = (typeof ProcessingStatus)[keyof typeof ProcessingStatus]
+
+
+export const ChunkSourceType = {
+  DOCUMENT: 'DOCUMENT',
+  PAGE: 'PAGE'
+} as const
+
+export type ChunkSourceType = (typeof ChunkSourceType)[keyof typeof ChunkSourceType]
